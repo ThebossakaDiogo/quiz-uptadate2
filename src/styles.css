@@ -1652,6 +1652,176 @@
   }
 }
 
+/* ==========================================================================
+   VSL (Video Sales Letter) Specific Styles & Animations
+   ========================================================================== */
+
+.vsl-hero-wrapper {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.vsl-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: #000;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 3px solid var(--wine);
+  box-shadow:
+    0 20px 40px -15px oklch(0.19 0.09 305 / 0.45),
+    0 0 0 1px oklch(1 1 1 / 0.1),
+    6px 6px 0 var(--coral);
+}
+
+@media (min-width: 768px) {
+  .vsl-video-frame {
+    border-radius: 2rem;
+    border-width: 4px;
+    box-shadow:
+      0 25px 50px -12px oklch(0.19 0.09 305 / 0.5),
+      8px 8px 0 var(--coral),
+      14px 14px 0 var(--wine);
+  }
+}
+
+.vsl-unmute-banner {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: linear-gradient(135deg, var(--coral), var(--wine));
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 2px solid white;
+  box-shadow:
+    0 10px 25px oklch(0.68 0.29 350 / 0.5),
+    0 0 0 4px oklch(0.68 0.29 350 / 0.25);
+  cursor: pointer;
+  animation: vsl-unmute-pulse 2s infinite ease-in-out;
+  max-width: 90%;
+  text-align: center;
+}
+
+@keyframes vsl-unmute-pulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 10px 25px oklch(0.68 0.29 350 / 0.5), 0 0 0 4px oklch(0.68 0.29 350 / 0.25);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.04);
+    box-shadow: 0 15px 35px oklch(0.68 0.29 350 / 0.7), 0 0 0 8px oklch(0.68 0.29 350 / 0.35);
+  }
+}
+
+.vsl-sound-bar {
+  display: inline-block;
+  width: 3px;
+  background-color: currentColor;
+  border-radius: 3px;
+  animation: vsl-sound-bounce 1.2s ease-in-out infinite alternate;
+}
+
+.vsl-sound-bar:nth-child(1) { height: 8px; animation-delay: 0.1s; }
+.vsl-sound-bar:nth-child(2) { height: 16px; animation-delay: 0.3s; }
+.vsl-sound-bar:nth-child(3) { height: 12px; animation-delay: 0.2s; }
+.vsl-sound-bar:nth-child(4) { height: 18px; animation-delay: 0.4s; }
+
+@keyframes vsl-sound-bounce {
+  0% { height: 4px; }
+  100% { height: 18px; }
+}
+
+.vsl-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  position: relative;
+}
+
+.vsl-pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  opacity: 0.7;
+  animation: vsl-pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes vsl-pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.vsl-play-overlay-btn {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--coral), var(--coral-dark));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 10px 30px oklch(0.68 0.29 350 / 0.6),
+    0 0 0 6px oklch(1 1 1 / 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vsl-play-overlay-btn:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 15px 40px oklch(0.68 0.29 350 / 0.8),
+    0 0 0 10px oklch(1 1 1 / 0.4);
+}
+
+.vsl-offer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--lime);
+  color: var(--wine);
+  border: 1.5px solid var(--wine);
+  box-shadow: 2px 2px 0 var(--wine);
+}
+
+.vsl-floating-bottom-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 0.75rem 1rem;
+  background: oklch(0.19 0.09 305 / 0.94);
+  backdrop-filter: blur(12px);
+  border-top: 2px solid var(--coral);
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.25);
+  animation: slide-in-from-bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1662,3 +1832,4 @@
     transition-duration: 0.01ms !important;
   }
 }
+

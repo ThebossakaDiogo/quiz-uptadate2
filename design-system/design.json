@@ -1,0 +1,286 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Design System - Neo-Pop High-Conversion Quiz",
+  "version": "1.0.0",
+  "description": "Especificação completa de design tokens, cores, tipografia, sombras neo-brutalistas, animações, micro-interações, efeitos sonoros e componentes de alta conversão.",
+  "tokens": {
+    "colors": {
+      "brand": {
+        "wine": {
+          "oklch": "oklch(0.19 0.09 305)",
+          "hex": "#2B0B2E",
+          "rgb": "rgb(43, 11, 46)",
+          "description": "Cor primária para textos, bordas neo-brutalistas e fundos escuros de destaque"
+        },
+        "wineLight": {
+          "oklch": "oklch(0.29 0.16 310)",
+          "hex": "#4C1450",
+          "rgb": "rgb(76, 20, 80)",
+          "description": "Variação de profundidade para gradientes de painéis escuros"
+        },
+        "coral": {
+          "oklch": "oklch(0.68 0.29 350)",
+          "hex": "#FF3377",
+          "rgb": "rgb(255, 51, 119)",
+          "description": "Cor de energia, ação primária, botões principais, sombras vibrantes e destaques"
+        },
+        "coralDark": {
+          "oklch": "oklch(0.59 0.3 342)",
+          "hex": "#D81B60",
+          "rgb": "rgb(216, 27, 96)",
+          "description": "Cor de contraste e sombras ativas dos elementos coral"
+        },
+        "coralSoft": {
+          "oklch": "oklch(0.91 0.13 345)",
+          "hex": "#FFD0DF",
+          "rgb": "rgb(255, 208, 223)",
+          "description": "Fundo sutil para badges e ícones em destaque"
+        },
+        "lime": {
+          "oklch": "0.9 0.28 128",
+          "hex": "#A7FF00",
+          "rgb": "rgb(167, 255, 0)",
+          "description": "Verde limão elétrico para sucesso, progresso, badges de desconto e CTAs secundários"
+        },
+        "greenBright": {
+          "oklch": "oklch(0.82 0.3 138)",
+          "hex": "#4CFA5C",
+          "rgb": "rgb(76, 250, 92)",
+          "description": "Gradiente de preenchimento para barras de progresso e botões de sucesso"
+        },
+        "greenDeep": {
+          "oklch": "oklch(0.61 0.24 148)",
+          "hex": "#00A859",
+          "rgb": "rgb(0, 168, 89)",
+          "description": "Âncora de gradiente para os botões e barras verdes"
+        },
+        "cream": {
+          "oklch": "oklch(0.975 0.055 105)",
+          "hex": "#FFF9E6",
+          "rgb": "rgb(255, 249, 230)",
+          "description": "Fundo de tela padrão, suave e acolhedor (warm canvas)"
+        },
+        "creamDeep": {
+          "oklch": "oklch(0.93 0.2 103)",
+          "hex": "#FFE899",
+          "rgb": "rgb(255, 232, 153)",
+          "description": "Fundo secundário para caixas de benefício e letras de opções"
+        },
+        "shockYellow": {
+          "oklch": "oklch(0.93 0.23 101)",
+          "hex": "#FFE600",
+          "rgb": "rgb(255, 230, 0)",
+          "description": "Amarelo elétrico para badges, pills e hover states táteis"
+        },
+        "electricPurple": {
+          "oklch": "oklch(0.55 0.3 305)",
+          "hex": "#9D1CBB",
+          "rgb": "rgb(157, 28, 187)",
+          "description": "Tom de transição do gradiente de botões e orbs cósmicos"
+        },
+        "electricBlue": {
+          "oklch": "oklch(0.69 0.2 238)",
+          "hex": "#00C2FF",
+          "rgb": "rgb(0, 194, 255)",
+          "description": "Tom auxiliar para orbs e efeitos secundários"
+        },
+        "inkMuted": {
+          "oklch": "oklch(0.43 0.075 305)",
+          "hex": "#6C586B",
+          "rgb": "rgb(108, 88, 107)",
+          "description": "Texto de apoio, legendas e rótulos secundários"
+        }
+      },
+      "semantic": {
+        "background": "var(--cream)",
+        "foreground": "var(--wine)",
+        "card": "rgba(255, 255, 255, 0.68)",
+        "cardBorder": "rgba(43, 11, 46, 0.16)",
+        "cardBorderHover": "var(--wine)",
+        "primary": "var(--coral)",
+        "primaryForeground": "#FFFFFF",
+        "accent": "var(--lime)",
+        "accentForeground": "var(--wine)",
+        "border": "var(--wine)",
+        "success": "var(--greenDeep)",
+        "warning": "var(--shockYellow)",
+        "focusRing": "rgba(255, 51, 119, 0.35)"
+      }
+    },
+    "typography": {
+      "fontFamilies": {
+        "display": "'Bricolage Grotesque', 'Impact', sans-serif",
+        "body": "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        "mono": "'JetBrains Mono', 'Fira Code', monospace"
+      },
+      "fontWeights": {
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700,
+        "extrabold": 800,
+        "black": 900
+      },
+      "headings": {
+        "h1": {
+          "fontFamily": "var(--font-display)",
+          "fontSizeDesktop": "3.75rem",
+          "fontSizeMobile": "2.55rem",
+          "fontWeight": 900,
+          "lineHeight": 0.94,
+          "letterSpacing": "-0.055em"
+        },
+        "h2": {
+          "fontFamily": "var(--font-display)",
+          "fontSizeDesktop": "2.5rem",
+          "fontSizeMobile": "1.85rem",
+          "fontWeight": 900,
+          "lineHeight": 1.0,
+          "letterSpacing": "-0.045em"
+        },
+        "h3": {
+          "fontFamily": "var(--font-display)",
+          "fontSizeDesktop": "1.75rem",
+          "fontSizeMobile": "1.5rem",
+          "fontWeight": 900,
+          "lineHeight": 1.1,
+          "letterSpacing": "-0.04em"
+        }
+      },
+      "eyebrows": {
+        "fontSize": "0.65rem",
+        "fontWeight": 900,
+        "letterSpacing": "0.13em",
+        "textTransform": "uppercase",
+        "lineHeight": 1
+      }
+    },
+    "shadows": {
+      "neoPopSmall": "3px 3px 0 var(--coral)",
+      "neoPopCard": "4px 4px 0 var(--wine)",
+      "neoPopButton": "6px 6px 0 var(--wine), 0 0 2rem rgba(255, 51, 119, 0.28)",
+      "neoPopButtonHover": "3px 3px 0 var(--wine), 0 0 2.4rem rgba(255, 51, 119, 0.42)",
+      "neoPopOptionHover": "5px 5px 0 var(--coral)",
+      "neoPopOptionSelected": "5px 5px 0 var(--wine), 0 0 1.8rem rgba(167, 255, 0, 0.42)",
+      "neoPopHeroDouble": "10px 10px 0 var(--coral), 18px 18px 0 var(--shockYellow), 0 35px 75px -30px rgba(43, 11, 46, 0.7)",
+      "neoPopDarkPanel": "8px 8px 0 var(--coral), 14px 14px 0 var(--lime), 0 30px 75px -32px rgba(43, 11, 46, 0.75)",
+      "neoPopOfferCard": "7px 7px 0 var(--lime), 13px 13px 0 var(--coral), 0 24px 65px -36px rgba(43, 11, 46, 0.6)"
+    },
+    "radii": {
+      "xs": "0.5rem",
+      "sm": "0.75rem",
+      "md": "1rem",
+      "lg": "1.25rem",
+      "xl": "1.5rem",
+      "2xl": "2rem",
+      "pill": "999px"
+    },
+    "borders": {
+      "thin": "1px solid rgba(43, 11, 46, 0.12)",
+      "standard": "2px solid var(--wine)",
+      "heavy": "3px solid var(--wine)",
+      "dashed": "1px dashed rgba(255, 255, 255, 0.3)"
+    },
+    "gradients": {
+      "ctaCoral": "linear-gradient(120deg, var(--coral) 0%, var(--electricPurple) 52%, var(--coral) 100%)",
+      "ctaLime": "linear-gradient(120deg, var(--lime) 0%, var(--greenBright) 50%, var(--greenDeep) 100%)",
+      "darkPanel": "radial-gradient(circle at 85% 10%, rgba(167, 255, 0, 0.24), transparent 16rem), radial-gradient(circle at 5% 90%, rgba(255, 51, 119, 0.3), transparent 18rem), linear-gradient(150deg, var(--wineLight), var(--wine))",
+      "ambientGlow": "radial-gradient(circle at 0% 0%, rgba(255, 230, 0, 0.72), transparent 30rem), radial-gradient(circle at 100% 16%, rgba(167, 255, 0, 0.38), transparent 27rem), radial-gradient(circle at 54% 100%, rgba(255, 51, 119, 0.2), transparent 30rem), var(--cream)",
+      "couponScratchCover": "linear-gradient(135deg, #FF2FB3 0%, #A735FF 50%, #5914B8 100%)",
+      "couponRevealed": "radial-gradient(circle at 18% 18%, var(--shockYellow), transparent 34%), linear-gradient(125deg, var(--lime), var(--greenBright) 50%, var(--greenDeep))"
+    },
+    "audioFeedback": {
+      "enabledByDefault": true,
+      "storageKey": "quiz-ui-sounds",
+      "soundTypes": {
+        "click": {
+          "oscillator": "triangle",
+          "startFreq": 270,
+          "endFreq": 210,
+          "duration": 0.055,
+          "volume": 0.025
+        },
+        "select": {
+          "oscillator": "triangle",
+          "startFreq": 390,
+          "endFreq": 620,
+          "duration": 0.09,
+          "volume": 0.04
+        },
+        "back": {
+          "oscillator": "triangle",
+          "startFreq": 330,
+          "endFreq": 190,
+          "duration": 0.075,
+          "volume": 0.025
+        },
+        "success": {
+          "oscillator": "sine",
+          "chimes": [
+            { "startFreq": 440, "endFreq": 660, "duration": 0.13, "delay": 0, "volume": 0.035 },
+            { "startFreq": 620, "endFreq": 880, "duration": 0.16, "delay": 0.075, "volume": 0.03 },
+            { "startFreq": 880, "endFreq": 1100, "duration": 0.18, "delay": 0.15, "volume": 0.025 }
+          ]
+        }
+      }
+    }
+  },
+  "components": {
+    "ctaButton": {
+      "description": "Botão principal de alta conversão com efeito sheen animado, sombra sólida neo-brutalista e gradiente fluido.",
+      "classes": "cta-button",
+      "variants": {
+        "primary": "background: var(--gradient-cta-coral); color: white;",
+        "light": "background: var(--gradient-cta-lime); color: var(--wine);"
+      },
+      "features": [
+        "Brilho refletivo animado contínuo (.button-sheen)",
+        "Micro-deslocamento tátil de 3px no hover com compressão de sombra",
+        "Efeito de pressão (scale 0.985) no :active",
+        "Tipografia em caixa alta e peso 900 com ícone chevron animado"
+      ]
+    },
+    "optionCard": {
+      "description": "Card de opção interativa para escolhas do quiz, com letra identificadora e indicador de seleção circular.",
+      "classes": "option-card",
+      "states": {
+        "default": "border: 2px solid rgba(43, 11, 46, 0.16); background: rgba(255, 255, 255, 0.68); backdrop-filter: blur(10px);",
+        "hover": "border: 2px solid var(--wine); background: var(--shockYellow); box-shadow: 5px 5px 0 var(--coral); transform: translate(-2px, -2px);",
+        "selected": "border: 2px solid var(--wine); background: linear-gradient(100deg, var(--lime), var(--greenBright)); box-shadow: 5px 5px 0 var(--wine); animation: option-selected 420ms;"
+      }
+    },
+    "eyebrowPill": {
+      "description": "Pílula superior de destaque para categorias, tempo e avisos com sombra colorida.",
+      "classes": "eyebrow-pill",
+      "style": "border: 2px solid var(--wine); background: var(--shockYellow); color: var(--wine); box-shadow: 3px 3px 0 var(--coral); border-radius: 999px;"
+    },
+    "progressBar": {
+      "description": "Barra de progresso suave com gradiente verde neon, marcador de cabeça pulsante e pontos milestones.",
+      "classes": "progress-track / progress-fill",
+      "style": "background: linear-gradient(90deg, var(--lime), var(--greenBright), var(--greenDeep)); box-shadow: 0 0 22px rgba(167, 255, 0, 0.48);"
+    },
+    "scratchCard": {
+      "description": "Módulo gamificado de cupom raspável via HTML5 Canvas com partículas de confete e desbloqueio por porcentagem (>36%).",
+      "classes": "scratch-wrap / scratch-canvas / coupon-reveal",
+      "features": [
+        "Suporte a PointerEvents (Mouse, Touch e Caneta Stylus)",
+        "Feedback sonoro imediato ao completar raspagem",
+        "Botão fallback para usuários que preferem não raspar"
+      ]
+    },
+    "soundToggle": {
+      "description": "Botão flutuante neo-brutalista para silenciar ou ativar a trilha sonora sintética.",
+      "classes": "sound-control",
+      "position": "fixed bottom-right"
+    }
+  },
+  "animations": {
+    "screenEnter": "Entrada suave com blur reverso, deslocamento de 24px e leve rotação",
+    "optionReveal": "Entrada escalonada em cascata com atraso por índice (index * 70ms)",
+    "optionSelected": "Bounce elástico ao selecionar a resposta (cubic-bezier 0.22, 1.3, 0.36, 1)",
+    "ambientDrift": "Flutuação orgânica contínua dos orbs luminosos de fundo",
+    "buttonSheen": "Varredura contínua de luz translúcida sobre botões de conversão",
+    "giftBounce": "Animação de flutuação para o ícone de presente do cupom",
+    "confettiBurst": "Explosão festiva de confetes geométricos coloridos"
+  }
+}

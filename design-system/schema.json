@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Quiz Funnel Schema - 28 Days High Conversion System",
+  "version": "1.0.0",
+  "meta": {
+    "title": "Desafío Glúteos Brasileños | Tu plan de 28 días",
+    "description": "Responde un test breve y descubre una ruta de entrenamiento en casa adaptada a tu tiempo, objetivo y nivel.",
+    "brandName": "Método Brasileño 28",
+    "language": "es",
+    "currency": "USD",
+    "checkoutBaseUrl": "https://pay.hotmart.com/I106974773O",
+    "defaultCoupon": "BUMBUM90",
+    "discountPercentage": 90,
+    "originalPrice": 199.00,
+    "discountedPrice": 19.90,
+    "totalQuestions": 13
+  },
+  "phases": [
+    {
+      "id": "starting_point",
+      "name": "Tu punto de partida",
+      "questionsRange": [1, 3],
+      "milestoneLabel": "Conociéndote"
+    },
+    {
+      "id": "ideal_routine",
+      "name": "Tu rutina ideal",
+      "questionsRange": [4, 8],
+      "milestoneLabel": "Diseñando tu rutina"
+    },
+    {
+      "id": "profile_goals",
+      "name": "Tu perfil",
+      "questionsRange": [9, 13],
+      "milestoneLabel": "Afinando tu plan"
+    }
+  ],
+  "screens": {
+    "landing": {
+      "type": "landing",
+      "badge": "60 segundos",
+      "eyebrow": "Evaluación gratuita y personalizada",
+      "title": {
+        "main": "Menos excusas.",
+        "highlight": "Más fuerza y curva."
+      },
+      "description": "Descubre una ruta de 28 días para activar y fortalecer tus glúteos en casa, adaptada a tu tiempo, tu nivel y el resultado que quieres ver.",
+      "benefits": [
+        { "icon": "Clock3", "title": "Desde 8 min", "text": "por sesión" },
+        { "icon": "Dumbbell", "title": "En casa", "text": "sin máquinas" },
+        { "icon": "Target", "title": "A tu medida", "text": "paso a paso" }
+      ],
+      "cta": "Crear mi ruta personalizada",
+      "trustNotice": "Sin registro. Tus respuestas permanecen en este dispositivo."
+    },
+    "coach": {
+      "type": "coach_introduction",
+      "eyebrow": "Acompañamiento, no presión",
+      "title": "Un plan que cabe en tu vida.",
+      "description": "La propuesta de Coach Luca combina activación, control y progresión. Cada sesión te muestra qué hacer, cómo hacerlo y cuándo avanzar, sin depender de un gimnasio.",
+      "points": [
+        {
+          "icon": "CirclePlay",
+          "title": "Demostraciones claras",
+          "text": "Mira el movimiento y acompaña el ritmo."
+        },
+        {
+          "icon": "CalendarDays",
+          "title": "Secuencia de 28 días",
+          "text": "Abre el día, entrena y marca tu avance."
+        },
+        {
+          "icon": "TrendingUp",
+          "title": "Progresión accesible",
+          "text": "Empieza donde estás y evoluciona sin compararte."
+        }
+      ],
+      "cta": "Descubrir mi punto de partida"
+    },
+    "questions": [
+      {
+        "id": "q1",
+        "n": 1,
+        "phase": "Tu punto de partida",
+        "eyebrow": "Empecemos por cómo te sientes hoy",
+        "title": "¿Cómo describirías tus glúteos actualmente?",
+        "helper": "No hay respuestas correctas. Tu honestidad hace que la recomendación sea más útil.",
+        "options": [
+          { "id": "q1_opt1", "label": "Quiero más firmeza y elevación", "sub": "Siento que perdieron tono con el tiempo" },
+          { "id": "q1_opt2", "label": "Quiero más volumen y forma", "sub": "Busco una curva más redondeada y visible" },
+          { "id": "q1_opt3", "label": "Ya me gustan, pero quiero potenciarlos", "sub": "Quiero definición y un efecto más marcado" }
+        ]
+      },
+      {
+        "id": "q2",
+        "n": 2,
+        "phase": "Tu punto de partida",
+        "eyebrow": "Tu prioridad estética",
+        "title": "¿Qué cambio tendría más impacto en tu confianza?",
+        "options": [
+          { "id": "q2_opt1", "label": "Ver más proyección de perfil", "sub": "Una silueta con más volumen y curva" },
+          { "id": "q2_opt2", "label": "Sentirlos más firmes", "sub": "Menos flacidez y mejor tono al tacto" },
+          { "id": "q2_opt3", "label": "Vestirme con más seguridad", "sub": "Sentirme mejor con jeans, vestidos y bikinis" }
+        ]
+      },
+      {
+        "id": "q3",
+        "n": 3,
+        "phase": "Tu punto de partida",
+        "eyebrow": "Tu relación con tu cuerpo",
+        "title": "Cuando eliges ropa, ¿cuánto influye esta inseguridad?",
+        "options": [
+          { "id": "q3_opt1", "label": "Mucho", "sub": "A veces cambio de ropa o evito ciertas prendas" },
+          { "id": "q3_opt2", "label": "Un poco", "sub": "Intento disimular, aunque no siempre" },
+          { "id": "q3_opt3", "label": "Casi nada", "sub": "Mi objetivo es mejorar, no esconderme" }
+        ]
+      },
+      {
+        "id": "q4",
+        "n": 4,
+        "phase": "Tu rutina ideal",
+        "eyebrow": "Ahora vamos a hacerlo posible",
+        "title": "¿Qué formato encaja mejor en tu día?",
+        "options": [
+          { "id": "q4_opt1", "label": "Rutinas cortas y directas", "sub": "Quiero terminar antes de encontrar una excusa" },
+          { "id": "q4_opt2", "label": "Sesiones guiadas con calma", "sub": "Prefiero aprender bien cada movimiento" },
+          { "id": "q4_opt3", "label": "Entrenos intensos", "sub": "Me gusta sentir un desafío mayor" }
+        ]
+      },
+      {
+        "id": "q5",
+        "n": 5,
+        "phase": "Tu rutina ideal",
+        "eyebrow": "Constancia antes que perfección",
+        "title": "¿Seguirías una secuencia clara durante 28 días?",
+        "options": [
+          { "id": "q5_opt1", "label": "Sí, si sé exactamente qué hacer", "sub": "Necesito una guía día por día" },
+          { "id": "q5_opt2", "label": "Sí, si noto que estoy avanzando", "sub": "Los pequeños logros me mantienen motivada" },
+          { "id": "q5_opt3", "label": "Sí, quiero crear este hábito", "sub": "Estoy lista para priorizarme" }
+        ]
+      },
+      {
+        "id": "q6",
+        "n": 6,
+        "phase": "Tu rutina ideal",
+        "eyebrow": "Diseñemos una meta realista",
+        "title": "¿Cuánto tiempo puedes reservar para ti?",
+        "options": [
+          { "id": "q6_opt1", "label": "8 a 10 minutos", "sub": "Formato express para días ocupados", "value": "8-10 min" },
+          { "id": "q6_opt2", "label": "10 a 15 minutos", "sub": "Tiempo para activar y entrenar", "value": "10-15 min" },
+          { "id": "q6_opt3", "label": "20 minutos o más", "sub": "Quiero una sesión más completa", "value": "20+ min" }
+        ]
+      },
+      {
+        "id": "q7",
+        "n": 7,
+        "phase": "Tu rutina ideal",
+        "eyebrow": "Tu frecuencia sostenible",
+        "title": "¿Cuántos días por semana puedes entrenar en casa?",
+        "options": [
+          { "id": "q7_opt1", "label": "3 días", "sub": "Quiero empezar de forma gradual", "value": "3 días" },
+          { "id": "q7_opt2", "label": "4 a 5 días", "sub": "Mi equilibrio ideal entre estímulo y descanso", "value": "4-5 días" },
+          { "id": "q7_opt3", "label": "6 días", "sub": "Me motivan las rutinas diarias y variadas", "value": "6 días" }
+        ]
+      },
+      {
+        "id": "q8",
+        "n": 8,
+        "phase": "Tu rutina ideal",
+        "eyebrow": "Un vistazo a tu alimentación",
+        "title": "¿Cómo suelen ser tus comidas durante el día?",
+        "helper": "Esto nos ayuda a recomendar una guía práctica, no una dieta restrictiva.",
+        "options": [
+          { "id": "q8_opt1", "label": "Como poco o me salto comidas", "sub": "Mis horarios dificultan organizarme" },
+          { "id": "q8_opt2", "label": "Hago 3 comidas bastante regulares", "sub": "Tengo una base y puedo mejorar detalles" },
+          { "id": "q8_opt3", "label": "Planifico bien mis comidas", "sub": "Quiero optimizar proteína e hidratación" },
+          { "id": "q8_opt4", "label": "Como de forma irregular", "sub": "El estrés o la ansiedad cambian mi rutina" }
+        ]
+      },
+      {
+        "id": "q9",
+        "n": 9,
+        "phase": "Tu perfil",
+        "eyebrow": "Adaptamos ritmo y recuperación",
+        "title": "¿Cuál es tu rango de edad?",
+        "helper": "Tu edad orienta la progresión; nunca limita lo que puedes conseguir.",
+        "grid": true,
+        "options": [
+          { "id": "q9_opt1", "label": "18 - 29 años", "imageKey": "age1", "value": "18-29 años" },
+          { "id": "q9_opt2", "label": "30 - 39 años", "imageKey": "age2", "value": "30-39 años" },
+          { "id": "q9_opt3", "label": "40 - 49 años", "imageKey": "age3", "value": "40-49 años" },
+          { "id": "q9_opt4", "label": "50+ años", "imageKey": "age4", "value": "50+ años" }
+        ]
+      },
+      {
+        "id": "q10",
+        "n": 10,
+        "phase": "Tu perfil",
+        "eyebrow": "Tu acuerdo contigo misma",
+        "title": "¿Qué compromiso se siente posible desde hoy?",
+        "options": [
+          { "id": "q10_opt1", "label": "Cumplir incluso en los días ocupados", "sub": "Ocho minutos también cuentan" },
+          { "id": "q10_opt2", "label": "Volver aunque pierda un día", "sub": "Sin culpa ni mentalidad de todo o nada" },
+          { "id": "q10_opt3", "label": "Registrar cada pequeña victoria", "sub": "Quiero ver mi constancia crecer" }
+        ]
+      },
+      {
+        "id": "q11",
+        "n": 11,
+        "phase": "Tu perfil",
+        "eyebrow": "Tu resultado deseado",
+        "title": "¿Qué objetivo te emociona más para estos 28 días?",
+        "options": [
+          { "id": "q11_opt1", "label": "Efecto push-up", "sub": "Más elevación, control y firmeza", "value": "Elevar y ganar firmeza" },
+          { "id": "q11_opt2", "label": "Curvas más redondeadas", "sub": "Volumen visual y mejor proyección", "value": "Construir curvas redondeadas" },
+          { "id": "q11_opt3", "label": "Definición y tono", "sub": "Una apariencia más fuerte y esculpida", "value": "Definir y tonificar" },
+          { "id": "q11_opt4", "label": "Reconectar con mi cuerpo", "sub": "Sentirme activa, segura y constante", "value": "Reconectar con tu cuerpo" }
+        ]
+      },
+      {
+        "id": "q12",
+        "n": 12,
+        "phase": "Tu perfil",
+        "eyebrow": "Vamos a anticipar los obstáculos",
+        "title": "¿Qué suele hacerte abandonar una rutina?",
+        "helper": "Tu plan incluirá una estrategia simple para este punto de fricción.",
+        "options": [
+          { "id": "q12_opt1", "label": "Pierdo la motivación", "sub": "Empiezo animada y después me desconecto", "value": "Motivación" },
+          { "id": "q12_opt2", "label": "No tengo tiempo", "sub": "Trabajo, casa o familia ocupan mi día", "value": "Falta de tiempo" },
+          { "id": "q12_opt3", "label": "No sé si lo hago bien", "sub": "Me falta una guía visual y progresiva", "value": "Inseguridad con la técnica" },
+          { "id": "q12_opt4", "label": "No veo cambios rápidos", "sub": "Me cuesta reconocer avances pequeños", "value": "Impaciencia con resultados" }
+        ]
+      },
+      {
+        "id": "q13",
+        "n": 13,
+        "phase": "Tu perfil",
+        "eyebrow": "Último paso",
+        "title": "¿Cómo quieres empezar tu nueva rutina?",
+        "options": [
+          { "id": "q13_opt1", "label": "Con energía y un plan claro", "sub": "Quiero saber qué hacer desde el primer día" },
+          { "id": "q13_opt2", "label": "A mi ritmo, pero sin parar", "sub": "Quiero constancia sin presión innecesaria" },
+          { "id": "q13_opt3", "label": "Con un desafío que me motive", "sub": "Estoy lista para celebrar cada avance" }
+        ]
+      }
+    ],
+    "infoScreen": {
+      "type": "educational_interstitial",
+      "eyebrow": "Lo que cambia el juego",
+      "title": "Primero activa. Después fortalece.",
+      "body": "Cuando pasamos muchas horas sentadas, es común compensar algunos ejercicios con muslos o zona lumbar. Por eso el método empieza con movimientos lentos y controlados para mejorar tu conexión mente-músculo.",
+      "steps": [
+        { "number": "01", "title": "Conectar", "text": "Aprendes a sentir el músculo trabajando." },
+        { "number": "02", "title": "Controlar", "text": "Mejoras técnica, ritmo y amplitud." },
+        { "number": "03", "title": "Progresar", "text": "Aumentas el desafío poco a poco." }
+      ],
+      "cta": "Ver lo que ya descubrimos"
+    },
+    "resultMilestone": {
+      "type": "milestone_summary",
+      "badge": "Primer bloque completado",
+      "title": "Tu rutina necesita ser breve, guiada y progresiva.",
+      "description": "Eso aumenta la posibilidad de que el entrenamiento se convierta en un hábito, no en otra tarea pendiente.",
+      "recommendation": "Alternar activación, fuerza y recuperación para que puedas evolucionar sin sobrecargar la zona lumbar.",
+      "cta": "Personalizar la siguiente fase"
+    },
+    "analyzing": {
+      "type": "progress_loader",
+      "eyebrow": "Análisis en curso",
+      "title": "Construyendo tu ruta de 28 días",
+      "description": "Cruzando tus respuestas para organizar una recomendación práctica.",
+      "steps": [
+        "Priorizando tu objetivo en la ruta",
+        "Ajustando duración y frecuencia",
+        "Preparando progresiones semanales",
+        "Añadiendo estrategia de constancia"
+      ]
+    },
+    "scratchCoupon": {
+      "type": "gamified_reward",
+      "eyebrow": "Por completar las 13 respuestas",
+      "title": "Hay un regalo reservado para ti.",
+      "description": "Raspa la tarjeta con el dedo o el mouse para descubrir tu descuento antes de ver tu plan.",
+      "couponCode": "BUMBUM90",
+      "discountLabel": "90% OFF",
+      "successMessage": "¡Descuento aplicado! Verás el valor final en la siguiente página.",
+      "ctaUnlocked": "Aplicar 90% OFF y ver mi plan",
+      "ctaLocked": "Raspa para liberar tu descuento"
+    },
+    "offer": {
+      "type": "final_offer_page",
+      "heroHeadline": "Tu próxima victoria cabe en {{user_time}}.",
+      "heroSummary": "Tu ruta prioriza {{user_goal}} y reduce el impacto de tu principal barrera: {{user_obstacle}}.",
+      "includedFeatures": [
+        { "icon": "CirclePlay", "title": "28 rutinas guiadas", "text": "Secuencia visual para seguir sin improvisar." },
+        { "icon": "CalendarDays", "title": "Calendario de progreso", "text": "Un mapa simple para mantener el ritmo." },
+        { "icon": "Utensils", "title": "Guía de alimentación", "text": "Ideas prácticas para organizar tus comidas.", "badge": "Bono" },
+        { "icon": "Zap", "title": "Activación express", "text": "Calentamiento corto para conectar mejor.", "badge": "Bono" },
+        { "icon": "Users", "title": "Comunidad de apoyo", "text": "Un espacio para dudas, avances y motivación.", "badge": "Bono" },
+        { "icon": "ShieldCheck", "title": "Acceso de por vida", "text": "Vuelve a la ruta siempre que lo necesites." }
+      ],
+      "pricing": {
+        "title": "Desafío Glúteos Brasileños",
+        "subtitle": "Programa digital completo de 28 días, con acceso inmediato.",
+        "badge": "Pago único",
+        "originalPriceFormatted": "$199.00 USD",
+        "finalPriceFormatted": "$19.90 USD",
+        "cta": "Sí, quiero empezar mis 28 días",
+        "guarantee": {
+          "title": "Garantía de 30 días",
+          "text": "Puedes solicitar el reembolso dentro del plazo informado en el checkout, según sus condiciones."
+        }
+      },
+      "testimonials": [
+        {
+          "name": "Mariana, 34",
+          "text": "Por primera vez no sentí que tenía que reorganizar toda mi vida para entrenar. Abrir la rutina y acompañarla fue mucho más fácil.",
+          "rating": 5
+        },
+        {
+          "name": "Carla, 42",
+          "text": "La explicación de cada movimiento me dio seguridad. Ahora presto atención a la técnica en lugar de solo contar repeticiones.",
+          "rating": 5,
+          "featured": true
+        },
+        {
+          "name": "Lucía, 51",
+          "text": "Me gustó poder adaptar el ritmo. Terminar cada sesión corta me devolvió esa sensación de estar cumpliendo conmigo.",
+          "rating": 5
+        }
+      ],
+      "faqs": [
+        {
+          "q": "¿Necesito pesas o equipo?",
+          "a": "No. Las rutinas principales usan el peso corporal. Una banda elástica puede ampliar las progresiones, pero no es obligatoria para empezar."
+        },
+        {
+          "q": "¿Qué pasa si pierdo un día?",
+          "a": "Retomas desde donde paraste. El objetivo es construir constancia sostenible, no una secuencia perfecta que genere culpa."
+        },
+        {
+          "q": "¿Es adecuado para principiantes?",
+          "a": "El programa propone variaciones y progresión gradual. Si tienes dolor, una lesión o una condición médica, consulta a un profesional antes de iniciar."
+        },
+        {
+          "q": "¿Cómo recibo el acceso?",
+          "a": "Después de la confirmación del pago, la plataforma de checkout envía las instrucciones de acceso al correo utilizado en la compra."
+        },
+        {
+          "q": "¿Es suscripción?",
+          "a": "No. La oferta mostrada corresponde a un pago único. Confirma el importe, la moneda y las condiciones finales directamente en el checkout."
+        }
+      ]
+    }
+  }
+}

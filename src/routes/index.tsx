@@ -3,22 +3,33 @@ import {
   useEffect,
   useRef,
   useState,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   BadgeCheck,
   CalendarDays,
   Check,
+  CheckCircle2,
   ChevronDown,
   ChevronRight,
   CirclePlay,
+  Clock,
   Clock3,
+  CreditCard,
   Dumbbell,
+  Eye,
   Gift,
   Heart,
+  Lock,
   LockKeyhole,
+  Maximize2,
+  Minimize2,
+  Pause,
+  Play,
   Quote,
   ShieldCheck,
   Sparkles,
@@ -30,6 +41,7 @@ import {
   Utensils,
   Volume2,
   VolumeX,
+  XCircle,
   Zap,
 } from "lucide-react";
 import coachDuo from "@/assets/coach-duo-new.png";
@@ -47,6 +59,9 @@ import {
   trackQuizComplete,
   trackQuizProgress,
   trackViewContent,
+  trackVslCtaClick,
+  trackVslMilestone,
+  trackVslPlay,
 } from "../pixel";
 
 export const Route = createFileRoute("/")({
@@ -1465,34 +1480,78 @@ const profileData = {
 };
 
 function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>) {
+  const [showPitch, setShowPitch] = useState(true);
+  const [showFloatingCta, setShowFloatingCta] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const offerSectionRef = useRef<HTMLDivElement>(null);
+
   const goal = profileData.goals[answers[11] ?? 0];
   const obstacle = profileData.obstacles[answers[12] ?? 0];
   const age = profileData.ages[answers[9] ?? 1];
   const time = profileData.times[answers[6] ?? 0];
-  const checkoutUrl = getDecoratedCheckoutUrl(CHECKOUT_URL);
+
+  useEffect(() => {
+    trackViewContent("Quiz Final VSL Screen", {
+      video_src: "/vsl-video.mp4",
+      user_goal: goal,
+      user_obstacle: obstacle,
+      user_age: age,
+      user_time: time,
+      price: 9.9,
+      currency: "USD",
+    });
+
+    const handleScroll = () => {
+      if (offerSectionRef.current) {
+        const rect = offerSectionRef.current.getBoundingClientRect();
+        setShowFloatingCta(window.scrollY > 650 && rect.bottom > 100);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [goal, obstacle, age, time]);
+
+  const handleCtaClick = (location: string) => {
+    trackVslCtaClick(location);
+    const checkoutUrl = getDecoratedCheckoutUrl(CHECKOUT_URL);
+    window.location.href = checkoutUrl;
+  };
+
+  const handleVideoPitchReached = () => {
+    setShowPitch(true);
+  };
 
   return (
-    <section className="screen-enter pb-20 sm:pb-0">
-      <header className="flex items-center justify-between">
+    <section className="screen-enter pb-24 sm:pb-12 text-[color:var(--wine)]">
+      {/* Header with live status and 90% discount pill */}
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-4">
         <BrandMark />
-        <span className="flex items-center gap-1.5 rounded-full bg-[color:var(--lime)]/25 px-3 py-2 text-[10px] font-black uppercase tracking-[0.13em] text-[color:var(--wine)]">
-          <TicketPercent size={13} strokeWidth={3} /> 90% aplicado
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 rounded-full bg-[color:var(--wine)] px-3 py-1.5 text-[10px] font-black uppercase text-white shadow-sm">
+            <span className="vsl-pulse-dot" />
+            <LiveViewerCounter />
+          </span>
+          <span className="flex items-center gap-1 rounded-full bg-[color:var(--lime)] px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[color:var(--wine)] shadow-sm">
+            <TicketPercent size={13} strokeWidth={3} /> 90% APLICADO ($9.90 USD)
+          </span>
+        </div>
       </header>
 
+      {/* Personalized Hero banner reflecting their quiz answers */}
       <div className="final-hero mt-6">
         <div className="relative z-10 text-left">
-          <span className="dark-eyebrow">Tu resultado personalizado</span>
-          <h1 className="mt-4 max-w-2xl font-display text-[2.4rem] font-black leading-[0.94] tracking-[-0.055em] text-white sm:text-6xl">
-            Tu próxima victoria cabe en <span className="text-[color:var(--lime)]">{time}.</span>
+          <span className="dark-eyebrow">Tu ruta personalizada de 28 días</span>
+          <h1 className="mt-3 max-w-2xl font-display text-[2.2rem] font-black leading-[0.95] tracking-[-0.04em] text-white sm:text-5xl">
+            Tu transformación cabe en{" "}
+            <span className="text-[color:var(--lime)]">{time} al día.</span>
           </h1>
-          <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-white/65 sm:text-base">
-            Tu ruta prioriza <strong className="text-white">{goal.toLowerCase()}</strong> y reduce
-            el impacto de tu principal barrera:{" "}
+          <p className="mt-3 max-w-xl text-xs sm:text-sm font-medium leading-relaxed text-white/75">
+            Ruta diseñada para <strong className="text-white">{goal.toLowerCase()}</strong>{" "}
+            eliminando tu principal obstáculo:{" "}
             <strong className="text-white">{obstacle.toLowerCase()}</strong>.
           </p>
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-5 flex flex-wrap gap-2">
             <ProfileTag icon={<Target size={14} />} text={goal} />
             <ProfileTag icon={<Clock3 size={14} />} text={`${time} por sesión`} />
             <ProfileTag icon={<CalendarDays size={14} />} text={age} />
@@ -1504,169 +1563,1306 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-8">
-        <div>
-          <div className="section-heading text-left">
-            <span>Todo lo que necesitas para avanzar</span>
-            <h2>Abre el día. Dale play. Cumple contigo.</h2>
-          </div>
+      {/* Headline for Video */}
+      <div className="mt-8 text-center">
+        <span className="eyebrow-pill mb-2">
+          <Sparkles size={13} className="text-[color:var(--coral)]" />
+          PRESENTACIÓN EN VIDEO DE TU RUTA
+        </span>
+        <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-black text-[color:var(--wine)]">
+          Mira Este Breve Video Para Desbloquear Tu Plan
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-[color:var(--ink-muted)]">
+          Aprende cómo activar las 3 porciones del glúteo en 15 minutos en casa sin dolor de
+          rodillas.
+        </p>
+      </div>
 
-          <div className="mt-5 overflow-hidden rounded-[28px] bg-[color:var(--wine)] p-4 shadow-[0_24px_70px_-28px_oklch(0.21_0.07_28/0.65)] sm:p-6">
-            <div className="program-visual">
-              <img
-                src={desafioCard}
-                alt="Vista del programa de entrenamiento de 28 días"
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--wine)] via-transparent to-transparent" />
-              <span className="absolute bottom-4 left-4 rounded-full bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[color:var(--wine)]">
-                <CirclePlay className="mr-1 inline" size={13} fill="currentColor" /> Acceso
-                inmediato
+      {/* 3x4 VSL Video Player with Smart Psychological Progress Bar */}
+      <div className="mt-6">
+        <VslQuizPlayer src="/vsl-video.mp4" onPitchReached={handleVideoPitchReached} />
+      </div>
+
+      {/* Full Pitch / Offer Section */}
+      {showPitch && (
+        <div ref={offerSectionRef} className="mt-12 animate-fade-in space-y-12">
+          {/* Main $9.90 USD Offer Card */}
+          <VslQuizOfferCard onCtaClick={handleCtaClick} />
+
+          {/* Itemized Value Breakdown */}
+          <VslQuizIncludedSummary />
+
+          {/* 4-Week Roadmap */}
+          <VslQuizRoadmap />
+
+          {/* 4 Free Bonuses */}
+          <VslQuizBonuses />
+
+          {/* Comparison Table */}
+          <VslQuizComparisonTable />
+
+          {/* Real Transformations with Student Photos */}
+          <VslQuizSocialProof />
+
+          {/* Target Audience Guide */}
+          <VslQuizTargetAudience />
+
+          {/* 3-Pillar Method & Coaches Authority */}
+          <VslQuizMethodAndCoaches />
+
+          {/* 7-Day Money-Back Guarantee Seal */}
+          <VslQuizGuarantee onCtaClick={() => handleCtaClick("quiz_guarantee_cta")} />
+
+          {/* Secondary Urgency CTA Banner */}
+          <div className="rounded-3xl border-3 border-[color:var(--wine)] bg-white/85 p-6 text-center shadow-[6px_6px_0_var(--wine)] backdrop-blur-md md:p-10">
+            <span className="vsl-offer-badge mb-3">🔥 CUPÓN ACTIVO: 90% DE DESCUENTO</span>
+            <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
+              ¿Lista para transformar tu silueta en 28 días?
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-[color:var(--ink-muted)]">
+              Accede de por vida al Desafío Glúteos Brasileños + 4 bonos de regalo por un único pago
+              de solo <strong className="text-[color:var(--coral)]">$9.90 USD</strong>.
+            </p>
+
+            <div className="mx-auto mt-6 max-w-lg">
+              <button
+                type="button"
+                onClick={() => handleCtaClick("quiz_secondary_cta")}
+                className="cta-button text-base font-black tracking-wider text-white shadow-xl hover:scale-[1.02]"
+              >
+                <span className="button-sheen" />
+                <span className="flex items-center justify-center gap-2">
+                  ¡QUIERO MI PLAN COMPLETO POR $9.90!
+                  <ArrowRight size={20} />
+                </span>
+              </button>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-[color:var(--ink-muted)]">
+              <span className="flex items-center gap-1">
+                <ShieldCheck size={16} className="text-emerald-600" /> Garantía de 7 días
+              </span>
+              <span className="flex items-center gap-1">
+                <Lock size={15} className="text-emerald-600" /> Pago 100% Encriptado
+              </span>
+              <span className="flex items-center gap-1">
+                <Sparkles size={15} className="text-[color:var(--coral)]" /> Acceso De Por Vida
               </span>
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <IncludedItem
-                icon={<CirclePlay size={19} />}
-                title="28 rutinas guiadas"
-                text="Secuencia visual para seguir sin improvisar."
-              />
-              <IncludedItem
-                icon={<CalendarDays size={19} />}
-                title="Calendario de progreso"
-                text="Un mapa simple para mantener el ritmo."
-              />
-              <IncludedItem
-                icon={<Utensils size={19} />}
-                title="Guía de alimentación"
-                text="Ideas prácticas para organizar tus comidas."
-                badge="Bono"
-              />
-              <IncludedItem
-                icon={<Zap size={19} />}
-                title="Activación express"
-                text="Calentamiento corto para conectar mejor."
-                badge="Bono"
-              />
-              <IncludedItem
-                icon={<Users size={19} />}
-                title="Comunidad de apoyo"
-                text="Un espacio para dudas, avances y motivación."
-                badge="Bono"
-              />
-              <IncludedItem
-                icon={<ShieldCheck size={19} />}
-                title="Acceso de por vida"
-                text="Vuelve a la ruta siempre que lo necesites."
-              />
-            </div>
           </div>
+
+          {/* Extended FAQ Accordion */}
+          <VslQuizFaq openFaq={openFaq} setOpenFaq={setOpenFaq} />
         </div>
+      )}
 
-        <aside className="offer-card lg:sticky lg:top-6">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[color:var(--coral)]">
-              Cupón BUMBUM90 aplicado
-            </span>
-            <span className="rounded-full bg-[color:var(--lime)]/25 px-2.5 py-1 text-[9px] font-black uppercase text-[color:var(--wine)]">
-              Pago único
-            </span>
-          </div>
-          <h3 className="mt-4 font-display text-2xl font-black leading-none tracking-[-0.04em] text-[color:var(--wine)]">
-            Desafío Glúteos Brasileños
-          </h3>
-          <p className="mt-2 text-xs leading-5 text-[color:var(--ink-muted)]">
-            Programa digital completo de 28 días, con acceso inmediato.
-          </p>
-
-          <div className="my-5 h-px bg-[color:var(--wine)]/8" />
-          <p className="text-[11px] font-bold text-[color:var(--ink-muted)]">
-            De <del className="text-[color:var(--coral)]">$199.00 USD</del> por:
-          </p>
-          <div className="mt-1 flex items-end gap-2">
-            <span className="font-display text-5xl font-black tracking-[-0.055em] text-[color:var(--wine)]">
-              $19.90
-            </span>
-            <span className="pb-1 text-xs font-black uppercase text-[color:var(--ink-muted)]">
-              USD
-            </span>
-          </div>
-          <p className="mt-1 text-[11px] font-semibold text-[color:var(--ink-muted)]">
-            Sin mensualidades. El valor final se confirma en el checkout.
-          </p>
-
-          <a
-            href={checkoutUrl}
-            onClick={() => trackInitiateCheckout("main_offer_card")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cta-button group mt-5"
-          >
-            <span>Sí, quiero empezar mis 28 días</span>
-            <ChevronRight size={20} />
-            <span className="button-sheen" aria-hidden="true" />
-          </a>
-          <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.1em] text-[color:var(--ink-muted)]">
-            <span className="flex items-center gap-1">
-              <LockKeyhole size={12} /> Pago seguro
-            </span>
-            <span className="h-1 w-1 rounded-full bg-[color:var(--coral)]" />
-            <span className="flex items-center gap-1">
-              <Zap size={12} /> Acceso inmediato
-            </span>
-          </div>
-
-          <div className="mt-5 flex gap-3 rounded-2xl bg-[color:var(--cream-deep)] p-4 text-left">
-            <ShieldCheck className="shrink-0 text-[color:var(--coral)]" size={25} />
-            <div>
-              <strong className="text-xs text-[color:var(--wine)]">Garantía de 30 días</strong>
-              <p className="mt-1 text-[10px] leading-4 text-[color:var(--ink-muted)]">
-                Puedes solicitar el reembolso dentro del plazo informado en el checkout, según sus
-                condiciones.
+      {/* Floating Sticky Bottom CTA on scroll ($9.90 USD) */}
+      {showFloatingCta && showPitch && (
+        <div className="vsl-floating-bottom-cta">
+          <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
+            <div className="hidden sm:block text-left text-white">
+              <p className="text-xs font-bold text-[color:var(--lime)]">90% OFF APLICADO</p>
+              <p className="text-sm font-black">
+                Desafío Glúteos 28 Días —{" "}
+                <span className="text-[color:var(--shock-yellow)]">$9.90 USD</span>
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() => handleCtaClick("quiz_floating_cta")}
+              className="cta-button min-h-[3.2rem] py-2 px-5 text-xs sm:text-sm font-black uppercase text-white shadow-md flex-1 sm:flex-initial"
+            >
+              <span className="button-sheen" />
+              <span className="flex items-center justify-center gap-1.5">
+                ¡ACCEDER POR SOLO $9.90!
+                <ArrowRight size={16} />
+              </span>
+            </button>
           </div>
-        </aside>
-      </div>
-
-      <SocialProof />
-      <FaqSection openFaq={openFaq} setOpenFaq={setOpenFaq} />
-
-      <div className="mt-9 rounded-[28px] bg-[color:var(--coral)] px-5 py-8 text-center text-white sm:px-9">
-        <Sparkles className="mx-auto" size={25} />
-        <h2 className="mx-auto mt-3 max-w-xl font-display text-3xl font-black leading-none tracking-[-0.045em]">
-          No necesitas una hora libre. Necesitas un primer día.
-        </h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-white/75">
-          Empieza con la ruta que acabamos de crear a partir de tus respuestas.
-        </p>
-        <a
-          href={checkoutUrl}
-          onClick={() => trackInitiateCheckout("bottom_banner_cta")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="cta-button cta-light group mx-auto mt-5 max-w-md"
-        >
-          <span>Quiero comenzar hoy</span>
-          <ChevronRight size={20} />
-          <span className="button-sheen" aria-hidden="true" />
-        </a>
-      </div>
-
-      <div className="mobile-checkout-bar">
-        <div>
-          <span className="block text-[9px] font-black uppercase tracking-[0.12em] text-white/55">
-            90% OFF aplicado
-          </span>
-          <strong className="font-display text-xl text-white">$19.90 USD</strong>
         </div>
-        <a
-          href={checkoutUrl}
-          onClick={() => trackInitiateCheckout("mobile_sticky_bar")}
-          target="_blank"
-          rel="noopener noreferrer"
+      )}
+    </section>
+  );
+}
+
+/**
+ * 3x4 VSL Player with Smart Psychological Progress Bar inside the Quiz Route
+ */
+function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
+
+  const trackedMilestones = useRef<Set<number>>(new Set());
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleLoadedMetadata = () => {
+      setDuration(video.duration || 0);
+    };
+
+    const handleTimeUpdate = () => {
+      const current = video.currentTime;
+      const total = video.duration || 1;
+      setCurrentTime(current);
+
+      const percent = Math.round((current / total) * 100);
+
+      [25, 50, 75, 90, 100].forEach((milestone) => {
+        if (percent >= milestone && !trackedMilestones.current.has(milestone)) {
+          trackedMilestones.current.add(milestone);
+          trackVslMilestone(milestone);
+        }
+      });
+
+      if (current >= 15 || percent >= 10) {
+        onPitchReached?.();
+      }
+    };
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+      if (!hasStartedPlaying) {
+        setHasStartedPlaying(true);
+        trackVslPlay();
+      }
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      trackVslMilestone(100);
+    };
+
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handleEnded);
+
+    video.muted = true;
+    setIsMuted(true);
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+          setHasStartedPlaying(true);
+        })
+        .catch(() => {
+          setIsPlaying(false);
+        });
+    }
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handleEnded);
+    };
+  }, [hasStartedPlaying, onPitchReached]);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      void video.play();
+      setIsPlaying(true);
+    } else {
+      video.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const handleUnmute = (e: ReactMouseEvent) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = false;
+    video.volume = 1;
+    setIsMuted(false);
+    setVolume(1);
+
+    if (video.paused) {
+      void video.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const handleToggleMute = (e: ReactMouseEvent) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+
+    const nextMuted = !video.muted;
+    video.muted = nextMuted;
+    setIsMuted(nextMuted);
+    if (!nextMuted && video.volume === 0) {
+      video.volume = 1;
+      setVolume(1);
+    }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVol = Number.parseFloat(e.target.value);
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.volume = newVol;
+    setVolume(newVol);
+    const shouldMute = newVol === 0;
+    video.muted = shouldMute;
+    setIsMuted(shouldMute);
+  };
+
+  const handleSeek = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const bar = progressBarRef.current;
+    const video = videoRef.current;
+    if (!bar || !video || !duration) return;
+
+    const rect = bar.getBoundingClientRect();
+    const clickPos = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const seekTime = (clickPos / rect.width) * duration;
+    video.currentTime = seekTime;
+    setCurrentTime(seekTime);
+  };
+
+  const handleSpeedToggle = (e: ReactMouseEvent) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+
+    const speeds = [1, 1.25, 1.5];
+    const nextIdx = (speeds.indexOf(playbackSpeed) + 1) % speeds.length;
+    const nextSpeed = speeds[nextIdx];
+    video.playbackRate = nextSpeed;
+    setPlaybackSpeed(nextSpeed);
+  };
+
+  const toggleFullscreen = (e: ReactMouseEvent) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    if (!document.fullscreenElement) {
+      void container.requestFullscreen?.().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      void document.exitFullscreen?.().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
+
+  const handleMouseMove = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (isPlaying) {
+        setShowControls(false);
+      }
+    }, 3000);
+  };
+
+  const formatTime = (seconds: number) => {
+    if (Number.isNaN(seconds) || seconds <= 0) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  /**
+   * Psychological progress bar formula:
+   * Starts fast, decelerates towards end.
+   */
+  const getPsychologicalProgress = (current: number, total: number) => {
+    if (!total || total <= 0 || current <= 0) return 0;
+    const ratio = Math.min(1, Math.max(0, current / total));
+    if (ratio >= 0.995) return 100;
+    const curved = (1 - Math.pow(1 - ratio, 2.7)) * 96;
+    return Math.min(99, Math.max(1, curved));
+  };
+
+  const progressPercent = getPsychologicalProgress(currentTime, duration);
+
+  return (
+    <div className="vsl-hero-wrapper mx-auto w-full max-w-[440px]">
+      <div
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => isPlaying && setShowControls(false)}
+        onClick={togglePlay}
+        className="vsl-video-frame group relative cursor-pointer select-none aspect-[3/4]"
+      >
+        {/* Video Element */}
+        <video
+          ref={videoRef}
+          src={src}
+          playsInline
+          preload="auto"
+          className="h-full w-full object-cover"
+        />
+
+        {/* Unmute Overlay Banner */}
+        {isMuted && isPlaying && (
+          <button type="button" onClick={handleUnmute} className="vsl-unmute-banner">
+            <VolumeX size={18} className="animate-pulse text-[color:var(--lime)]" />
+            <span>Haz Clic Para Activar El Audio 🔊</span>
+            <div className="flex items-center gap-0.5">
+              <span className="vsl-sound-bar" />
+              <span className="vsl-sound-bar" />
+              <span className="vsl-sound-bar" />
+              <span className="vsl-sound-bar" />
+            </div>
+          </button>
+        )}
+
+        {/* Play Overlay Button */}
+        {!isPlaying && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-opacity">
+            <button
+              type="button"
+              onClick={togglePlay}
+              className="vsl-play-overlay-btn group-hover:scale-110"
+              aria-label="Reproducir Video"
+            >
+              <Play size={36} className="ml-1 text-white fill-white" />
+            </button>
+          </div>
+        )}
+
+        {/* Custom Video Controls Bar */}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={`absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-3 pt-6 text-white transition-opacity duration-300 ${
+            showControls || !isPlaying ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
         >
-          Empezar ahora <ChevronRight size={17} />
-        </a>
+          {/* Smart Accelerating / Decelerating Progress Bar */}
+          <div
+            ref={progressBarRef}
+            onClick={handleSeek}
+            className="group/bar relative mb-2.5 h-2 w-full cursor-pointer rounded-full bg-white/25 hover:h-2.5 transition-all overflow-hidden"
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[color:var(--coral)] to-[color:var(--lime)] relative transition-[width] duration-300 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          {/* Controls row */}
+          <div className="flex items-center justify-between gap-2 text-xs font-semibold">
+            {/* Left controls */}
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={togglePlay}
+                className="rounded p-1 text-white hover:text-[color:var(--lime)] transition-colors"
+                aria-label={isPlaying ? "Pausar" : "Reproducir"}
+              >
+                {isPlaying ? <Pause size={18} /> : <Play size={18} fill="currentColor" />}
+              </button>
+
+              <div className="flex items-center gap-1 group/vol">
+                <button
+                  type="button"
+                  onClick={handleToggleMute}
+                  className="rounded p-1 text-white hover:text-[color:var(--lime)] transition-colors"
+                  aria-label={isMuted ? "Activar sonido" : "Silenciar"}
+                >
+                  {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                  className="h-1.5 w-12 cursor-pointer accent-[color:var(--coral)] opacity-80 hover:opacity-100"
+                  aria-label="Control de volumen"
+                />
+              </div>
+
+              <span className="font-mono text-[10px] text-white/90">{formatTime(currentTime)}</span>
+            </div>
+
+            {/* Right controls */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleSpeedToggle}
+                className="rounded bg-white/20 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase hover:bg-white/30 transition-colors"
+                title="Velocidad de reproducción"
+              >
+                {playbackSpeed}x
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="rounded p-1 text-white hover:text-[color:var(--lime)] transition-colors"
+                aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+              >
+                {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-[color:var(--ink-muted)]">
+        <Volume2 size={15} className="text-[color:var(--coral)] animate-bounce" />
+        <span>Asegúrate de tener el audio activado para seguir todas las explicaciones</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Main Offer Card ($9.90 USD) for the Quiz Funnel
+ */
+function VslQuizOfferCard({ onCtaClick }: { onCtaClick: (location: string) => void }) {
+  return (
+    <div className="relative overflow-hidden rounded-3xl border-4 border-[color:var(--wine)] bg-white p-6 shadow-[10px_10px_0_var(--wine)] md:p-10">
+      {/* Top Banner */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-5">
+        <div>
+          <span className="vsl-offer-badge">🔥 OFERTA EXCLUSIVA DE LANZAMIENTO (90% OFF)</span>
+          <h2 className="font-display text-2xl font-black text-[color:var(--wine)] sm:text-3xl mt-1.5">
+            Desafío Glúteos Brasileños 28 Días
+          </h2>
+          <p className="text-xs font-medium text-[color:var(--ink-muted)]">
+            Acceso Completo De Por Vida + 4 Bonos de Regalo + Garantía Incondicional de 7 Días
+          </p>
+        </div>
+
+        <OfferCountdownTimer />
+      </div>
+
+      {/* Content Columns */}
+      <div className="grid gap-8 lg:grid-cols-12 items-center">
+        {/* Left column: Image Card */}
+        <div className="lg:col-span-5 flex flex-col items-center">
+          <div className="relative overflow-hidden rounded-2xl border-3 border-[color:var(--wine)] bg-[color:var(--wine)] shadow-[6px_6px_0_var(--coral)]">
+            <img
+              src={desafioCard}
+              alt="Desafío Glúteos Brasileños"
+              className="h-auto w-full max-w-[280px] object-cover transition-transform hover:scale-105 duration-300"
+            />
+            <div className="absolute bottom-2 left-2 right-2 rounded-xl bg-black/80 p-2 text-center text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+              ✨ Programa Digital Completo en Video
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-1 text-xs font-bold text-[color:var(--wine)]">
+            <div className="flex text-amber-500">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} size={14} fill="currentColor" />
+              ))}
+            </div>
+            <span>4.9 / 5.0 (Más de 2.800 alumnas)</span>
+          </div>
+        </div>
+
+        {/* Right column: Benefits list & Pricing */}
+        <div className="lg:col-span-7 space-y-4">
+          <ul className="space-y-2.5 text-xs sm:text-sm font-semibold text-[color:var(--wine)]">
+            <li className="flex items-start gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--lime)] text-[color:var(--wine)]">
+                <Check size={13} strokeWidth={3} />
+              </span>
+              <span>
+                <strong>Protocolo Guiado de 28 Días:</strong> Rutinas completas en video de 15 min
+                al día.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--lime)] text-[color:var(--wine)]">
+                <Check size={13} strokeWidth={3} />
+              </span>
+              <span>
+                <strong>Biomecánica Brasileña:</strong> Aislamiento del glúteo sin hipertrofiar
+                muslos ni dolor articular.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--lime)] text-[color:var(--wine)]">
+                <Check size={13} strokeWidth={3} />
+              </span>
+              <span>
+                <strong>Entrena 100% en Casa:</strong> Sin gimnasio ni máquinas pesadas.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
+                <Gift size={13} />
+              </span>
+              <span>
+                <strong>Bono #1:</strong> Guía Nutricional Anti-Flacidez y Menú Glúteos Firmes{" "}
+                <span className="text-[color:var(--coral)]">(Gratis hoy)</span>
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
+                <Gift size={13} />
+              </span>
+              <span>
+                <strong>Bono #2:</strong> Protocolo Express Anti-Celulitis y Drenaje Linfático{" "}
+                <span className="text-[color:var(--coral)]">(Gratis hoy)</span>
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
+                <Gift size={13} />
+              </span>
+              <span>
+                <strong>Bono #3:</strong> Tracker Imprimible y Planificador de Hábitos{" "}
+                <span className="text-[color:var(--coral)]">(Gratis hoy)</span>
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
+                <Gift size={13} />
+              </span>
+              <span>
+                <strong>Bono #4:</strong> Comunidad VIP de Alumnas y Soporte Vitalicio{" "}
+                <span className="text-[color:var(--coral)]">(Gratis hoy)</span>
+              </span>
+            </li>
+          </ul>
+
+          {/* Price Box */}
+          <div className="rounded-2xl border-2 border-[color:var(--wine)] bg-[color:var(--cream)] p-4 text-center">
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-sm font-bold text-[color:var(--ink-muted)] line-through">
+                Precio Regular: $97 USD
+              </span>
+              <span className="rounded-full bg-[color:var(--coral)] px-2.5 py-0.5 text-xs font-black text-white">
+                90% DE DESCUENTO
+              </span>
+            </div>
+
+            <div className="mt-1 flex items-baseline justify-center gap-1.5">
+              <span className="text-sm sm:text-base font-bold text-[color:var(--wine)]">
+                Pago único hoy:
+              </span>
+              <span className="font-display text-4xl sm:text-5xl font-black text-[color:var(--coral)]">
+                $9.90
+              </span>
+              <span className="text-sm font-bold text-[color:var(--wine)]">USD</span>
+            </div>
+            <p className="mt-0.5 text-[11px] font-semibold text-[color:var(--ink-muted)]">
+              Pago único • Acceso ilimitado de por vida • Sin mensualidades ni cobros recurrentes
+            </p>
+          </div>
+
+          {/* Big CTA */}
+          <button
+            type="button"
+            onClick={() => onCtaClick("quiz_offer_primary_cta")}
+            className="cta-button text-base md:text-lg font-black tracking-wider text-white shadow-xl hover:scale-[1.02]"
+          >
+            <span className="button-sheen" />
+            <span className="flex items-center justify-center gap-2">
+              ¡QUIERO ACCESO POR SOLO $9.90 USD!
+              <ArrowRight size={22} />
+            </span>
+          </button>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-center text-[11px] font-semibold text-[color:var(--ink-muted)]">
+            <span className="flex items-center gap-1">
+              <Lock size={13} className="text-emerald-600" /> Checkout Seguro Hotmart
+            </span>
+            <span className="flex items-center gap-1">
+              <ShieldCheck size={14} className="text-emerald-600" /> Garantía de 7 Días
+            </span>
+            <span className="flex items-center gap-1">
+              <CreditCard size={13} className="text-[color:var(--wine)]" /> Tarjetas / PayPal
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Itemized Value Summary for the Quiz
+ */
+function VslQuizIncludedSummary() {
+  const items = [
+    { name: "Programa Completo Desafío Glúteos Brasileños 28 Días", value: "$97.00 USD" },
+    { name: "Módulo 1: Despertar Neuromuscular y Activación Inicial", value: "$27.00 USD" },
+    { name: "Módulo 2: Sobrecarga Progresiva y Volumen Lateral", value: "$37.00 USD" },
+    { name: "Módulo 3: Escultura, Elevación y Firmeza Máxima", value: "$37.00 USD" },
+    {
+      name: "Bono #1: Guía Nutricional Anti-Flacidez y Menú Glúteos Firmes",
+      value: "$37.00 USD",
+      free: true,
+    },
+    {
+      name: "Bono #2: Protocolo Express Anti-Celulitis y Drenaje",
+      value: "$29.00 USD",
+      free: true,
+    },
+    {
+      name: "Bono #3: Planificador Imprimible de Hábitos y Tracker Diario",
+      value: "$19.00 USD",
+      free: true,
+    },
+    {
+      name: "Bono #4: Acceso VIP a la Comunidad y Soporte De Por Vida",
+      value: "$47.00 USD",
+      free: true,
+    },
+    { name: "Garantía Incondicional de Reembolso Total en 7 Días", value: "INVALUABLE" },
+  ];
+
+  return (
+    <div className="rounded-3xl border-3 border-[color:var(--wine)] bg-white p-6 shadow-[6px_6px_0_var(--wine)] md:p-8">
+      <div className="text-center mb-6">
+        <span className="eyebrow-pill mb-2">RESUMEN DEL PAQUETE COMPLETO</span>
+        <h3 className="font-display text-2xl font-black text-[color:var(--wine)]">
+          Todo Lo Que Recibes Al Unirte Hoy
+        </h3>
+      </div>
+
+      <div className="space-y-3 divide-y divide-black/10">
+        {items.map((item) => (
+          <div
+            key={item.name}
+            className="flex items-center justify-between pt-3 text-xs sm:text-sm"
+          >
+            <span className="flex items-center gap-2 font-bold text-[color:var(--wine)]">
+              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+              {item.name}
+            </span>
+            <span
+              className={`shrink-0 font-extrabold ${item.free ? "text-[color:var(--coral)]" : "text-[color:var(--ink-muted)] line-through"}`}
+            >
+              {item.free ? "GRATIS HOY" : item.value}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[color:var(--wine)] p-4 text-white">
+        <div>
+          <span className="text-xs text-white/70 block">VALOR TOTAL REAL:</span>
+          <span className="text-sm font-bold line-through text-white/60">$229.00 USD</span>
+        </div>
+        <div className="text-right">
+          <span className="text-xs font-bold text-[color:var(--lime)] block">
+            PRECIO PROMOCIONAL HOY:
+          </span>
+          <span className="font-display text-3xl font-black text-[color:var(--shock-yellow)]">
+            $9.90 USD
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 4-Week Roadmap
+ */
+function VslQuizRoadmap() {
+  const weeks = [
+    {
+      week: "Semana 1 (Días 1 a 7)",
+      phase: "Despertar Neuromuscular",
+      goal: "Reactivar la conexión mente-músculo y despertar las fibras 'dormidas' del glúteo mayor y medio sin forzar rodillas.",
+      badge: "Fase de Inicio",
+    },
+    {
+      week: "Semana 2 (Días 8 a 14)",
+      phase: "Sobrecarga y Redondez Lateral",
+      goal: "Estimulación del glúteo medio para rellenar los hoyuelos laterales y crear esa silueta redondeada y femenina.",
+      badge: "Fase de Volumen",
+    },
+    {
+      week: "Semana 3 (Días 15 a 21)",
+      phase: "Elevación y Firmeza Profunda",
+      goal: "Aumento de la tensión metabólica para elevar la curva inferior del glúteo, reduciendo la flacidez visible.",
+      badge: "Fase de Elevación",
+    },
+    {
+      week: "Semana 4 (Días 22 a 28)",
+      phase: "Consolidación y Efecto Push-Up",
+      goal: "Rutinas de alta densidad para fijar el tono muscular duradero y lucir cualquier ropa con total seguridad.",
+      badge: "Fase de Resultados",
+    },
+  ];
+
+  return (
+    <section className="space-y-6">
+      <div className="text-center">
+        <span className="eyebrow-pill mb-2">PLAN DÍA POR DÍA</span>
+        <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
+          Las 4 Fases de Tu Transformación en 28 Días
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-sm text-[color:var(--ink-muted)]">
+          Un plan estructurado paso a paso para que cada día sepas exactamente qué video ver y qué
+          ejercicios hacer.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {weeks.map((w) => (
+          <div
+            key={w.week}
+            className="relative rounded-2xl border-3 border-[color:var(--wine)] bg-white p-5 shadow-[4px_4px_0_var(--wine)] flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-black uppercase text-[color:var(--coral)]">
+                  {w.week}
+                </span>
+                <span className="rounded-full bg-[color:var(--lime)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--wine)]">
+                  {w.badge}
+                </span>
+              </div>
+              <h3 className="font-display text-lg font-black text-[color:var(--wine)]">
+                {w.phase}
+              </h3>
+              <p className="mt-2 text-xs leading-relaxed text-[color:var(--ink-muted)]">{w.goal}</p>
+            </div>
+            <div className="mt-4 border-t border-black/10 pt-2 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
+              <Check size={13} strokeWidth={3} />
+              <span>15 minutos diarios guiados en video HD</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * 4 Free Bonuses
+ */
+function VslQuizBonuses() {
+  const bonuses = [
+    {
+      badge: "BONO #1",
+      title: "Guía Nutricional Anti-Flacidez",
+      value: "$37 USD",
+      desc: "Menús simples y qué comer antes y después de entrenar para estimular la síntesis de colágeno y firmeza.",
+    },
+    {
+      badge: "BONO #2",
+      title: "Protocolo Anti-Celulitis Express",
+      value: "$29 USD",
+      desc: "Secuencias de drenaje y activación circulatoria en casa para alisar la textura de la piel en glúteos y piernas.",
+    },
+    {
+      badge: "BONO #3",
+      title: "Tracker Imprimible de 28 Días",
+      value: "$19 USD",
+      desc: "Plantilla visual para registrar tus medidas, tus fotos de progreso y mantener la motivación al 100%.",
+    },
+    {
+      badge: "BONO #4",
+      title: "Comunidad VIP de Alumnas & Soporte",
+      value: "$47 USD",
+      desc: "Espacio privado exclusivo para resolver preguntas, compartir recetas y motivarte con compañeras.",
+    },
+  ];
+
+  return (
+    <div className="rounded-3xl border-3 border-[color:var(--wine)] bg-[color:var(--cream-deep)]/40 p-6 md:p-8">
+      <div className="mb-6 text-center">
+        <span className="rounded-full bg-[color:var(--coral)] px-3 py-1 text-xs font-black uppercase text-white shadow-sm">
+          🎁 4 REGALOS EXCLUSIVOS INCLUIDOS HOY
+        </span>
+        <h3 className="font-display mt-2 text-xl font-black text-[color:var(--wine)] md:text-2xl">
+          Llévate Estos 4 Bonos de Regalo (Valorados en $132 USD) por $0
+        </h3>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {bonuses.map((bonus) => (
+          <div
+            key={bonus.title}
+            className="rounded-2xl border-2 border-[color:var(--wine)] bg-white p-4 shadow-[3px_3px_0_var(--coral)]"
+          >
+            <div className="flex items-center justify-between text-xs font-black">
+              <span className="text-[color:var(--coral)]">{bonus.badge}</span>
+              <span className="text-[color:var(--ink-muted)] line-through">{bonus.value}</span>
+            </div>
+            <h4 className="mt-1 font-display font-bold text-[color:var(--wine)] text-sm">
+              {bonus.title}
+            </h4>
+            <p className="mt-1.5 text-xs text-[color:var(--ink-muted)] leading-relaxed">
+              {bonus.desc}
+            </p>
+            <div className="mt-3 inline-block rounded-md bg-[color:var(--lime)] px-2 py-0.5 text-[10px] font-black text-[color:var(--wine)]">
+              GRATIS CON TU PLAN
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Comparison Table
+ */
+function VslQuizComparisonTable() {
+  const comparisons = [
+    {
+      feature: "Tiempo requerido",
+      brazilian: "15 a 20 minutos al día en casa",
+      standard: "45 a 60 min + traslado al gimnasio",
+    },
+    {
+      feature: "Enfoque muscular",
+      brazilian: "100% Aislamiento de las 3 porciones del glúteo",
+      standard: "Sobrecarga en cuádriceps y piernas gruesas",
+    },
+    {
+      feature: "Impacto en rodillas/espalda",
+      brazilian: "Cero impacto articular (sin sentadillas pesadas)",
+      standard: "Alta compresión axial en columna y rodillas",
+    },
+    {
+      feature: "Equipo necesario",
+      brazilian: "Ninguno (peso corporal y apoyos caseros)",
+      standard: "Máquinas caras y pesas gigantes",
+    },
+    {
+      feature: "Acompañamiento",
+      brazilian: "Paso a paso estructurado día a día por 28 días",
+      standard: "Videos desordenados en YouTube",
+    },
+  ];
+
+  return (
+    <section className="rounded-3xl border-3 border-[color:var(--wine)] bg-white p-6 shadow-[6px_6px_0_var(--wine)] md:p-8">
+      <div className="text-center mb-6">
+        <span className="eyebrow-pill mb-2">POR QUÉ ES SUPERIOR</span>
+        <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
+          Método Brasileño vs. Rutinas Tradicionales
+        </h2>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs sm:text-sm">
+          <thead>
+            <tr className="border-b-2 border-[color:var(--wine)]">
+              <th className="pb-3 font-bold text-[color:var(--ink-muted)]">Característica</th>
+              <th className="pb-3 font-black text-[color:var(--coral)]">
+                ✨ Método Brasileño 28 Días
+              </th>
+              <th className="pb-3 font-medium text-[color:var(--ink-muted)]">
+                Rutinas de Gym / YouTube
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-black/10">
+            {comparisons.map((row) => (
+              <tr key={row.feature} className="hover:bg-slate-50/60">
+                <td className="py-3 font-bold text-[color:var(--wine)]">{row.feature}</td>
+                <td className="py-3 font-extrabold text-emerald-800 flex items-center gap-1.5">
+                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                  {row.brazilian}
+                </td>
+                <td className="py-3 text-[color:var(--ink-muted)]">
+                  <div className="flex items-center gap-1.5">
+                    <XCircle size={15} className="text-rose-500 shrink-0" />
+                    {row.standard}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Social Proof with Avatars
+ */
+function VslQuizSocialProof() {
+  const testimonials = [
+    {
+      name: "Mariana Silva, 34 años",
+      city: "Santiago, Chile",
+      image: age1,
+      quote:
+        "Había probado rutinas de YouTube durante meses y solo me dolían las rodillas. En 2 semanas con el Método Brasileño sentí por primera vez la activación real. Mis pantalones me quedan completamente distintos.",
+      stars: 5,
+    },
+    {
+      name: "Camila Rodríguez, 29 años",
+      city: "Bogotá, Colombia",
+      image: age2,
+      quote:
+        "Tengo un trabajo de oficina y paso 8 horas sentada. Este programa de 15 minutos fue lo único que pude mantener con constancia. La firmeza que logré en 28 días es impresionante.",
+      stars: 5,
+      featured: true,
+    },
+    {
+      name: "Valeria Morales, 42 años",
+      city: "Ciudad de México",
+      image: age3,
+      quote:
+        "A mis 42 creía que ya era imposible levantar los glúteos sin ir al gym con pesas gigantes. La explicación de la postura y los ángulos lo cambia todo. 100% recomendado.",
+      stars: 5,
+    },
+    {
+      name: "Lucía Gómez, 51 años",
+      city: "Lima, Perú",
+      image: age4,
+      quote:
+        "Tenía mucho miedo de lastimarme la columna porque tengo antecedentes lumbares. Las rutinas son suaves pero queman de verdad en el músculo correcto. Me devolvió la seguridad en mí misma.",
+      stars: 5,
+    },
+  ];
+
+  return (
+    <section className="space-y-6">
+      <div className="text-center">
+        <span className="eyebrow-pill mb-2">RESULTADOS COMPROBADOS</span>
+        <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
+          Mujeres Reales, Cambios Reales en 28 Días
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-sm text-[color:var(--ink-muted)]">
+          Más de 2.800 alumnas en toda Latinoamérica ya han transformado su silueta desde su casa.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {testimonials.map((t) => (
+          <div
+            key={t.name}
+            className={`rounded-2xl border-3 border-[color:var(--wine)] bg-white p-5 shadow-[4px_4px_0_var(--wine)] flex flex-col justify-between ${
+              t.featured ? "ring-2 ring-[color:var(--coral)]" : ""
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex text-amber-500">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} size={14} fill="currentColor" />
+                  ))}
+                </div>
+                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <BadgeCheck size={14} className="text-emerald-600" /> Alumna Verificada
+                </span>
+              </div>
+
+              <p className="text-xs font-medium leading-relaxed text-[color:var(--wine)] italic">
+                "{t.quote}"
+              </p>
+            </div>
+
+            <div className="mt-4 border-t border-black/10 pt-3 flex items-center gap-3">
+              <img
+                src={t.image}
+                alt={t.name}
+                className="h-10 w-10 rounded-full object-cover border-2 border-[color:var(--wine)]"
+              />
+              <div>
+                <strong className="block text-xs font-black text-[color:var(--wine)]">
+                  {t.name}
+                </strong>
+                <span className="text-[11px] text-[color:var(--ink-muted)]">{t.city}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Target Audience
+ */
+function VslQuizTargetAudience() {
+  return (
+    <section className="grid gap-4 md:grid-cols-2">
+      <div className="rounded-3xl border-3 border-emerald-600 bg-emerald-50/70 p-6 shadow-[4px_4px_0_theme(colors.emerald.800)]">
+        <div className="flex items-center gap-2 mb-3 text-emerald-900">
+          <CheckCircle2 size={24} className="text-emerald-600" />
+          <h3 className="font-display text-lg font-black">Este Programa ES Para Ti Si:</h3>
+        </div>
+        <ul className="space-y-2 text-xs sm:text-sm text-emerald-950 font-medium">
+          <li className="flex items-start gap-2">
+            <span>✓</span> Tienes poco tiempo y prefieres entrenar 15 min en tu sala.
+          </li>
+          <li className="flex items-start gap-2">
+            <span>✓</span> Pasas muchas horas sentada y sientes tus glúteos "planos o dormidos".
+          </li>
+          <li className="flex items-start gap-2">
+            <span>✓</span> Quieres levantar y tonificar sin que tus piernas se ensanchen.
+          </li>
+          <li className="flex items-start gap-2">
+            <span>✓</span> Buscas un método seguro que proteja tus rodillas y espalda.
+          </li>
+        </ul>
+      </div>
+
+      <div className="rounded-3xl border-3 border-rose-500 bg-rose-50/70 p-6 shadow-[4px_4px_0_theme(colors.rose.800)]">
+        <div className="flex items-center gap-2 mb-3 text-rose-900">
+          <XCircle size={24} className="text-rose-500" />
+          <h3 className="font-display text-lg font-black">Este Programa NO Es Para Ti Si:</h3>
+        </div>
+        <ul className="space-y-2 text-xs sm:text-sm text-rose-950 font-medium">
+          <li className="flex items-start gap-2">
+            <span>✗</span> Buscas pastillas mágicas sin mover un solo músculo.
+          </li>
+          <li className="flex items-start gap-2">
+            <span>✗</span> No estás dispuesta a dedicar 15 minutos diarios a tu salud.
+          </li>
+          <li className="flex items-start gap-2">
+            <span>✗</span> Prefieres gastar miles de dólares en cirugías invasivas.
+          </li>
+          <li className="flex items-start gap-2">
+            <span>✗</span> No seguirás las instrucciones de postura y técnica en video.
+          </li>
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * 3-Pillar Method & Coaches Section
+ */
+function VslQuizMethodAndCoaches() {
+  return (
+    <div className="space-y-8">
+      {/* 3 Pillars */}
+      <div className="rounded-3xl border-3 border-[color:var(--wine)] bg-white p-6 shadow-[6px_6px_0_var(--wine)] md:p-8">
+        <div className="text-center mb-6">
+          <span className="eyebrow-pill mb-2">CIENCIA Y BIOMECÁNICA</span>
+          <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
+            Los 3 Pilares del Estímulo Brasileño
+          </h2>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="flex flex-col items-start gap-2">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--wine)] font-display text-base font-black text-[color:var(--shock-yellow)] shadow-[3px_3px_0_var(--coral)]">
+              01
+            </span>
+            <h3 className="font-display text-base font-black text-[color:var(--wine)]">
+              Aislamiento Posterior Puro
+            </h3>
+            <p className="text-xs text-[color:var(--ink-muted)] leading-relaxed">
+              Ajustamos el ángulo de la cadera para que el glúteo trabaje al 100% sin sobrecargar
+              tus muslos ni ensanchar tus piernas.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-start gap-2">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--wine)] font-display text-base font-black text-[color:var(--shock-yellow)] shadow-[3px_3px_0_var(--coral)]">
+              02
+            </span>
+            <h3 className="font-display text-base font-black text-[color:var(--wine)]">
+              Tensión Metabólica en 15 Min
+            </h3>
+            <p className="text-xs text-[color:var(--ink-muted)] leading-relaxed">
+              No necesitas rutinas de 1 hora. Con estímulos continuos de 15 min activas la síntesis
+              de colágeno y firmeza muscular.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-start gap-2">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--wine)] font-display text-base font-black text-[color:var(--shock-yellow)] shadow-[3px_3px_0_var(--coral)]">
+              03
+            </span>
+            <h3 className="font-display text-base font-black text-[color:var(--wine)]">
+              Cero Sobrecarga Articular
+            </h3>
+            <p className="text-xs text-[color:var(--ink-muted)] leading-relaxed">
+              Movimientos controlados con peso corporal que protegen tu espalda baja y rodillas en
+              todo momento.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Coaches Authority */}
+      <div className="rounded-3xl border-3 border-[color:var(--wine)] bg-[color:var(--wine)] p-6 text-white shadow-[6px_6px_0_var(--coral)] md:p-8">
+        <div className="grid gap-6 md:grid-cols-12 items-center">
+          <div className="md:col-span-4 flex justify-center">
+            <div className="relative overflow-hidden rounded-2xl border-3 border-white/20 shadow-xl max-w-[220px]">
+              <img src={coachPortrait} alt="Entrenadores" className="h-auto w-full object-cover" />
+            </div>
+          </div>
+
+          <div className="md:col-span-8 space-y-3">
+            <span className="rounded-full bg-[color:var(--lime)] px-3 py-1 text-xs font-black uppercase text-[color:var(--wine)]">
+              TU EQUIPO DE ENTRENADORES
+            </span>
+            <h2 className="font-display text-2xl font-black md:text-3xl text-white">
+              Especialistas en Biomecánica y Estética Femenina
+            </h2>
+            <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
+              Hemos dedicado años a estudiar el patrón de activación muscular brasileño para crear
+              un protocolo simple, seguro y efectivo que cualquier mujer pueda realizar en casa, sin
+              importar su edad ni su condición física actual.
+            </p>
+            <div className="flex flex-wrap gap-4 pt-2 text-xs font-bold text-[color:var(--shock-yellow)]">
+              <span>✓ +10 Años de Experiencia</span>
+              <span>✓ Especialistas en Glúteos</span>
+              <span>✓ Soporte Personalizado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 7-Day Guarantee
+ */
+function VslQuizGuarantee({ onCtaClick }: { onCtaClick: () => void }) {
+  return (
+    <section className="rounded-3xl border-4 border-emerald-600 bg-emerald-50 p-6 md:p-8 text-center shadow-[6px_6px_0_theme(colors.emerald.800)]">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-md mb-3">
+        <ShieldCheck size={32} />
+      </div>
+
+      <span className="text-xs font-black uppercase tracking-wider text-emerald-800">
+        COMPRA 100% LIBRE DE RIESGO
+      </span>
+
+      <h2 className="font-display text-2xl font-black text-emerald-950 md:text-3xl mt-1">
+        Garantía Incondicional de Devolución de 7 Días
+      </h2>
+
+      <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-emerald-900 leading-relaxed">
+        Prueba el Desafío Glúteos Brasileños durante 7 días completos. Si por cualquier motivo no
+        sientes la activación y los cambios en tu cuerpo, simplemente solicita tu reembolso con un
+        clic y te devolvemos el 100% de tu dinero de inmediato ($9.90 USD). Sin preguntas ni
+        trámites.
+      </p>
+
+      <div className="mt-5">
+        <button
+          type="button"
+          onClick={onCtaClick}
+          className="cta-button max-w-md mx-auto text-sm font-black uppercase text-white shadow-md hover:scale-[1.02]"
+        >
+          <span className="button-sheen" />
+          <span>PROBAR EL MÉTODO SIN RIESGO POR $9.90</span>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * FAQ Accordion
+ */
+function VslQuizFaq({
+  openFaq,
+  setOpenFaq,
+}: {
+  openFaq: number | null;
+  setOpenFaq: (idx: number | null) => void;
+}) {
+  const faqs = [
+    {
+      q: "¿Cómo y cuándo recibo mi acceso al programa?",
+      a: "El acceso es 100% inmediato. Tras confirmar tu pago seguro de $9.90 USD en Hotmart, recibirás un correo electrónico con tus credenciales de acceso para entrar a la plataforma y comenzar hoy mismo.",
+    },
+    {
+      q: "¿Necesito equipo o pesas para hacer las rutinas?",
+      a: "No. El protocolo está diseñado para realizarse con peso corporal y apoyos simples que tienes en tu casa (como una silla o pared). Las bandas elásticas son opcionales para cuando quieras más resistencia.",
+    },
+    {
+      q: "¿Es seguro si tengo dolor de rodillas o problemas de espalda?",
+      a: "Sí. A diferencia de las sentadillas tradicionales con peso en barra, nuestros ejercicios biomecánicos eliminan la compresión axial sobre la columna y aíslan el glúteo sin impacto articular.",
+    },
+    {
+      q: "¿Cuánto tiempo al día necesito dedicarle?",
+      a: "Solo 15 a 20 minutos al día. Las sesiones son compactas y de alta densidad para adaptarse a tu rutina diaria sin complicaciones.",
+    },
+    {
+      q: "¿Es un pago único o me cobrarán cada mes?",
+      a: "Es un pago ÚNICO de solo $9.90 USD. No hay mensualidades, cargos sorpresa ni suscripciones ocultas. Tu acceso es de por vida con todas las actualizaciones futuras incluidas.",
+    },
+    {
+      q: "¿Qué métodos de pago aceptan?",
+      a: "Aceptamos todas las tarjetas de crédito, débito, PayPal y métodos locales disponibles en tu país a través de la pasarela cifrada de Hotmart.",
+    },
+    {
+      q: "¿Cómo funciona la garantía de devolución de 7 días?",
+      a: "Si dentro de los primeros 7 días sientes que el programa no cumple con tus expectativas, solicitas el reembolso directamente en la plataforma con un solo clic y se te devuelve el 100% de tu dinero.",
+    },
+  ];
+
+  return (
+    <section className="space-y-6">
+      <div className="text-center">
+        <span className="eyebrow-pill mb-2">RESOLVEMOS TODAS TUS DUDAS</span>
+        <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
+          Preguntas Frecuentes
+        </h2>
+      </div>
+
+      <div className="space-y-3">
+        {faqs.map((faq, index) => {
+          const isOpen = openFaq === index;
+          return (
+            <div
+              key={faq.q}
+              className={`rounded-2xl border-2 border-[color:var(--wine)] bg-white transition-all ${
+                isOpen ? "shadow-[4px_4px_0_var(--wine)]" : "shadow-sm"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => setOpenFaq(isOpen ? null : index)}
+                className="flex w-full items-center justify-between p-4 text-left font-display font-bold text-sm sm:text-base text-[color:var(--wine)]"
+                aria-expanded={isOpen}
+              >
+                <span>{faq.q}</span>
+                <ChevronDown
+                  size={18}
+                  className={`shrink-0 transition-transform duration-200 ${
+                    isOpen ? "rotate-180 text-[color:var(--coral)]" : ""
+                  }`}
+                />
+              </button>
+              {isOpen && (
+                <div className="border-t border-black/10 p-4 pt-2 text-xs sm:text-sm text-[color:var(--ink-muted)] leading-relaxed">
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -1681,148 +2877,43 @@ function ProfileTag({ icon, text }: Readonly<{ icon: ReactNode; text: string }>)
   );
 }
 
-function IncludedItem({
-  icon,
-  title,
-  text,
-  badge,
-}: Readonly<{
-  icon: ReactNode;
-  title: string;
-  text: string;
-  badge?: string;
-}>) {
+function LiveViewerCounter() {
+  const [count, setCount] = useState(1482);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCount((prev) => prev + Math.floor(Math.random() * 5) - 2);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return <span>{count.toLocaleString()} viendo</span>;
+}
+
+function OfferCountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState(14 * 60 + 59);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
   return (
-    <div className="included-item">
-      <span className="included-icon">{icon}</span>
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <strong>{title}</strong>
-          {badge && <span>{badge}</span>}
-        </div>
-        <p>{text}</p>
+    <div className="flex items-center gap-2 rounded-xl border-2 border-[color:var(--coral)] bg-[color:var(--coral-soft)]/30 px-3.5 py-1.5">
+      <Clock size={16} className="text-[color:var(--coral)] animate-spin-slow" />
+      <div className="text-left">
+        <span className="block text-[10px] font-extrabold uppercase tracking-wide text-[color:var(--coral-dark)]">
+          El cupón de $9.90 expira en:
+        </span>
+        <span className="font-mono text-sm font-black text-[color:var(--wine)]">
+          {minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}
+        </span>
       </div>
     </div>
-  );
-}
-
-function SocialProof() {
-  return (
-    <section className="mt-12">
-      <div className="section-heading text-center">
-        <span>Constancia que se siente</span>
-        <h2>Pequeñas sesiones. Grandes cambios de hábito.</h2>
-      </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <Testimonial
-          name="Mariana, 34"
-          text="Por primera vez no sentí que tenía que reorganizar toda mi vida para entrenar. Abrir la rutina y acompañarla fue mucho más fácil."
-        />
-        <Testimonial
-          name="Carla, 42"
-          text="La explicación de cada movimiento me dio seguridad. Ahora presto atención a la técnica en lugar de solo contar repeticiones."
-          featured
-        />
-        <Testimonial
-          name="Lucía, 51"
-          text="Me gustó poder adaptar el ritmo. Terminar cada sesión corta me devolvió esa sensación de estar cumpliendo conmigo."
-        />
-      </div>
-      <p className="mt-3 text-center text-[10px] leading-4 text-[color:var(--ink-muted)]">
-        Relatos ilustrativos de experiencia. Los resultados individuales pueden variar.
-      </p>
-    </section>
-  );
-}
-
-function Testimonial({
-  name,
-  text,
-  featured = false,
-}: Readonly<{
-  name: string;
-  text: string;
-  featured?: boolean;
-}>) {
-  return (
-    <article className={`testimonial-card ${featured ? "featured" : ""}`}>
-      <div className="flex items-center justify-between">
-        <Quote size={22} className="text-[color:var(--coral)]" fill="currentColor" />
-        <span className="flex gap-0.5 text-[color:var(--coral)]">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={11} fill="currentColor" />
-          ))}
-        </span>
-      </div>
-      <p className="mt-5 text-sm font-medium leading-6 text-[color:var(--wine)]">“{text}”</p>
-      <div className="mt-5 flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[color:var(--wine)] font-display text-xs font-black text-white">
-          {name[0]}
-        </span>
-        <strong className="text-xs text-[color:var(--wine)]">{name}</strong>
-        <BadgeCheck size={14} className="text-[color:var(--coral)]" />
-      </div>
-    </article>
-  );
-}
-
-function FaqSection({
-  openFaq,
-  setOpenFaq,
-}: Readonly<{
-  openFaq: number | null;
-  setOpenFaq: (value: number | null) => void;
-}>) {
-  const faqs = [
-    {
-      q: "¿Necesito pesas o equipo?",
-      a: "No. Las rutinas principales usan el peso corporal. Una banda elástica puede ampliar las progresiones, pero no es obligatoria para empezar.",
-    },
-    {
-      q: "¿Qué pasa si pierdo un día?",
-      a: "Retomas desde donde paraste. El objetivo es construir constancia sostenible, no una secuencia perfecta que genere culpa.",
-    },
-    {
-      q: "¿Es adecuado para principiantes?",
-      a: "El programa propone variaciones y progresión gradual. Si tienes dolor, una lesión o una condición médica, consulta a un profesional antes de iniciar.",
-    },
-    {
-      q: "¿Cómo recibo el acceso?",
-      a: "Después de la confirmación del pago, la plataforma de checkout envía las instrucciones de acceso al correo utilizado en la compra.",
-    },
-    {
-      q: "¿Es suscripción?",
-      a: "No. La oferta mostrada corresponde a un pago único. Confirma el importe, la moneda y las condiciones finales directamente en el checkout.",
-    },
-  ];
-
-  return (
-    <section className="mx-auto mt-12 max-w-3xl">
-      <div className="section-heading text-center">
-        <span>Sin dudas pendientes</span>
-        <h2>Preguntas frecuentes</h2>
-      </div>
-      <div className="mt-6 space-y-2.5">
-        {faqs.map((item, index) => {
-          const open = openFaq === index;
-          return (
-            <div key={item.q} className={`faq-item ${open ? "is-open" : ""}`}>
-              <button onClick={() => setOpenFaq(open ? null : index)} aria-expanded={open}>
-                <span>{item.q}</span>
-                <ChevronDown
-                  size={18}
-                  className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-                />
-              </button>
-              <div className="faq-answer">
-                <div>
-                  <p>{item.a}</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
   );
 }

@@ -221,3 +221,41 @@ export function getDecoratedCheckoutUrl(baseUrl = BASE_CHECKOUT_URL): string {
     return baseUrl;
   }
 }
+
+/**
+ * Track when VSL video begins playback
+ */
+export function trackVslPlay(videoName = "vsl-video.mp4") {
+  fbq("trackCustom", "VslPlay", {
+    video_name: videoName,
+    page_type: "vsl",
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * Track VSL video watch milestone (25%, 50%, 75%, 90%, 100%)
+ */
+export function trackVslMilestone(percent: number, videoName = "vsl-video.mp4") {
+  fbq("trackCustom", `VslWatch_${percent}%`, {
+    video_name: videoName,
+    milestone_percent: percent,
+  });
+
+  if (percent >= 50) {
+    fbq("trackCustom", "VslEngagedViewer", { percent });
+  }
+}
+
+/**
+ * Track CTA click on the VSL page
+ */
+export function trackVslCtaClick(location = "vsl_primary_cta") {
+  trackInitiateCheckout(location);
+  fbq("trackCustom", "VslCtaClick", {
+    click_location: location,
+    product: "Desafío Glúteos Brasileños 28 Días",
+    value: 9.9,
+    currency: "USD",
+  });
+}

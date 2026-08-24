@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Showcase - Neo-Pop Quiz Design System</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    .demo-section {
+      margin-top: 3.5rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .color-swatch {
+      border: 2px solid var(--wine);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      box-shadow: 4px 4px 0 var(--wine);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 120px;
+    }
+    .swatch-title {
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+    .swatch-code {
+      font-family: monospace;
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body class="quiz-canvas">
+  <div class="ambient-orb ambient-orb-one"></div>
+  <div class="ambient-orb ambient-orb-two"></div>
+
+  <button class="sound-control is-enabled" id="soundBtn" onclick="toggleSound()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+    <span id="soundLabel">Som: Ativado</span>
+    <i></i>
+  </button>
+
+  <main class="container screen-enter">
+    <header style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="brand-mark">⚡</span>
+        <div>
+          <span style="display: block; font-family: var(--font-display); font-weight: 900; text-transform: uppercase; font-size: 1.1rem; line-height: 1;">Design System</span>
+          <span style="font-size: 0.65rem; font-weight: 900; letter-spacing: 0.18em; text-transform: uppercase; color: var(--coral);">Neo-Pop High Conversion</span>
+        </div>
+      </div>
+      <span class="eyebrow-pill">Pronto para Reutilizar</span>
+    </header>
+
+    <h1 class="font-display" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; line-height: 0.95; letter-spacing: -0.05em;">
+      Componentes, Cores e Estilos <span style="color: var(--coral);">Prontos para Produção</span>.
+    </h1>
+    <p style="margin-top: 1rem; color: var(--ink-muted); font-size: 1.05rem; max-width: 650px;">
+      Este pacote contém tudo o que você precisa para criar quizzes, páginas de vendas e fluxos interativos de altíssima conversão.
+    </p>
+
+    <!-- PALETA DE CORES -->
+    <section class="demo-section">
+      <span class="eyebrow-pill">Paleta Principal</span>
+      <h2 class="font-display" style="font-size: 1.8rem; font-weight: 900; margin-top: 0.5rem;">Cores Neo-Brutalistas</h2>
+      
+      <div class="demo-grid">
+        <div class="color-swatch" style="background: var(--wine); color: white;">
+          <span class="swatch-title">Wine (Vinho Profundo)</span>
+          <span class="swatch-code">#2B0B2E | Textos & Bordas</span>
+        </div>
+        <div class="color-swatch" style="background: var(--coral); color: white;">
+          <span class="swatch-title">Coral (Rosa Elétrico)</span>
+          <span class="swatch-code">#FF3377 | CTAs & Sombras</span>
+        </div>
+        <div class="color-swatch" style="background: var(--lime); color: var(--wine);">
+          <span class="swatch-title">Lime (Verde Limão)</span>
+          <span class="swatch-code">#A7FF00 | Sucesso & Destaque</span>
+        </div>
+        <div class="color-swatch" style="background: var(--shock-yellow); color: var(--wine);">
+          <span class="swatch-title">Shock Yellow</span>
+          <span class="swatch-code">#FFE600 | Hover & Badges</span>
+        </div>
+        <div class="color-swatch" style="background: var(--cream); color: var(--wine);">
+          <span class="swatch-title">Cream Canvas</span>
+          <span class="swatch-code">#FFF9E6 | Fundo Quente</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTÕES & CTAs -->
+    <section class="demo-section">
+      <span class="eyebrow-pill">Interações & Ação</span>
+      <h2 class="font-display" style="font-size: 1.8rem; font-weight: 900; margin-top: 0.5rem;">Botões com Efeito Sheen e Som</h2>
+      
+      <div class="demo-grid" style="align-items: center;">
+        <div>
+          <p style="font-size: 0.8rem; font-weight: 700; color: var(--ink-muted); margin-bottom: 0.5rem;">Botão Primário (Coral Glow)</p>
+          <button class="cta-button" onclick="playAudio('success')">
+            <span>Iniciar Meu Quiz Agora</span>
+            <span class="button-sheen"></span>
+          </button>
+        </div>
+
+        <div>
+          <p style="font-size: 0.8rem; font-weight: 700; color: var(--ink-muted); margin-bottom: 0.5rem;">Botão Secundário (Lime Gradient)</p>
+          <button class="cta-button cta-light" onclick="playAudio('success')">
+            <span>Desbloquear 90% OFF</span>
+            <span class="button-sheen"></span>
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <div>
+            <p style="font-size: 0.8rem; font-weight: 700; color: var(--ink-muted); margin-bottom: 0.5rem;">Botão Voltar</p>
+            <button class="back-button" onclick="playAudio('back')">←</button>
+          </div>
+          <div>
+            <p style="font-size: 0.8rem; font-weight: 700; color: var(--ink-muted); margin-bottom: 0.5rem;">Voltar Dark</p>
+            <div style="background: var(--wine); padding: 0.5rem; border-radius: var(--radius-md);">
+              <button class="back-button back-button-dark" onclick="playAudio('back')">←</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARDS DE OPÇÃO -->
+    <section class="demo-section">
+      <span class="eyebrow-pill">Quiz & Formulários</span>
+      <h2 class="font-display" style="font-size: 1.8rem; font-weight: 900; margin-top: 0.5rem;">Cards de Opção Interativos</h2>
+      
+      <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.5rem; max-width: 550px;">
+        <button class="option-card" onclick="selectOption(this)">
+          <span class="option-letter">A</span>
+          <span style="flex: 1; text-align: left;">
+            <strong style="display: block; font-size: 0.95rem; color: var(--wine);">Quero mais firmeza e elevação</strong>
+            <span style="font-size: 0.75rem; color: var(--ink-muted);">Sinto que perdi o tônus com o tempo</span>
+          </span>
+          <span class="option-check">✓</span>
+        </button>
+
+        <button class="option-card is-selected" onclick="selectOption(this)">
+          <span class="option-letter">B</span>
+          <span style="flex: 1; text-align: left;">
+            <strong style="display: block; font-size: 0.95rem; color: var(--wine);">Quero mais volume e formato</strong>
+            <span style="font-size: 0.75rem; color: var(--ink-muted);">Busco uma curva mais redonda e visível</span>
+          </span>
+          <span class="option-check is-selected">✓</span>
+        </button>
+
+        <button class="option-card" onclick="selectOption(this)">
+          <span class="option-letter">C</span>
+          <span style="flex: 1; text-align: left;">
+            <strong style="display: block; font-size: 0.95rem; color: var(--wine);">Já estou satisfeita, mas quero definir</strong>
+            <span style="font-size: 0.75rem; color: var(--ink-muted);">Quero um efeito mais marcado e esculpido</span>
+          </span>
+          <span class="option-check">✓</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- PAINEL ESCURO & DESTAQUES -->
+    <section class="demo-section">
+      <span class="eyebrow-pill">Apresentação</span>
+      <h2 class="font-display" style="font-size: 1.8rem; font-weight: 900; margin-top: 0.5rem;">Dark Panel com Glow Radial</h2>
+
+      <div class="dark-panel" style="margin-top: 1.5rem;">
+        <span class="dark-eyebrow">Destaque Exclusivo</span>
+        <h3 class="font-display" style="font-size: 2rem; font-weight: 900; margin-top: 0.75rem; line-height: 1;">
+          Ativação Muscular & Foco em Resultados
+        </h3>
+        <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; line-height: 1.6; margin-top: 0.5rem;">
+          Este container utiliza sombras duplas coloridas (#FF3377 e #A7FF00) com fundo escuro de vinho (#2B0B2E) e gradientes radiais luminosos.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+          <div style="background: rgba(255,255,255,0.08); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1);">
+            <strong style="color: var(--lime); font-size: 0.75rem; text-transform: uppercase;">01. Conectar</strong>
+            <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 0.25rem;">Sentir o estímulo correto.</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.08); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1);">
+            <strong style="color: var(--lime); font-size: 0.75rem; text-transform: uppercase;">02. Controlar</strong>
+            <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 0.25rem;">Aperfeiçoar a amplitude.</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.08); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1);">
+            <strong style="color: var(--lime); font-size: 0.75rem; text-transform: uppercase;">03. Proredir</strong>
+            <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 0.25rem;">Evoluir com segurança.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { uiAudio } from './audio-engine.js';
+
+    window.playAudio = (kind) => {
+      uiAudio.play(kind);
+    };
+
+    window.selectOption = (el) => {
+      document.querySelectorAll('.option-card').forEach(card => {
+        card.classList.remove('is-selected');
+        const check = card.querySelector('.option-check');
+        if (check) check.classList.remove('is-selected');
+      });
+      el.classList.add('is-selected');
+      const check = el.querySelector('.option-check');
+      if (check) check.classList.add('is-selected');
+      uiAudio.play('select');
+    };
+
+    window.toggleSound = () => {
+      const isEnabled = uiAudio.toggle();
+      const btn = document.getElementById('soundBtn');
+      const label = document.getElementById('soundLabel');
+      if (isEnabled) {
+        btn.classList.add('is-enabled');
+        label.textContent = 'Som: Ativado';
+      } else {
+        btn.classList.remove('is-enabled');
+        label.textContent = 'Som: Silenciado';
+      }
+    };
+  </script>
+</body>
+</html>
