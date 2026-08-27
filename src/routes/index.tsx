@@ -26,8 +26,6 @@ import {
   Heart,
   Lock,
   LockKeyhole,
-  Maximize2,
-  Minimize2,
   Pause,
   Play,
   Quote,
@@ -113,15 +111,33 @@ type Screen =
   | { kind: "final" };
 
 const TOTAL = 13;
-const CHECKOUT_URL = "https://pay.hotmart.com/I106974773O";
+const CHECKOUT_URL = "";
 
 type SoundKind = "click" | "select" | "back" | "success";
 
 let uiAudioContext: AudioContext | null = null;
+let uiClickAudio: HTMLAudioElement | null = null;
 let uiSoundsEnabled = true;
 
 function playUiSound(kind: SoundKind) {
   if (!uiSoundsEnabled || typeof window === "undefined") return;
+
+  if (kind === "select" || kind === "click") {
+    try {
+      if (!uiClickAudio) {
+        uiClickAudio = new Audio("/button-click.mp3");
+        uiClickAudio.preload = "auto";
+      }
+      uiClickAudio.currentTime = 0;
+      const playPromise = uiClickAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+      return;
+    } catch {
+      // Fallback to synthesized oscillator if audio file cannot be played
+    }
+  }
 
   uiAudioContext ??= new AudioContext();
   const context = uiAudioContext;
@@ -399,6 +415,28 @@ function Index() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [transitioning, setTransitioning] = useState(false);
 
+  // Backredirect System: Intercepts browser Back button and redirects to high-converting offer page
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      window.history.pushState({ page: "quiz_active" }, "", window.location.href);
+    } catch {
+      // Ignore security errors in sandboxed environments
+    }
+
+    const handlePopState = () => {
+      const search = window.location.search || "";
+      const targetUrl = `/oferta-especial${search}`;
+      window.location.href = targetUrl;
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -437,6 +475,7 @@ function Index() {
 
   const selectAnswer = (question: Question, optionIndex: number) => {
     if (transitioning) return;
+    playUiSound("select");
     setTransitioning(true);
     const selectedOption = question.options[optionIndex]?.label || "";
     trackQuizAnswer(question.n, question.title, selectedOption);
@@ -1698,7 +1737,6 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
@@ -1858,19 +1896,6 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
     setPlaybackSpeed(nextSpeed);
   };
 
-  const toggleFullscreen = (e: ReactMouseEvent) => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    if (!document.fullscreenElement) {
-      void container.requestFullscreen?.().catch(() => {});
-      setIsFullscreen(true);
-    } else {
-      void document.exitFullscreen?.().catch(() => {});
-      setIsFullscreen(false);
-    }
-  };
-
   const handleMouseMove = () => {
     setShowControls(true);
     if (controlsTimeoutRef.current) {
@@ -1911,6 +1936,7 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
         onMouseMove={handleMouseMove}
         onMouseLeave={() => isPlaying && setShowControls(false)}
         onClick={togglePlay}
+        onContextMenu={(e) => e.preventDefault()}
         className="vsl-video-frame group relative cursor-pointer select-none aspect-[3/4]"
       >
         {/* Video Element */}
@@ -1919,6 +1945,7 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
           src={src}
           playsInline
           preload="auto"
+          onContextMenu={(e) => e.preventDefault()}
           className="h-full w-full object-cover"
         />
 
@@ -2011,19 +2038,10 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
               <button
                 type="button"
                 onClick={handleSpeedToggle}
-                className="rounded bg-white/20 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase hover:bg-white/30 transition-colors"
+                className="rounded bg-white/20 px-2 py-1 text-[10px] font-bold tracking-wider uppercase hover:bg-white/30 transition-colors"
                 title="Velocidad de reproducción"
               >
                 {playbackSpeed}x
-              </button>
-
-              <button
-                type="button"
-                onClick={toggleFullscreen}
-                className="rounded p-1 text-white hover:text-[color:var(--lime)] transition-colors"
-                aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
-              >
-                {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
               </button>
             </div>
           </div>

@@ -8,7 +8,7 @@
     "brandName": "Método Brasileño 28",
     "language": "es",
     "currency": "USD",
-    "checkoutBaseUrl": "https://pay.hotmart.com/I106974773O",
+    "checkoutBaseUrl": "",
     "defaultCoupon": "BUMBUM90",
     "discountPercentage": 90,
     "originalPrice": 199.00,

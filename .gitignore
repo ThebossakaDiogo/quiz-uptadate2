@@ -38,6 +38,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# Root video duplicate
+# Root video / audio duplicate
 /vsl-video.mp4
+/button-click.mp3
 

@@ -1,5 +1,5 @@
-export const META_PIXEL_ID = "1544991763138548";
-export const BASE_CHECKOUT_URL = "https://pay.hotmart.com/I106974773O";
+export const META_PIXEL_ID = "";
+export const BASE_CHECKOUT_URL = "";
 
 type MetaPixelFn = {
   (...args: unknown[]): void;
@@ -21,7 +21,7 @@ declare global {
  * Safe execution helper for Meta Pixel (window.fbq)
  */
 export function fbq(...args: unknown[]) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !META_PIXEL_ID) return;
   if (window.fbq) {
     try {
       window.fbq(...args);
@@ -35,7 +35,7 @@ export function fbq(...args: unknown[]) {
  * Initializes Meta Pixel in the browser if not already loaded
  */
 export function initMetaPixel() {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !META_PIXEL_ID) return;
 
   if (!window.fbq) {
     const n: MetaPixelFn = function (...args: unknown[]) {
@@ -180,6 +180,7 @@ export function trackInitiateCheckout(clickLocation = "final_cta") {
  * Reads URL search params and appends UTMs + tracking tokens directly to Hotmart Checkout URL.
  */
 export function getDecoratedCheckoutUrl(baseUrl = BASE_CHECKOUT_URL): string {
+  if (!baseUrl) return "#";
   if (typeof window === "undefined") return baseUrl;
 
   try {
@@ -256,6 +257,70 @@ export function trackVslCtaClick(location = "vsl_primary_cta") {
     click_location: location,
     product: "Desafío Glúteos Brasileños 28 Días",
     value: 9.9,
+    currency: "USD",
+  });
+}
+
+/**
+ * Track Backredirect page view
+ */
+export function trackBackredirectView() {
+  trackPageView("Backredirect - Oferta Especial 28 Días");
+  trackViewContent("Backredirect Especial", {
+    page_type: "backredirect",
+    value: 9.9,
+    currency: "USD",
+  });
+  fbq("trackCustom", "BackredirectView", {
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * Track CTA click on Backredirect page ($9.90 offer)
+ */
+export function trackBackredirectCtaClick(location = "backredirect_primary_cta") {
+  trackInitiateCheckout(location);
+  fbq("trackCustom", "BackredirectCtaClick", {
+    click_location: location,
+    product: "Desafío Glúteos Brasileños 28 Días",
+    value: 9.9,
+    currency: "USD",
+  });
+}
+
+/**
+ * Track when Downsell modal ($5.90 offer) is triggered/viewed
+ */
+export function trackDownsellModalView() {
+  fbq("trackCustom", "DownsellModalView", {
+    offer: "Plan 28 Días Downsell",
+    price: 5.9,
+    currency: "USD",
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * Track CTA click on Downsell offer ($5.90)
+ */
+export function trackDownsellCtaClick(location = "downsell_modal_cta") {
+  fbq("track", "InitiateCheckout", {
+    content_name: "Desafío Glúteos Brasileños 28 Días - Oferta Downsell",
+    content_category: "Programa Digital",
+    content_ids: ["BUMBUM28_DOWNSELL"],
+    content_type: "product",
+    value: 5.9,
+    currency: "USD",
+    num_items: 1,
+    coupon: "BUMBUM590",
+    click_location: location,
+  });
+
+  fbq("trackCustom", "DownsellCtaClick", {
+    click_location: location,
+    product: "Desafío Glúteos Brasileños 28 Días Downsell",
+    value: 5.9,
     currency: "USD",
   });
 }
