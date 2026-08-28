@@ -1773,7 +1773,7 @@ function VslQuizPlayer({
 }>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLButtonElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -1988,18 +1988,8 @@ function VslQuizPlayer({
         ref={containerRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => isPlaying && setShowControls(false)}
-        onClick={togglePlay}
-        onKeyDown={(e) => {
-          if (e.key === " " || e.key === "Enter") {
-            e.preventDefault();
-            togglePlay();
-          }
-        }}
-        tabIndex={0}
-        role="region"
-        aria-label="Reproductor de video"
         onContextMenu={(e) => e.preventDefault()}
-        className="vsl-video-frame group relative cursor-pointer select-none aspect-[3/4]"
+        className="vsl-video-frame group relative select-none aspect-[3/4]"
       >
         {/* Video Element */}
         <video
@@ -2043,17 +2033,13 @@ function VslQuizPlayer({
 
         {/* Custom Video Controls Bar */}
         <div
-          role="toolbar"
-          tabIndex={0}
-          aria-label="Controles del video"
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
           className={`absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-3 pt-6 text-white transition-opacity duration-300 ${
             showControls || !isPlaying ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
           {/* Smart Accelerating / Decelerating Progress Bar */}
-          <div
+          <button
+            type="button"
             ref={progressBarRef}
             onClick={handleSeek}
             onKeyDown={(e) => {
@@ -2068,19 +2054,14 @@ function VslQuizPlayer({
                 }
               }
             }}
-            tabIndex={0}
-            role="slider"
             aria-label="Progreso del video"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(progressPercent)}
-            className="group/bar relative mb-2.5 h-2 w-full cursor-pointer rounded-full bg-white/25 hover:h-2.5 transition-all overflow-hidden"
+            className="group/bar relative mb-2.5 h-2 w-full cursor-pointer rounded-full bg-white/25 hover:h-2.5 transition-all overflow-hidden block border-none p-0"
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[color:var(--coral)] to-[color:var(--lime)] relative transition-[width] duration-300 ease-out"
+              className="h-full rounded-full bg-gradient-to-r from-[color:var(--coral)] to-[color:var(--lime)] relative transition-[width] duration-300 ease-out pointer-events-none"
               style={{ width: `${progressPercent}%` }}
             />
-          </div>
+          </button>
 
           {/* Controls row */}
           <div className="flex items-center justify-between gap-2 text-xs font-semibold">
