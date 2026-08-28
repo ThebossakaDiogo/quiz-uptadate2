@@ -69,6 +69,11 @@ import {
 } from "../pixel";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    etapa: typeof search.etapa === "string" ? search.etapa : undefined,
+    step: typeof search.step === "string" ? search.step : undefined,
+    slug: typeof search.slug === "string" ? search.slug : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Desafío Glúteos Brasileños | Tu plan de 28 días" },
@@ -478,7 +483,7 @@ function slugToScreen(slug: string | null | undefined): Screen {
     return { kind: "final" };
   }
 
-  const match = slug.match(/^(?:pergunta|etapa|step|p|q)-?(\d+)$/i);
+  const match = /^(?:pergunta|etapa|step|p|q)-?(\d+)$/i.exec(slug);
   if (match) {
     const num = Number.parseInt(match[1], 10);
     if (!Number.isNaN(num) && num >= 1 && num <= questions.length) {
@@ -489,22 +494,39 @@ function slugToScreen(slug: string | null | undefined): Screen {
   return { kind: "landing" };
 }
 
+function getFallbackPreviousScreen(screen: Screen): Screen | null {
+  switch (screen.kind) {
+    case "coach":
+      return { kind: "landing" };
+    case "question":
+      return screen.n > 1 ? questions[screen.n - 2] : { kind: "coach" };
+    case "info":
+      return questions[7];
+    case "result":
+      return { kind: "info" };
+    case "analyzing":
+    case "coupon":
+      return questions[12];
+    default:
+      return null;
+  }
+}
+
 function Index() {
+  const searchParams = Route.useSearch();
+  const slugFromUrl = searchParams.etapa || searchParams.step || searchParams.slug;
+
   const [screen, setScreen] = useState<Screen>(() => {
-    if (typeof window === "undefined") return { kind: "landing" };
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const etapaParam =
-        params.get("etapa") || params.get("step") || params.get("slug") || params.get("fase");
-      if (etapaParam) {
-        return slugToScreen(etapaParam);
+    if (slugFromUrl) {
+      return slugToScreen(slugFromUrl);
+    }
+    if (typeof window !== "undefined") {
+      try {
+        const saved = window.sessionStorage.getItem(STORAGE_SCREEN_KEY);
+        if (saved) return slugToScreen(saved);
+      } catch {
+        // fallback
       }
-      const saved = window.sessionStorage.getItem(STORAGE_SCREEN_KEY);
-      if (saved) {
-        return slugToScreen(saved);
-      }
-    } catch {
-      // fallback
     }
     return { kind: "landing" };
   });
@@ -632,38 +654,17 @@ function Index() {
       trackQuizNavigationBack(screen.kind);
       setScreen(previous);
       setHistory((items) => items.slice(0, -1));
-      if (typeof window !== "undefined") {
-        const slug = screenToSlug(previous);
-        const url = new URL(window.location.href);
-        if (slug === "inicio") {
-          url.searchParams.delete("etapa");
-        } else {
-          url.searchParams.set("etapa", slug);
-        }
-        try {
-          window.history.replaceState({ page: "quiz_active", etapa: slug }, "", url.toString());
-        } catch {
-          // ignore
-        }
-      }
-    } else {
-      if (screen.kind === "question" && screen.n > 1) {
-        go(questions[screen.n - 2]);
-      } else if (screen.kind === "coach") {
-        go({ kind: "landing" });
-      } else if (screen.kind === "info") {
-        go(questions[7]);
-      } else if (screen.kind === "result") {
-        go({ kind: "info" });
-      } else if (screen.kind === "analyzing") {
-        go(questions[12]);
-      } else if (screen.kind === "coupon") {
-        go(questions[12]);
-      } else {
-        const search = window.location.search || "";
-        window.location.href = `/oferta-especial${search}`;
-      }
+      return;
     }
+
+    const fallback = getFallbackPreviousScreen(screen);
+    if (fallback) {
+      go(fallback);
+      return;
+    }
+
+    const search = window.location.search || "";
+    window.location.href = `/oferta-especial${search}`;
   };
 
   const selectAnswer = (question: Question, optionIndex: number) => {
@@ -1519,45 +1520,52 @@ function ScratchCouponScreen({
   };
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const renderCanvas = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(rect.width * pixelRatio);
-    canvas.height = Math.round(rect.height * pixelRatio);
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width || canvas.clientWidth || 340;
+      const height = rect.height || canvas.clientHeight || 180;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
 
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    context.scale(pixelRatio, pixelRatio);
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.scale(pixelRatio, pixelRatio);
 
-    const gradient = context.createLinearGradient(0, 0, rect.width, rect.height);
-    gradient.addColorStop(0, "#ff2fb3");
-    gradient.addColorStop(0.5, "#a735ff");
-    gradient.addColorStop(1, "#5914b8");
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, rect.width, rect.height);
+      const gradient = context.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, "#ff2fb3");
+      gradient.addColorStop(0.5, "#a735ff");
+      gradient.addColorStop(1, "#5914b8");
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, width, height);
 
-    context.globalAlpha = 0.12;
-    context.fillStyle = "#ffffff";
-    for (let x = -rect.height; x < rect.width + rect.height; x += 34) {
-      context.save();
-      context.translate(x, 0);
-      context.rotate(Math.PI / 4);
-      context.fillRect(0, -rect.height, 9, rect.height * 3);
-      context.restore();
-    }
-    context.globalAlpha = 1;
+      context.globalAlpha = 0.12;
+      context.fillStyle = "#ffffff";
+      for (let x = -height; x < width + height; x += 34) {
+        context.save();
+        context.translate(x, 0);
+        context.rotate(Math.PI / 4);
+        context.fillRect(0, -height, 9, height * 3);
+        context.restore();
+      }
+      context.globalAlpha = 1;
 
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillStyle = "#ffffff";
-    context.font = `800 ${Math.min(18, rect.width / 19)}px DM Sans, sans-serif`;
-    context.fillText("DESLIZA PARA RASPAR", rect.width / 2, rect.height / 2 - 8);
-    context.globalAlpha = 0.7;
-    context.font = `700 ${Math.min(11, rect.width / 31)}px DM Sans, sans-serif`;
-    context.fillText("TU RECOMPENSA ESTÁ DEBAJO", rect.width / 2, rect.height / 2 + 20);
-    context.globalAlpha = 1;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillStyle = "#ffffff";
+      context.font = `800 ${Math.min(18, width / 19)}px DM Sans, sans-serif`;
+      context.fillText("DESLIZA PARA RASPAR", width / 2, height / 2 - 8);
+      context.globalAlpha = 0.7;
+      context.font = `700 ${Math.min(11, width / 31)}px DM Sans, sans-serif`;
+      context.fillText("TU RECOMPENSA ESTÁ DEBAJO", width / 2, height / 2 + 20);
+      context.globalAlpha = 1;
+    };
+
+    const animFrame = requestAnimationFrame(renderCanvas);
+    return () => cancelAnimationFrame(animFrame);
   }, []);
 
   const checkRevealProgress = () => {
@@ -2109,7 +2117,7 @@ function VslQuizPlayer({
     setIsMuted(shouldMute);
   };
 
-  const handleSeek = (e: ReactMouseEvent<HTMLDivElement>) => {
+  const handleSeek = (e: ReactMouseEvent<HTMLButtonElement | HTMLElement>) => {
     const bar = progressBarRef.current;
     const video = videoRef.current;
     if (!bar || !video || !duration) return;
