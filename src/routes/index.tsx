@@ -416,13 +416,147 @@ function SoundControl() {
   );
 }
 
+const STORAGE_ANSWERS_KEY = "mb28_quiz_answers";
+const STORAGE_SCREEN_KEY = "mb28_quiz_screen";
+
+function screenToSlug(screen: Screen): string {
+  switch (screen.kind) {
+    case "landing":
+      return "inicio";
+    case "coach":
+      return "apresentacao";
+    case "question":
+      return `pergunta-${screen.n}`;
+    case "info":
+      return "ativacao";
+    case "result":
+      return "resultado-parcial";
+    case "analyzing":
+      return "analisando";
+    case "coupon":
+      return "cupon";
+    case "final":
+      return "oferta";
+    default:
+      return "inicio";
+  }
+}
+
+function slugToScreen(slug: string | null | undefined): Screen {
+  if (!slug || slug === "inicio" || slug === "landing") return { kind: "landing" };
+  if (slug === "apresentacao" || slug === "coach" || slug === "bienvenida")
+    return { kind: "coach" };
+  if (slug === "ativacao" || slug === "info" || slug === "ciencia" || slug === "activacion")
+    return { kind: "info" };
+  if (
+    slug === "resultado-parcial" ||
+    slug === "result" ||
+    slug === "diagnostico" ||
+    slug === "progreso"
+  )
+    return { kind: "result" };
+  if (slug === "analisando" || slug === "analyzing" || slug === "analisis")
+    return { kind: "analyzing" };
+  if (
+    slug === "cupon" ||
+    slug === "cupom" ||
+    slug === "coupon" ||
+    slug === "desconto" ||
+    slug === "descuento" ||
+    slug === "raspadinha"
+  ) {
+    return { kind: "coupon" };
+  }
+  if (
+    slug === "oferta" ||
+    slug === "vsl" ||
+    slug === "final" ||
+    slug === "resultado" ||
+    slug === "plano" ||
+    slug === "plan"
+  ) {
+    return { kind: "final" };
+  }
+
+  const match = slug.match(/^(?:pergunta|etapa|step|p|q)-?(\d+)$/i);
+  if (match) {
+    const num = Number.parseInt(match[1], 10);
+    if (!Number.isNaN(num) && num >= 1 && num <= questions.length) {
+      return questions[num - 1];
+    }
+  }
+
+  return { kind: "landing" };
+}
+
 function Index() {
-  const [screen, setScreen] = useState<Screen>({ kind: "landing" });
+  const [screen, setScreen] = useState<Screen>(() => {
+    if (typeof window === "undefined") return { kind: "landing" };
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const etapaParam =
+        params.get("etapa") || params.get("step") || params.get("slug") || params.get("fase");
+      if (etapaParam) {
+        return slugToScreen(etapaParam);
+      }
+      const saved = window.sessionStorage.getItem(STORAGE_SCREEN_KEY);
+      if (saved) {
+        return slugToScreen(saved);
+      }
+    } catch {
+      // fallback
+    }
+    return { kind: "landing" };
+  });
+
   const [history, setHistory] = useState<Screen[]>([]);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+
+  const [answers, setAnswers] = useState<Record<number, number>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const saved =
+        window.sessionStorage.getItem(STORAGE_ANSWERS_KEY) ||
+        window.localStorage.getItem(STORAGE_ANSWERS_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {
+      // fallback
+    }
+    return {};
+  });
+
   const [transitioning, setTransitioning] = useState(false);
 
-  // Backredirect System: Intercepts browser Back button and redirects to high-converting offer page
+  // Sincroniza URL com o slug da etapa atual e salva respostas para persistir no F5
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const currentSlug = screenToSlug(screen);
+    try {
+      window.sessionStorage.setItem(STORAGE_SCREEN_KEY, currentSlug);
+      window.sessionStorage.setItem(STORAGE_ANSWERS_KEY, JSON.stringify(answers));
+      window.localStorage.setItem(STORAGE_ANSWERS_KEY, JSON.stringify(answers));
+
+      const url = new URL(window.location.href);
+      if (currentSlug === "inicio") {
+        url.searchParams.delete("etapa");
+      } else {
+        url.searchParams.set("etapa", currentSlug);
+      }
+
+      if (window.location.search !== url.search) {
+        window.history.replaceState(
+          { page: "quiz_active", etapa: currentSlug },
+          "",
+          url.toString(),
+        );
+      }
+    } catch {
+      // Ignore in restricted environments
+    }
+  }, [screen, answers]);
+
+  // Backredirect System: Intercepts browser Back button and redirects to high-converting offer page or updates quiz step
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -433,9 +567,15 @@ function Index() {
     }
 
     const handlePopState = () => {
-      const search = window.location.search || "";
-      const targetUrl = `/oferta-especial${search}`;
-      window.location.href = targetUrl;
+      const params = new URLSearchParams(window.location.search);
+      const etapaParam = params.get("etapa");
+      if (!etapaParam || etapaParam === "inicio") {
+        const search = window.location.search || "";
+        const targetUrl = `/oferta-especial${search}`;
+        window.location.href = targetUrl;
+      } else {
+        setScreen(slugToScreen(etapaParam));
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -469,6 +609,20 @@ function Index() {
   const go = (next: Screen) => {
     setHistory((items) => [...items, screen]);
     setScreen(next);
+    if (typeof window !== "undefined") {
+      const slug = screenToSlug(next);
+      const url = new URL(window.location.href);
+      if (slug === "inicio") {
+        url.searchParams.delete("etapa");
+      } else {
+        url.searchParams.set("etapa", slug);
+      }
+      try {
+        window.history.pushState({ page: "quiz_active", etapa: slug }, "", url.toString());
+      } catch {
+        // ignore
+      }
+    }
   };
 
   const back = () => {
@@ -478,6 +632,37 @@ function Index() {
       trackQuizNavigationBack(screen.kind);
       setScreen(previous);
       setHistory((items) => items.slice(0, -1));
+      if (typeof window !== "undefined") {
+        const slug = screenToSlug(previous);
+        const url = new URL(window.location.href);
+        if (slug === "inicio") {
+          url.searchParams.delete("etapa");
+        } else {
+          url.searchParams.set("etapa", slug);
+        }
+        try {
+          window.history.replaceState({ page: "quiz_active", etapa: slug }, "", url.toString());
+        } catch {
+          // ignore
+        }
+      }
+    } else {
+      if (screen.kind === "question" && screen.n > 1) {
+        go(questions[screen.n - 2]);
+      } else if (screen.kind === "coach") {
+        go({ kind: "landing" });
+      } else if (screen.kind === "info") {
+        go(questions[7]);
+      } else if (screen.kind === "result") {
+        go({ kind: "info" });
+      } else if (screen.kind === "analyzing") {
+        go(questions[12]);
+      } else if (screen.kind === "coupon") {
+        go(questions[12]);
+      } else {
+        const search = window.location.search || "";
+        window.location.href = `/oferta-especial${search}`;
+      }
     }
   };
 
@@ -1590,7 +1775,7 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
 
   const handleCtaClick = (location: string) => {
     trackVslCtaClick(location);
-    const checkoutUrl = getDecoratedCheckoutUrl(CHECKOUT_URL);
+    const checkoutUrl = getDecoratedCheckoutUrl(BASE_CHECKOUT_URL);
     window.location.href = checkoutUrl;
   };
 
