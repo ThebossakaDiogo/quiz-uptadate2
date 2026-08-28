@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
-  Award,
   BadgeCheck,
-  CalendarDays,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -14,36 +12,30 @@ import {
   CreditCard,
   Flame,
   Gift,
-  Heart,
-  HelpCircle,
   Lock,
-  MessageCircle,
-  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Star,
   Target,
   TicketPercent,
   TrendingUp,
-  UserCheck,
-  Users,
   X,
-  Zap,
 } from "lucide-react";
 import coachDuo from "@/assets/coach-duo-new.png";
-import coachPortrait from "@/assets/pic2page.webp";
 import desafioCard from "@/assets/desafio-card.jpg";
 import avatarMaria from "@/assets/avatar-maria.jpg";
 import avatarCarla from "@/assets/avatar-carla.jpg";
 import avatarPatricia from "@/assets/avatar-patricia.jpg";
 import avatarSofia from "@/assets/avatar-sofia.jpg";
 import {
-  BASE_CHECKOUT_URL,
+  BASE_BACKREDIRECT_URL,
   getDecoratedCheckoutUrl,
   trackBackredirectCtaClick,
   trackBackredirectView,
   trackDownsellCtaClick,
+  trackDownsellDismiss,
   trackDownsellModalView,
+  trackFaqToggle,
 } from "../pixel";
 
 export const Route = createFileRoute("/oferta-especial")({
@@ -122,16 +114,20 @@ export default function OfertaEspecialPage() {
   // Primary CTA click ($9.90 Offer)
   const handlePrimaryCta = (location = "backredirect_hero_cta") => {
     trackBackredirectCtaClick(location);
-    const checkoutUrl = getDecoratedCheckoutUrl(BASE_CHECKOUT_URL);
+    const checkoutUrl = getDecoratedCheckoutUrl(BASE_BACKREDIRECT_URL);
     window.location.href = checkoutUrl;
   };
 
   // Downsell CTA click ($5.90 Offer)
   const handleDownsellCta = (location = "downsell_modal_cta") => {
     trackDownsellCtaClick(location);
-    // Decorates Hotmart checkout URL with coupon/off parameter or custom downsell URL
-    const checkoutUrl = getDecoratedCheckoutUrl(BASE_CHECKOUT_URL);
+    const checkoutUrl = getDecoratedCheckoutUrl(BASE_BACKREDIRECT_URL);
     window.location.href = checkoutUrl;
+  };
+
+  const handleCloseDownsellModal = () => {
+    trackDownsellDismiss();
+    setShowDownsellModal(false);
   };
 
   return (
@@ -904,7 +900,11 @@ export default function OfertaEspecialPage() {
                 >
                   <button
                     type="button"
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
+                    onClick={() => {
+                      const nextOpen = !isOpen;
+                      setOpenFaq(nextOpen ? index : null);
+                      trackFaqToggle(faq.q, nextOpen, "backredirect_faq");
+                    }}
                     className="flex w-full items-center justify-between p-4 text-left font-display font-bold text-sm sm:text-base text-[color:var(--wine)]"
                     aria-expanded={isOpen}
                   >
@@ -963,7 +963,7 @@ export default function OfertaEspecialPage() {
             {/* Close Button */}
             <button
               type="button"
-              onClick={() => setShowDownsellModal(false)}
+              onClick={handleCloseDownsellModal}
               className="absolute right-4 top-4 rounded-full bg-black/5 p-1.5 text-gray-500 hover:bg-black/10 transition-colors"
               aria-label="Cerrar ventana"
             >
@@ -1041,7 +1041,7 @@ export default function OfertaEspecialPage() {
 
               <button
                 type="button"
-                onClick={() => setShowDownsellModal(false)}
+                onClick={handleCloseDownsellModal}
                 className="block w-full text-center text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors underline"
               >
                 No gracias, prefiero perder esta oportunidad única y pagar el precio completo
@@ -1113,8 +1113,11 @@ function LiveCounter() {
   const [count, setCount] = useState(1495);
 
   useEffect(() => {
+    const deltas = [2, -1, 3, -2, 1, -1, 2, -3, 1, 2];
+    let idx = 0;
     const interval = setInterval(() => {
-      setCount((prev) => prev + Math.floor(Math.random() * 5) - 2);
+      setCount((prev) => prev + deltas[idx % deltas.length]);
+      idx += 1;
     }, 4500);
     return () => clearInterval(interval);
   }, []);

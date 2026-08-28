@@ -21,22 +21,18 @@ import {
   Clock3,
   CreditCard,
   Dumbbell,
-  Eye,
   Gift,
   Heart,
   Lock,
   LockKeyhole,
   Pause,
   Play,
-  Quote,
   ShieldCheck,
   Sparkles,
   Star,
   Target,
   TicketPercent,
   TrendingUp,
-  Users,
-  Utensils,
   Volume2,
   VolumeX,
   XCircle,
@@ -51,15 +47,25 @@ import age2 from "@/assets/age-2.jpg";
 import age3 from "@/assets/age-3.jpg";
 import age4 from "@/assets/age-4.jpg";
 import {
+  BASE_CHECKOUT_URL,
   getDecoratedCheckoutUrl,
-  trackInitiateCheckout,
+  trackCouponContinueClick,
+  trackCouponScratchStart,
+  trackCouponUnlocked,
+  trackFaqToggle,
+  trackLandingStartClick,
   trackQuizAnswer,
   trackQuizComplete,
+  trackQuizNavigationBack,
   trackQuizProgress,
+  trackSoundToggle,
   trackViewContent,
   trackVslCtaClick,
   trackVslMilestone,
+  trackVslPitchReached,
   trackVslPlay,
+  trackVslSpeedChange,
+  trackVslUnmute,
 } from "../pixel";
 
 export const Route = createFileRoute("/")({
@@ -111,7 +117,7 @@ type Screen =
   | { kind: "final" };
 
 const TOTAL = 13;
-const CHECKOUT_URL = "";
+const CHECKOUT_URL = BASE_CHECKOUT_URL;
 
 type SoundKind = "click" | "select" | "back" | "success";
 
@@ -388,6 +394,7 @@ function SoundControl() {
     const next = !enabled;
     uiSoundsEnabled = next;
     setEnabled(next);
+    trackSoundToggle(next);
     window.localStorage.setItem("quiz-ui-sounds", next ? "on" : "off");
     if (next) playUiSound("select");
   };
@@ -468,6 +475,7 @@ function Index() {
     if (transitioning) return;
     const previous = history.at(-1);
     if (previous) {
+      trackQuizNavigationBack(screen.kind);
       setScreen(previous);
       setHistory((items) => items.slice(0, -1));
     }
@@ -557,7 +565,7 @@ function PrimaryButton({
   className?: string;
 }>) {
   return (
-    <button onClick={onClick} className={`cta-button group ${className}`}>
+    <button type="button" onClick={onClick} className={`cta-button group ${className}`}>
       <span>{children}</span>
       <ChevronRight
         className="transition-transform duration-300 group-hover:translate-x-1"
@@ -598,7 +606,13 @@ function Landing({ onStart }: Readonly<{ onStart: () => void }>) {
             <MiniBenefit icon={<Target size={17} />} title="A tu medida" text="paso a paso" />
           </div>
 
-          <PrimaryButton onClick={onStart} className="mt-6 sm:max-w-md">
+          <PrimaryButton
+            onClick={() => {
+              trackLandingStartClick();
+              onStart();
+            }}
+            className="mt-6 sm:max-w-md"
+          >
             Crear mi ruta personalizada
           </PrimaryButton>
           <p className="mt-3 flex items-center gap-2 text-xs font-semibold text-[color:var(--ink-muted)]">
@@ -729,7 +743,7 @@ function CoachPoint({
 function SimpleTopbar({ onBack, label }: Readonly<{ onBack: () => void; label: string }>) {
   return (
     <div className="flex items-center justify-between">
-      <button onClick={onBack} className="back-button" aria-label="Volver">
+      <button type="button" onClick={onBack} className="back-button" aria-label="Volver">
         <ArrowLeft size={18} />
       </button>
       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
@@ -764,7 +778,7 @@ function QuestionScreen({
   return (
     <section className="screen-enter">
       <div className="flex items-center justify-between">
-        <button onClick={onBack} className="back-button" aria-label="Volver">
+        <button type="button" onClick={onBack} className="back-button" aria-label="Volver">
           <ArrowLeft size={18} />
         </button>
         <BrandMark />
@@ -864,6 +878,7 @@ function OptionButton({
   if (grid && option.image) {
     return (
       <button
+        type="button"
         onClick={onClick}
         disabled={disabled}
         role="radio"
@@ -891,6 +906,7 @@ function OptionButton({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       role="radio"
@@ -981,13 +997,19 @@ function InfoScreen({ onBack, onNext }: Readonly<{ onBack: () => void; onNext: (
   return (
     <section className="dark-panel screen-enter relative overflow-hidden">
       <div className="flex items-center justify-between">
-        <button onClick={onBack} className="back-button back-button-dark" aria-label="Volver">
+        <button
+          type="button"
+          onClick={onBack}
+          className="back-button back-button-dark"
+          aria-label="Volver"
+        >
           <ArrowLeft size={18} />
         </button>
 
         <div className="flex items-center gap-2">
           {isGenerating ? (
             <button
+              type="button"
               onClick={finishGeneration}
               className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--lime)]/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[color:var(--lime)] border border-[color:var(--lime)]/40 backdrop-blur-md transition-all hover:bg-[color:var(--lime)]/25 active:scale-95"
             >
@@ -1086,7 +1108,7 @@ function InfoScreen({ onBack, onNext }: Readonly<{ onBack: () => void; onNext: (
             : "opacity-40 translate-y-2 pointer-events-none"
         }`}
       >
-        <button onClick={onNext} className="cta-button cta-light group mt-7">
+        <button type="button" onClick={onNext} className="cta-button cta-light group mt-7">
           <span>Ver lo que ya descubrimos</span>
           <ChevronRight size={20} />
           <span className="button-sheen" aria-hidden="true" />
@@ -1188,7 +1210,7 @@ function ResultScreen({
         </div>
       </div>
 
-      <button onClick={onNext} className="cta-button group mt-6">
+      <button type="button" onClick={onNext} className="cta-button group mt-6">
         <span>Personalizar la siguiente fase</span>
         <ChevronRight size={20} />
         <span className="button-sheen" aria-hidden="true" />
@@ -1300,12 +1322,14 @@ function ScratchCouponScreen({
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const moveCountRef = useRef(0);
   const revealedRef = useRef(false);
+  const startedScratchRef = useRef(false);
   const [revealed, setRevealed] = useState(false);
 
   const revealCoupon = () => {
     if (revealedRef.current) return;
     revealedRef.current = true;
     setRevealed(true);
+    trackCouponUnlocked();
     playUiSound("success");
   };
 
@@ -1397,6 +1421,10 @@ function ScratchCouponScreen({
   };
 
   const startScratch = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (!startedScratchRef.current) {
+      startedScratchRef.current = true;
+      trackCouponScratchStart();
+    }
     drawingRef.current = true;
     event.currentTarget.setPointerCapture(event.pointerId);
     scratch(event);
@@ -1469,7 +1497,12 @@ function ScratchCouponScreen({
       </div>
 
       {!revealed ? (
-        <button data-sound="none" className="coupon-fallback mt-4" onClick={revealCoupon}>
+        <button
+          type="button"
+          data-sound="none"
+          className="coupon-fallback mt-4"
+          onClick={revealCoupon}
+        >
           No puedo raspar, revelar mi cupón
         </button>
       ) : (
@@ -1484,7 +1517,11 @@ function ScratchCouponScreen({
       )}
 
       <button
-        onClick={onContinue}
+        type="button"
+        onClick={() => {
+          trackCouponContinueClick();
+          onContinue();
+        }}
         disabled={!revealed}
         className={`cta-button group mt-6 ${revealed ? "coupon-cta-ready" : "coupon-cta-locked"}`}
       >
@@ -1727,7 +1764,13 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
 /**
  * 3x4 VSL Player with Smart Psychological Progress Bar inside the Quiz Route
  */
-function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: () => void }) {
+function VslQuizPlayer({
+  src,
+  onPitchReached,
+}: Readonly<{
+  src: string;
+  onPitchReached?: () => void;
+}>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -1742,6 +1785,7 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
   const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
 
   const trackedMilestones = useRef<Set<number>>(new Set());
+  const pitchTrackedRef = useRef(false);
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -1767,6 +1811,10 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
       });
 
       if (current >= 15 || percent >= 10) {
+        if (!pitchTrackedRef.current) {
+          pitchTrackedRef.current = true;
+          trackVslPitchReached();
+        }
         onPitchReached?.();
       }
     };
@@ -1835,6 +1883,7 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
     const video = videoRef.current;
     if (!video) return;
 
+    trackVslUnmute();
     video.muted = false;
     video.volume = 1;
     setIsMuted(false);
@@ -1852,6 +1901,9 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
     if (!video) return;
 
     const nextMuted = !video.muted;
+    if (!nextMuted) {
+      trackVslUnmute();
+    }
     video.muted = nextMuted;
     setIsMuted(nextMuted);
     if (!nextMuted && video.volume === 0) {
@@ -1894,6 +1946,7 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
     const nextSpeed = speeds[nextIdx];
     video.playbackRate = nextSpeed;
     setPlaybackSpeed(nextSpeed);
+    trackVslSpeedChange(nextSpeed);
   };
 
   const handleMouseMove = () => {
@@ -1936,6 +1989,15 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
         onMouseMove={handleMouseMove}
         onMouseLeave={() => isPlaying && setShowControls(false)}
         onClick={togglePlay}
+        onKeyDown={(e) => {
+          if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+            togglePlay();
+          }
+        }}
+        tabIndex={0}
+        role="region"
+        aria-label="Reproductor de video"
         onContextMenu={(e) => e.preventDefault()}
         className="vsl-video-frame group relative cursor-pointer select-none aspect-[3/4]"
       >
@@ -1947,7 +2009,9 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
           preload="auto"
           onContextMenu={(e) => e.preventDefault()}
           className="h-full w-full object-cover"
-        />
+        >
+          <track kind="captions" />
+        </video>
 
         {/* Unmute Overlay Banner */}
         {isMuted && isPlaying && (
@@ -1979,7 +2043,11 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
 
         {/* Custom Video Controls Bar */}
         <div
+          role="toolbar"
+          tabIndex={0}
+          aria-label="Controles del video"
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
           className={`absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-3 pt-6 text-white transition-opacity duration-300 ${
             showControls || !isPlaying ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
@@ -1988,6 +2056,24 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
           <div
             ref={progressBarRef}
             onClick={handleSeek}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                e.preventDefault();
+                const step = e.key === "ArrowRight" ? 5 : -5;
+                if (videoRef.current) {
+                  videoRef.current.currentTime = Math.max(
+                    0,
+                    Math.min(duration, videoRef.current.currentTime + step),
+                  );
+                }
+              }
+            }}
+            tabIndex={0}
+            role="slider"
+            aria-label="Progreso del video"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progressPercent)}
             className="group/bar relative mb-2.5 h-2 w-full cursor-pointer rounded-full bg-white/25 hover:h-2.5 transition-all overflow-hidden"
           >
             <div
@@ -2059,7 +2145,7 @@ function VslQuizPlayer({ src, onPitchReached }: { src: string; onPitchReached?: 
 /**
  * Main Offer Card ($9.90 USD) for the Quiz Funnel
  */
-function VslQuizOfferCard({ onCtaClick }: { onCtaClick: (location: string) => void }) {
+function VslQuizOfferCard({ onCtaClick }: Readonly<{ onCtaClick: (location: string) => void }>) {
   return (
     <div className="relative overflow-hidden rounded-3xl border-4 border-[color:var(--wine)] bg-white p-6 shadow-[10px_10px_0_var(--wine)] md:p-10">
       {/* Top Banner */}
@@ -2586,7 +2672,7 @@ function VslQuizSocialProof() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex text-amber-500">
                   {Array.from({ length: t.stars }).map((_, i) => (
-                    <Star key={i} size={14} fill="currentColor" />
+                    <Star key={`${t.name}-star-${i}`} size={14} fill="currentColor" />
                   ))}
                 </div>
                 <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
@@ -2763,7 +2849,7 @@ function VslQuizMethodAndCoaches() {
 /**
  * 7-Day Guarantee
  */
-function VslQuizGuarantee({ onCtaClick }: { onCtaClick: () => void }) {
+function VslQuizGuarantee({ onCtaClick }: Readonly<{ onCtaClick: () => void }>) {
   return (
     <section className="rounded-3xl border-4 border-emerald-600 bg-emerald-50 p-6 md:p-8 text-center shadow-[6px_6px_0_theme(colors.emerald.800)]">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-md mb-3">
@@ -2805,10 +2891,10 @@ function VslQuizGuarantee({ onCtaClick }: { onCtaClick: () => void }) {
 function VslQuizFaq({
   openFaq,
   setOpenFaq,
-}: {
+}: Readonly<{
   openFaq: number | null;
   setOpenFaq: (idx: number | null) => void;
-}) {
+}>) {
   const faqs = [
     {
       q: "¿Cómo y cuándo recibo mi acceso al programa?",
@@ -2861,7 +2947,11 @@ function VslQuizFaq({
             >
               <button
                 type="button"
-                onClick={() => setOpenFaq(isOpen ? null : index)}
+                onClick={() => {
+                  const nextOpen = !isOpen;
+                  setOpenFaq(nextOpen ? index : null);
+                  trackFaqToggle(faq.q, nextOpen, "quiz_vsl_faq");
+                }}
                 className="flex w-full items-center justify-between p-4 text-left font-display font-bold text-sm sm:text-base text-[color:var(--wine)]"
                 aria-expanded={isOpen}
               >
@@ -2899,8 +2989,11 @@ function LiveViewerCounter() {
   const [count, setCount] = useState(1482);
 
   useEffect(() => {
+    const deltas = [2, -1, 3, -2, 1, -1, 2, -3, 1, 2];
+    let idx = 0;
     const interval = setInterval(() => {
-      setCount((prev) => prev + Math.floor(Math.random() * 5) - 2);
+      setCount((prev) => prev + deltas[idx % deltas.length]);
+      idx += 1;
     }, 4500);
     return () => clearInterval(interval);
   }, []);

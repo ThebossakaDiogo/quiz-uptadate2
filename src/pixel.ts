@@ -1,5 +1,6 @@
-export const META_PIXEL_ID = "";
-export const BASE_CHECKOUT_URL = "";
+export const META_PIXEL_ID = "2472461739900461";
+export const BASE_CHECKOUT_URL = "https://pay.hotmart.com/N107368916I?off=m7n77trl";
+export const BASE_BACKREDIRECT_URL = "https://pay.hotmart.com/N107368916I?off=tabofigi";
 
 type MetaPixelFn = {
   (...args: unknown[]): void;
@@ -86,9 +87,18 @@ export function trackViewContent(screenName: string, extraParams: Record<string,
     content_name: screenName,
     content_category: "Quiz Funnel 28 Dias",
     content_type: "quiz_step",
-    value: 19.9,
+    value: 9.9,
     currency: "USD",
     ...extraParams,
+  });
+}
+
+/**
+ * Track when user clicks to start the quiz on landing page
+ */
+export function trackLandingStartClick() {
+  fbq("trackCustom", "QuizLandingStartClick", {
+    timestamp: new Date().toISOString(),
   });
 }
 
@@ -141,6 +151,46 @@ export function trackQuizAnswer(
 }
 
 /**
+ * Track navigation back within the quiz
+ */
+export function trackQuizNavigationBack(fromScreen: string) {
+  fbq("trackCustom", "QuizBackClick", {
+    from_screen: fromScreen,
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * Track user scratching the coupon card
+ */
+export function trackCouponScratchStart() {
+  fbq("trackCustom", "CouponScratchStart", {
+    coupon_code: "BUMBUM90",
+  });
+}
+
+/**
+ * Track coupon successfully unlocked
+ */
+export function trackCouponUnlocked() {
+  fbq("trackCustom", "CouponUnlocked", {
+    coupon_code: "BUMBUM90",
+    discount: "90% OFF",
+    status: "unlocked",
+  });
+}
+
+/**
+ * Track click on continue button after unlocking coupon
+ */
+export function trackCouponContinueClick() {
+  fbq("trackCustom", "CouponContinueClick", {
+    coupon_code: "BUMBUM90",
+    destination: "vsl_final_screen",
+  });
+}
+
+/**
  * Track full completion of the quiz (Question 13 finished)
  */
 export function trackQuizComplete(profileSummary: Record<string, unknown> = {}) {
@@ -153,7 +203,7 @@ export function trackQuizComplete(profileSummary: Record<string, unknown> = {}) 
   fbq("track", "Lead", {
     content_name: "Quiz 28 Días Completado",
     content_category: "Quiz Lead",
-    value: 19.9,
+    value: 9.9,
     currency: "USD",
     ...profileSummary,
   });
@@ -162,17 +212,23 @@ export function trackQuizComplete(profileSummary: Record<string, unknown> = {}) 
 /**
  * Track InitiateCheckout when CTA button is clicked
  */
-export function trackInitiateCheckout(clickLocation = "final_cta") {
+export function trackInitiateCheckout(
+  clickLocation = "final_cta",
+  productValue = 9.9,
+  couponCode = "BUMBUM90",
+  extra: Record<string, unknown> = {},
+) {
   fbq("track", "InitiateCheckout", {
     content_name: "Desafío Glúteos Brasileños 28 Días",
     content_category: "Programa Digital",
     content_ids: ["BUMBUM28"],
     content_type: "product",
-    value: 19.9,
+    value: productValue,
     currency: "USD",
     num_items: 1,
-    coupon: "BUMBUM90",
+    coupon: couponCode,
     click_location: clickLocation,
+    ...extra,
   });
 }
 
@@ -184,7 +240,7 @@ export function getDecoratedCheckoutUrl(baseUrl = BASE_CHECKOUT_URL): string {
   if (typeof window === "undefined") return baseUrl;
 
   try {
-    const url = new URL(baseUrl);
+    const url = new URL(baseUrl, window.location.origin);
     const currentParams = new URLSearchParams(window.location.search);
 
     const paramsToPass = [
@@ -197,7 +253,6 @@ export function getDecoratedCheckoutUrl(baseUrl = BASE_CHECKOUT_URL): string {
       "gclid",
       "src",
       "sck",
-      "off",
     ];
 
     let hasCustomSrc = false;
@@ -208,6 +263,12 @@ export function getDecoratedCheckoutUrl(baseUrl = BASE_CHECKOUT_URL): string {
         if (param === "src" || param === "sck") hasCustomSrc = true;
       }
     });
+
+    // If query string explicitly has custom off parameter, allow override
+    if (currentParams.has("off")) {
+      const offVal = currentParams.get("off");
+      if (offVal) url.searchParams.set("off", offVal);
+    }
 
     if (!hasCustomSrc) {
       const utmSource = currentParams.get("utm_source") || "meta_ads";
@@ -249,10 +310,37 @@ export function trackVslMilestone(percent: number, videoName = "vsl-video.mp4") 
 }
 
 /**
+ * Track when VSL video reaches pitch section
+ */
+export function trackVslPitchReached() {
+  fbq("trackCustom", "VslPitchReached", {
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * Track VSL unmuting
+ */
+export function trackVslUnmute() {
+  fbq("trackCustom", "VslUnmuteClick", {
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * Track VSL speed change
+ */
+export function trackVslSpeedChange(speed: number) {
+  fbq("trackCustom", "VslSpeedChange", {
+    speed,
+  });
+}
+
+/**
  * Track CTA click on the VSL page
  */
 export function trackVslCtaClick(location = "vsl_primary_cta") {
-  trackInitiateCheckout(location);
+  trackInitiateCheckout(location, 9.9, "BUMBUM90");
   fbq("trackCustom", "VslCtaClick", {
     click_location: location,
     product: "Desafío Glúteos Brasileños 28 Días",
@@ -280,7 +368,7 @@ export function trackBackredirectView() {
  * Track CTA click on Backredirect page ($9.90 offer)
  */
 export function trackBackredirectCtaClick(location = "backredirect_primary_cta") {
-  trackInitiateCheckout(location);
+  trackInitiateCheckout(location, 9.9, "BUMBUM90", { page: "backredirect" });
   fbq("trackCustom", "BackredirectCtaClick", {
     click_location: location,
     product: "Desafío Glúteos Brasileños 28 Días",
@@ -305,22 +393,42 @@ export function trackDownsellModalView() {
  * Track CTA click on Downsell offer ($5.90)
  */
 export function trackDownsellCtaClick(location = "downsell_modal_cta") {
-  fbq("track", "InitiateCheckout", {
-    content_name: "Desafío Glúteos Brasileños 28 Días - Oferta Downsell",
-    content_category: "Programa Digital",
-    content_ids: ["BUMBUM28_DOWNSELL"],
-    content_type: "product",
-    value: 5.9,
-    currency: "USD",
-    num_items: 1,
-    coupon: "BUMBUM590",
-    click_location: location,
-  });
+  trackInitiateCheckout(location, 5.9, "BUMBUM590", { page: "downsell_modal" });
 
   fbq("trackCustom", "DownsellCtaClick", {
     click_location: location,
     product: "Desafío Glúteos Brasileños 28 Días Downsell",
     value: 5.9,
     currency: "USD",
+  });
+}
+
+/**
+ * Track when user dismisses or closes downsell modal
+ */
+export function trackDownsellDismiss() {
+  fbq("trackCustom", "DownsellModalDismiss", {
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * Track FAQ Accordion interaction
+ */
+export function trackFaqToggle(faqQuestion: string, isOpen: boolean, screenContext = "final_vsl") {
+  if (isOpen) {
+    fbq("trackCustom", "FaqItemOpened", {
+      question: faqQuestion,
+      screen_context: screenContext,
+    });
+  }
+}
+
+/**
+ * Track UI sound toggle
+ */
+export function trackSoundToggle(enabled: boolean) {
+  fbq("trackCustom", "SoundToggleClick", {
+    sound_enabled: enabled,
   });
 }
