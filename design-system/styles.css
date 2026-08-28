@@ -3,7 +3,7 @@
    Baseado no estilo do projeto Quiz Funnel 28 Dias
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700..900&family=DM+Sans:ital,opsz,wght@0,9..40,400..900;1,9..40,400..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700..900&family=DM+Sans:ital,opsz,wght@0,9..40,400..900;1,9..40,400..900&display=swap");
 
 :root {
   /* Paleta Base */
@@ -34,7 +34,9 @@
 }
 
 /* Base e Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -48,12 +50,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-button, a {
+button,
+a {
   -webkit-tap-highlight-color: transparent;
   font-family: inherit;
 }
 
-button:focus-visible, a:focus-visible {
+button:focus-visible,
+a:focus-visible {
   outline: 3px solid var(--coral);
   outline-offset: 3px;
 }
@@ -74,8 +78,7 @@ button:focus-visible, a:focus-visible {
   background:
     radial-gradient(circle at 0% 0%, oklch(0.93 0.23 101 / 0.72), transparent 30rem),
     radial-gradient(circle at 100% 16%, oklch(0.9 0.28 128 / 0.38), transparent 27rem),
-    radial-gradient(circle at 54% 100%, oklch(0.68 0.29 350 / 0.2), transparent 30rem),
-    var(--cream);
+    radial-gradient(circle at 54% 100%, oklch(0.68 0.29 350 / 0.2), transparent 30rem), var(--cream);
 }
 
 .quiz-canvas::before {
@@ -185,7 +188,12 @@ button:focus-visible, a:focus-visible {
   overflow: hidden;
   border: 2px solid var(--wine);
   border-radius: var(--radius-md);
-  background: linear-gradient(120deg, var(--coral) 0%, var(--electric-purple) 52%, var(--coral) 100%);
+  background: linear-gradient(
+    120deg,
+    var(--coral) 0%,
+    var(--electric-purple) 52%,
+    var(--coral) 100%
+  );
   background-size: 200% 100%;
   padding: 0.9rem 1.2rem;
   color: white;
@@ -254,7 +262,9 @@ button:focus-visible, a:focus-visible {
   cursor: pointer;
   box-shadow: 0 8px 20px -16px oklch(0.24 0.085 27 / 0.5);
   backdrop-filter: blur(10px);
-  transition: transform 180ms ease, background-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
 }
 
 .back-button:hover {
@@ -329,7 +339,9 @@ button:focus-visible, a:focus-visible {
   font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 900;
-  transition: background-color 180ms ease, color 180ms ease;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .option-card.is-selected .option-letter {
@@ -347,7 +359,10 @@ button:focus-visible, a:focus-visible {
   border: 1.5px solid oklch(0.24 0.085 27 / 0.2);
   border-radius: var(--radius-pill);
   color: white;
-  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
 }
 
 .option-check.is-selected {
@@ -364,7 +379,10 @@ button:focus-visible, a:focus-visible {
   background: white;
   cursor: pointer;
   box-shadow: 0 14px 32px -27px oklch(0.24 0.085 27 / 0.7);
-  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .age-option:hover {
@@ -406,7 +424,9 @@ button:focus-visible, a:focus-visible {
   width: 0.35rem;
   border-radius: var(--radius-pill);
   background: oklch(0.24 0.085 27 / 0.13);
-  transition: background-color 200ms ease, transform 200ms ease;
+  transition:
+    background-color 200ms ease,
+    transform 200ms ease;
 }
 
 .progress-dot.is-active {
@@ -480,7 +500,9 @@ button:focus-visible, a:focus-visible {
   background: oklch(1 0 0 / 0.62);
   padding: 1.15rem;
   box-shadow: 4px 4px 0 var(--wine);
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .testimonial-card:hover {
@@ -517,7 +539,10 @@ button:focus-visible, a:focus-visible {
   cursor: pointer;
   box-shadow: 3px 3px 0 var(--wine);
   backdrop-filter: blur(12px);
-  transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .sound-control:hover {
@@ -571,24 +596,45 @@ button:focus-visible, a:focus-visible {
 }
 
 @keyframes option-selected {
-  0% { transform: scale(1); }
-  45% { transform: scale(1.025) rotate(-0.4deg); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.025) rotate(-0.4deg);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes ambient-drift {
-  from { transform: translate3d(0, 0, 0) rotate(0); }
-  to { transform: translate3d(1.5rem, -1rem, 0) rotate(8deg); }
+  from {
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+  to {
+    transform: translate3d(1.5rem, -1rem, 0) rotate(8deg);
+  }
 }
 
 @keyframes button-sheen {
-  0%, 58% { transform: translateX(-120%); }
-  82%, 100% { transform: translateX(120%); }
+  0%,
+  58% {
+    transform: translateX(-120%);
+  }
+  82%,
+  100% {
+    transform: translateX(120%);
+  }
 }
 
 @keyframes sound-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.61 0.24 148 / 0.45); }
-  50% { box-shadow: 0 0 0 6px oklch(0.61 0.24 148 / 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.61 0.24 148 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 6px oklch(0.61 0.24 148 / 0);
+  }
 }
 
 .screen-enter {

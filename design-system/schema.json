@@ -11,8 +11,8 @@
     "checkoutBaseUrl": "",
     "defaultCoupon": "BUMBUM90",
     "discountPercentage": 90,
-    "originalPrice": 199.00,
-    "discountedPrice": 19.90,
+    "originalPrice": 199.0,
+    "discountedPrice": 19.9,
     "totalQuestions": 13
   },
   "phases": [
@@ -86,9 +86,21 @@
         "title": "¿Cómo describirías tus glúteos actualmente?",
         "helper": "No hay respuestas correctas. Tu honestidad hace que la recomendación sea más útil.",
         "options": [
-          { "id": "q1_opt1", "label": "Quiero más firmeza y elevación", "sub": "Siento que perdieron tono con el tiempo" },
-          { "id": "q1_opt2", "label": "Quiero más volumen y forma", "sub": "Busco una curva más redondeada y visible" },
-          { "id": "q1_opt3", "label": "Ya me gustan, pero quiero potenciarlos", "sub": "Quiero definición y un efecto más marcado" }
+          {
+            "id": "q1_opt1",
+            "label": "Quiero más firmeza y elevación",
+            "sub": "Siento que perdieron tono con el tiempo"
+          },
+          {
+            "id": "q1_opt2",
+            "label": "Quiero más volumen y forma",
+            "sub": "Busco una curva más redondeada y visible"
+          },
+          {
+            "id": "q1_opt3",
+            "label": "Ya me gustan, pero quiero potenciarlos",
+            "sub": "Quiero definición y un efecto más marcado"
+          }
         ]
       },
       {
@@ -98,9 +110,21 @@
         "eyebrow": "Tu prioridad estética",
         "title": "¿Qué cambio tendría más impacto en tu confianza?",
         "options": [
-          { "id": "q2_opt1", "label": "Ver más proyección de perfil", "sub": "Una silueta con más volumen y curva" },
-          { "id": "q2_opt2", "label": "Sentirlos más firmes", "sub": "Menos flacidez y mejor tono al tacto" },
-          { "id": "q2_opt3", "label": "Vestirme con más seguridad", "sub": "Sentirme mejor con jeans, vestidos y bikinis" }
+          {
+            "id": "q2_opt1",
+            "label": "Ver más proyección de perfil",
+            "sub": "Una silueta con más volumen y curva"
+          },
+          {
+            "id": "q2_opt2",
+            "label": "Sentirlos más firmes",
+            "sub": "Menos flacidez y mejor tono al tacto"
+          },
+          {
+            "id": "q2_opt3",
+            "label": "Vestirme con más seguridad",
+            "sub": "Sentirme mejor con jeans, vestidos y bikinis"
+          }
         ]
       },
       {
@@ -110,7 +134,11 @@
         "eyebrow": "Tu relación con tu cuerpo",
         "title": "Cuando eliges ropa, ¿cuánto influye esta inseguridad?",
         "options": [
-          { "id": "q3_opt1", "label": "Mucho", "sub": "A veces cambio de ropa o evito ciertas prendas" },
+          {
+            "id": "q3_opt1",
+            "label": "Mucho",
+            "sub": "A veces cambio de ropa o evito ciertas prendas"
+          },
           { "id": "q3_opt2", "label": "Un poco", "sub": "Intento disimular, aunque no siempre" },
           { "id": "q3_opt3", "label": "Casi nada", "sub": "Mi objetivo es mejorar, no esconderme" }
         ]
@@ -122,9 +150,21 @@
         "eyebrow": "Ahora vamos a hacerlo posible",
         "title": "¿Qué formato encaja mejor en tu día?",
         "options": [
-          { "id": "q4_opt1", "label": "Rutinas cortas y directas", "sub": "Quiero terminar antes de encontrar una excusa" },
-          { "id": "q4_opt2", "label": "Sesiones guiadas con calma", "sub": "Prefiero aprender bien cada movimiento" },
-          { "id": "q4_opt3", "label": "Entrenos intensos", "sub": "Me gusta sentir un desafío mayor" }
+          {
+            "id": "q4_opt1",
+            "label": "Rutinas cortas y directas",
+            "sub": "Quiero terminar antes de encontrar una excusa"
+          },
+          {
+            "id": "q4_opt2",
+            "label": "Sesiones guiadas con calma",
+            "sub": "Prefiero aprender bien cada movimiento"
+          },
+          {
+            "id": "q4_opt3",
+            "label": "Entrenos intensos",
+            "sub": "Me gusta sentir un desafío mayor"
+          }
         ]
       },
       {
@@ -134,9 +174,21 @@
         "eyebrow": "Constancia antes que perfección",
         "title": "¿Seguirías una secuencia clara durante 28 días?",
         "options": [
-          { "id": "q5_opt1", "label": "Sí, si sé exactamente qué hacer", "sub": "Necesito una guía día por día" },
-          { "id": "q5_opt2", "label": "Sí, si noto que estoy avanzando", "sub": "Los pequeños logros me mantienen motivada" },
-          { "id": "q5_opt3", "label": "Sí, quiero crear este hábito", "sub": "Estoy lista para priorizarme" }
+          {
+            "id": "q5_opt1",
+            "label": "Sí, si sé exactamente qué hacer",
+            "sub": "Necesito una guía día por día"
+          },
+          {
+            "id": "q5_opt2",
+            "label": "Sí, si noto que estoy avanzando",
+            "sub": "Los pequeños logros me mantienen motivada"
+          },
+          {
+            "id": "q5_opt3",
+            "label": "Sí, quiero crear este hábito",
+            "sub": "Estoy lista para priorizarme"
+          }
         ]
       },
       {
@@ -146,9 +198,24 @@
         "eyebrow": "Diseñemos una meta realista",
         "title": "¿Cuánto tiempo puedes reservar para ti?",
         "options": [
-          { "id": "q6_opt1", "label": "8 a 10 minutos", "sub": "Formato express para días ocupados", "value": "8-10 min" },
-          { "id": "q6_opt2", "label": "10 a 15 minutos", "sub": "Tiempo para activar y entrenar", "value": "10-15 min" },
-          { "id": "q6_opt3", "label": "20 minutos o más", "sub": "Quiero una sesión más completa", "value": "20+ min" }
+          {
+            "id": "q6_opt1",
+            "label": "8 a 10 minutos",
+            "sub": "Formato express para días ocupados",
+            "value": "8-10 min"
+          },
+          {
+            "id": "q6_opt2",
+            "label": "10 a 15 minutos",
+            "sub": "Tiempo para activar y entrenar",
+            "value": "10-15 min"
+          },
+          {
+            "id": "q6_opt3",
+            "label": "20 minutos o más",
+            "sub": "Quiero una sesión más completa",
+            "value": "20+ min"
+          }
         ]
       },
       {
@@ -158,9 +225,24 @@
         "eyebrow": "Tu frecuencia sostenible",
         "title": "¿Cuántos días por semana puedes entrenar en casa?",
         "options": [
-          { "id": "q7_opt1", "label": "3 días", "sub": "Quiero empezar de forma gradual", "value": "3 días" },
-          { "id": "q7_opt2", "label": "4 a 5 días", "sub": "Mi equilibrio ideal entre estímulo y descanso", "value": "4-5 días" },
-          { "id": "q7_opt3", "label": "6 días", "sub": "Me motivan las rutinas diarias y variadas", "value": "6 días" }
+          {
+            "id": "q7_opt1",
+            "label": "3 días",
+            "sub": "Quiero empezar de forma gradual",
+            "value": "3 días"
+          },
+          {
+            "id": "q7_opt2",
+            "label": "4 a 5 días",
+            "sub": "Mi equilibrio ideal entre estímulo y descanso",
+            "value": "4-5 días"
+          },
+          {
+            "id": "q7_opt3",
+            "label": "6 días",
+            "sub": "Me motivan las rutinas diarias y variadas",
+            "value": "6 días"
+          }
         ]
       },
       {
@@ -171,10 +253,26 @@
         "title": "¿Cómo suelen ser tus comidas durante el día?",
         "helper": "Esto nos ayuda a recomendar una guía práctica, no una dieta restrictiva.",
         "options": [
-          { "id": "q8_opt1", "label": "Como poco o me salto comidas", "sub": "Mis horarios dificultan organizarme" },
-          { "id": "q8_opt2", "label": "Hago 3 comidas bastante regulares", "sub": "Tengo una base y puedo mejorar detalles" },
-          { "id": "q8_opt3", "label": "Planifico bien mis comidas", "sub": "Quiero optimizar proteína e hidratación" },
-          { "id": "q8_opt4", "label": "Como de forma irregular", "sub": "El estrés o la ansiedad cambian mi rutina" }
+          {
+            "id": "q8_opt1",
+            "label": "Como poco o me salto comidas",
+            "sub": "Mis horarios dificultan organizarme"
+          },
+          {
+            "id": "q8_opt2",
+            "label": "Hago 3 comidas bastante regulares",
+            "sub": "Tengo una base y puedo mejorar detalles"
+          },
+          {
+            "id": "q8_opt3",
+            "label": "Planifico bien mis comidas",
+            "sub": "Quiero optimizar proteína e hidratación"
+          },
+          {
+            "id": "q8_opt4",
+            "label": "Como de forma irregular",
+            "sub": "El estrés o la ansiedad cambian mi rutina"
+          }
         ]
       },
       {
@@ -199,9 +297,21 @@
         "eyebrow": "Tu acuerdo contigo misma",
         "title": "¿Qué compromiso se siente posible desde hoy?",
         "options": [
-          { "id": "q10_opt1", "label": "Cumplir incluso en los días ocupados", "sub": "Ocho minutos también cuentan" },
-          { "id": "q10_opt2", "label": "Volver aunque pierda un día", "sub": "Sin culpa ni mentalidad de todo o nada" },
-          { "id": "q10_opt3", "label": "Registrar cada pequeña victoria", "sub": "Quiero ver mi constancia crecer" }
+          {
+            "id": "q10_opt1",
+            "label": "Cumplir incluso en los días ocupados",
+            "sub": "Ocho minutos también cuentan"
+          },
+          {
+            "id": "q10_opt2",
+            "label": "Volver aunque pierda un día",
+            "sub": "Sin culpa ni mentalidad de todo o nada"
+          },
+          {
+            "id": "q10_opt3",
+            "label": "Registrar cada pequeña victoria",
+            "sub": "Quiero ver mi constancia crecer"
+          }
         ]
       },
       {
@@ -211,10 +321,30 @@
         "eyebrow": "Tu resultado deseado",
         "title": "¿Qué objetivo te emociona más para estos 28 días?",
         "options": [
-          { "id": "q11_opt1", "label": "Efecto push-up", "sub": "Más elevación, control y firmeza", "value": "Elevar y ganar firmeza" },
-          { "id": "q11_opt2", "label": "Curvas más redondeadas", "sub": "Volumen visual y mejor proyección", "value": "Construir curvas redondeadas" },
-          { "id": "q11_opt3", "label": "Definición y tono", "sub": "Una apariencia más fuerte y esculpida", "value": "Definir y tonificar" },
-          { "id": "q11_opt4", "label": "Reconectar con mi cuerpo", "sub": "Sentirme activa, segura y constante", "value": "Reconectar con tu cuerpo" }
+          {
+            "id": "q11_opt1",
+            "label": "Efecto push-up",
+            "sub": "Más elevación, control y firmeza",
+            "value": "Elevar y ganar firmeza"
+          },
+          {
+            "id": "q11_opt2",
+            "label": "Curvas más redondeadas",
+            "sub": "Volumen visual y mejor proyección",
+            "value": "Construir curvas redondeadas"
+          },
+          {
+            "id": "q11_opt3",
+            "label": "Definición y tono",
+            "sub": "Una apariencia más fuerte y esculpida",
+            "value": "Definir y tonificar"
+          },
+          {
+            "id": "q11_opt4",
+            "label": "Reconectar con mi cuerpo",
+            "sub": "Sentirme activa, segura y constante",
+            "value": "Reconectar con tu cuerpo"
+          }
         ]
       },
       {
@@ -225,10 +355,30 @@
         "title": "¿Qué suele hacerte abandonar una rutina?",
         "helper": "Tu plan incluirá una estrategia simple para este punto de fricción.",
         "options": [
-          { "id": "q12_opt1", "label": "Pierdo la motivación", "sub": "Empiezo animada y después me desconecto", "value": "Motivación" },
-          { "id": "q12_opt2", "label": "No tengo tiempo", "sub": "Trabajo, casa o familia ocupan mi día", "value": "Falta de tiempo" },
-          { "id": "q12_opt3", "label": "No sé si lo hago bien", "sub": "Me falta una guía visual y progresiva", "value": "Inseguridad con la técnica" },
-          { "id": "q12_opt4", "label": "No veo cambios rápidos", "sub": "Me cuesta reconocer avances pequeños", "value": "Impaciencia con resultados" }
+          {
+            "id": "q12_opt1",
+            "label": "Pierdo la motivación",
+            "sub": "Empiezo animada y después me desconecto",
+            "value": "Motivación"
+          },
+          {
+            "id": "q12_opt2",
+            "label": "No tengo tiempo",
+            "sub": "Trabajo, casa o familia ocupan mi día",
+            "value": "Falta de tiempo"
+          },
+          {
+            "id": "q12_opt3",
+            "label": "No sé si lo hago bien",
+            "sub": "Me falta una guía visual y progresiva",
+            "value": "Inseguridad con la técnica"
+          },
+          {
+            "id": "q12_opt4",
+            "label": "No veo cambios rápidos",
+            "sub": "Me cuesta reconocer avances pequeños",
+            "value": "Impaciencia con resultados"
+          }
         ]
       },
       {
@@ -238,9 +388,21 @@
         "eyebrow": "Último paso",
         "title": "¿Cómo quieres empezar tu nueva rutina?",
         "options": [
-          { "id": "q13_opt1", "label": "Con energía y un plan claro", "sub": "Quiero saber qué hacer desde el primer día" },
-          { "id": "q13_opt2", "label": "A mi ritmo, pero sin parar", "sub": "Quiero constancia sin presión innecesaria" },
-          { "id": "q13_opt3", "label": "Con un desafío que me motive", "sub": "Estoy lista para celebrar cada avance" }
+          {
+            "id": "q13_opt1",
+            "label": "Con energía y un plan claro",
+            "sub": "Quiero saber qué hacer desde el primer día"
+          },
+          {
+            "id": "q13_opt2",
+            "label": "A mi ritmo, pero sin parar",
+            "sub": "Quiero constancia sin presión innecesaria"
+          },
+          {
+            "id": "q13_opt3",
+            "label": "Con un desafío que me motive",
+            "sub": "Estoy lista para celebrar cada avance"
+          }
         ]
       }
     ],
@@ -292,12 +454,39 @@
       "heroHeadline": "Tu próxima victoria cabe en {{user_time}}.",
       "heroSummary": "Tu ruta prioriza {{user_goal}} y reduce el impacto de tu principal barrera: {{user_obstacle}}.",
       "includedFeatures": [
-        { "icon": "CirclePlay", "title": "28 rutinas guiadas", "text": "Secuencia visual para seguir sin improvisar." },
-        { "icon": "CalendarDays", "title": "Calendario de progreso", "text": "Un mapa simple para mantener el ritmo." },
-        { "icon": "Utensils", "title": "Guía de alimentación", "text": "Ideas prácticas para organizar tus comidas.", "badge": "Bono" },
-        { "icon": "Zap", "title": "Activación express", "text": "Calentamiento corto para conectar mejor.", "badge": "Bono" },
-        { "icon": "Users", "title": "Comunidad de apoyo", "text": "Un espacio para dudas, avances y motivación.", "badge": "Bono" },
-        { "icon": "ShieldCheck", "title": "Acceso de por vida", "text": "Vuelve a la ruta siempre que lo necesites." }
+        {
+          "icon": "CirclePlay",
+          "title": "28 rutinas guiadas",
+          "text": "Secuencia visual para seguir sin improvisar."
+        },
+        {
+          "icon": "CalendarDays",
+          "title": "Calendario de progreso",
+          "text": "Un mapa simple para mantener el ritmo."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Guía de alimentación",
+          "text": "Ideas prácticas para organizar tus comidas.",
+          "badge": "Bono"
+        },
+        {
+          "icon": "Zap",
+          "title": "Activación express",
+          "text": "Calentamiento corto para conectar mejor.",
+          "badge": "Bono"
+        },
+        {
+          "icon": "Users",
+          "title": "Comunidad de apoyo",
+          "text": "Un espacio para dudas, avances y motivación.",
+          "badge": "Bono"
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Acceso de por vida",
+          "text": "Vuelve a la ruta siempre que lo necesites."
+        }
       ],
       "pricing": {
         "title": "Desafío Glúteos Brasileños",

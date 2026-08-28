@@ -1718,13 +1718,18 @@
 }
 
 @keyframes vsl-unmute-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(-50%) scale(1);
-    box-shadow: 0 10px 25px oklch(0.68 0.29 350 / 0.5), 0 0 0 4px oklch(0.68 0.29 350 / 0.25);
+    box-shadow:
+      0 10px 25px oklch(0.68 0.29 350 / 0.5),
+      0 0 0 4px oklch(0.68 0.29 350 / 0.25);
   }
   50% {
     transform: translateX(-50%) scale(1.04);
-    box-shadow: 0 15px 35px oklch(0.68 0.29 350 / 0.7), 0 0 0 8px oklch(0.68 0.29 350 / 0.35);
+    box-shadow:
+      0 15px 35px oklch(0.68 0.29 350 / 0.7),
+      0 0 0 8px oklch(0.68 0.29 350 / 0.35);
   }
 }
 
@@ -1736,14 +1741,30 @@
   animation: vsl-sound-bounce 1.2s ease-in-out infinite alternate;
 }
 
-.vsl-sound-bar:nth-child(1) { height: 8px; animation-delay: 0.1s; }
-.vsl-sound-bar:nth-child(2) { height: 16px; animation-delay: 0.3s; }
-.vsl-sound-bar:nth-child(3) { height: 12px; animation-delay: 0.2s; }
-.vsl-sound-bar:nth-child(4) { height: 18px; animation-delay: 0.4s; }
+.vsl-sound-bar:nth-child(1) {
+  height: 8px;
+  animation-delay: 0.1s;
+}
+.vsl-sound-bar:nth-child(2) {
+  height: 16px;
+  animation-delay: 0.3s;
+}
+.vsl-sound-bar:nth-child(3) {
+  height: 12px;
+  animation-delay: 0.2s;
+}
+.vsl-sound-bar:nth-child(4) {
+  height: 18px;
+  animation-delay: 0.4s;
+}
 
 @keyframes vsl-sound-bounce {
-  0% { height: 4px; }
-  100% { height: 18px; }
+  0% {
+    height: 4px;
+  }
+  100% {
+    height: 18px;
+  }
 }
 
 .vsl-pulse-dot {
@@ -1765,9 +1786,18 @@
 }
 
 @keyframes vsl-pulse-ring {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(2.2); opacity: 0; }
-  100% { transform: scale(2.2); opacity: 0; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 
 .vsl-play-overlay-btn {
@@ -1782,7 +1812,9 @@
   box-shadow:
     0 10px 30px oklch(0.68 0.29 350 / 0.6),
     0 0 0 6px oklch(1 1 1 / 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .vsl-play-overlay-btn:hover {
@@ -1832,4 +1864,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-

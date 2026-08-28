@@ -7,30 +7,30 @@ class UiAudioEngine {
   constructor() {
     this.context = null;
     this.enabled = true;
-    this.storageKey = 'quiz-ui-sounds';
+    this.storageKey = "quiz-ui-sounds";
     this.init();
   }
 
   init() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const stored = window.localStorage.getItem(this.storageKey);
-    this.enabled = stored !== 'off';
+    this.enabled = stored !== "off";
   }
 
   ensureContext() {
-    if (!this.context && typeof window !== 'undefined') {
+    if (!this.context && typeof window !== "undefined") {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.context = new AudioCtx();
       }
     }
-    if (this.context && this.context.state === 'suspended') {
+    if (this.context && this.context.state === "suspended") {
       void this.context.resume();
     }
     return this.context;
   }
 
-  playTone(startFreq, endFreq, duration, delay = 0, volume = 0.035, type = 'triangle') {
+  playTone(startFreq, endFreq, duration, delay = 0, volume = 0.035, type = "triangle") {
     if (!this.enabled) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
@@ -55,7 +55,7 @@ class UiAudioEngine {
       oscillator.start(startAt);
       oscillator.stop(endAt + 0.015);
     } catch (e) {
-      console.warn('[Audio Engine] Playback note error:', e);
+      console.warn("[Audio Engine] Playback note error:", e);
     }
   }
 
@@ -63,31 +63,31 @@ class UiAudioEngine {
     if (!this.enabled) return;
 
     switch (kind) {
-      case 'select':
-        this.playTone(390, 620, 0.09, 0, 0.04, 'triangle');
+      case "select":
+        this.playTone(390, 620, 0.09, 0, 0.04, "triangle");
         break;
-      case 'back':
-        this.playTone(330, 190, 0.075, 0, 0.025, 'triangle');
+      case "back":
+        this.playTone(330, 190, 0.075, 0, 0.025, "triangle");
         break;
-      case 'success':
-        this.playTone(440, 660, 0.13, 0, 0.035, 'sine');
-        this.playTone(620, 880, 0.16, 0.075, 0.03, 'sine');
-        this.playTone(880, 1100, 0.18, 0.15, 0.025, 'sine');
+      case "success":
+        this.playTone(440, 660, 0.13, 0, 0.035, "sine");
+        this.playTone(620, 880, 0.16, 0.075, 0.03, "sine");
+        this.playTone(880, 1100, 0.18, 0.15, 0.025, "sine");
         break;
-      case 'click':
+      case "click":
       default:
-        this.playTone(270, 210, 0.055, 0, 0.025, 'triangle');
+        this.playTone(270, 210, 0.055, 0, 0.025, "triangle");
         break;
     }
   }
 
   toggle() {
     this.enabled = !this.enabled;
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(this.storageKey, this.enabled ? 'on' : 'off');
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(this.storageKey, this.enabled ? "on" : "off");
     }
     if (this.enabled) {
-      this.play('select');
+      this.play("select");
     }
     return this.enabled;
   }
@@ -97,6 +97,6 @@ class UiAudioEngine {
 export const uiAudio = new UiAudioEngine();
 
 // Compatibilidade Vanilla JS (window.uiAudio)
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.uiAudio = uiAudio;
 }

@@ -58,7 +58,8 @@ export const Route = createFileRoute("/oferta-especial")({
       { property: "og:title", content: "Oferta Especial - Método Brasileño 28 Días" },
       {
         property: "og:description",
-        content: "Descubre los casos reales y el método biomecánico para tonificar tus glúteos en 15 min al día.",
+        content:
+          "Descubre los casos reales y el método biomecánico para tonificar tus glúteos en 15 min al día.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -192,7 +193,12 @@ export default function OfertaEspecialPage() {
               ¿Por Qué Dejar Para Mañana El Bumbum Firme Que Puedes Empezar a Construir Hoy?
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-base font-medium text-[color:var(--ink-muted)] leading-relaxed">
-              Sabemos que tienes dudas o que has intentado otros programas sin ver resultados. Por eso, antes de que te vayas, queremos mostrarte <strong className="text-[color:var(--wine)]">exactamente por qué el Método Brasileño funciona</strong> donde las sentadillas tradicionales y las dietas estrictas fallan.
+              Sabemos que tienes dudas o que has intentado otros programas sin ver resultados. Por
+              eso, antes de que te vayas, queremos mostrarte{" "}
+              <strong className="text-[color:var(--wine)]">
+                exactamente por qué el Método Brasileño funciona
+              </strong>{" "}
+              donde las sentadillas tradicionales y las dietas estrictas fallan.
             </p>
           </div>
 
@@ -202,24 +208,36 @@ export default function OfertaEspecialPage() {
               <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white shadow-sm mb-2">
                 <Clock3 size={20} />
               </div>
-              <h3 className="font-display text-sm font-black text-emerald-950">Solo 15 Minutos/Día</h3>
-              <p className="mt-1 text-xs text-emerald-900 leading-snug">Rutinas breves y precisas que se adaptan a tu ritmo en casa.</p>
+              <h3 className="font-display text-sm font-black text-emerald-950">
+                Solo 15 Minutos/Día
+              </h3>
+              <p className="mt-1 text-xs text-emerald-900 leading-snug">
+                Rutinas breves y precisas que se adaptan a tu ritmo en casa.
+              </p>
             </div>
 
             <div className="rounded-2xl border-2 border-[color:var(--coral)]/30 bg-[color:var(--coral-soft)]/40 p-4 text-center">
               <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--coral)] text-white shadow-sm mb-2">
                 <Target size={20} />
               </div>
-              <h3 className="font-display text-sm font-black text-[color:var(--wine)]">100% Aislamiento Glúteo</h3>
-              <p className="mt-1 text-xs text-[color:var(--ink-muted)] leading-snug">Activa glúteo mayor y medio sin ensanchar muslos ni dañar rodillas.</p>
+              <h3 className="font-display text-sm font-black text-[color:var(--wine)]">
+                100% Aislamiento Glúteo
+              </h3>
+              <p className="mt-1 text-xs text-[color:var(--ink-muted)] leading-snug">
+                Activa glúteo mayor y medio sin ensanchar muslos ni dañar rodillas.
+              </p>
             </div>
 
             <div className="rounded-2xl border-2 border-[color:var(--lime)]/60 bg-[color:var(--lime)]/20 p-4 text-center">
               <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--wine)] text-[color:var(--lime)] shadow-sm mb-2">
                 <ShieldCheck size={20} />
               </div>
-              <h3 className="font-display text-sm font-black text-[color:var(--wine)]">7 Días Garantizados</h3>
-              <p className="mt-1 text-xs text-[color:var(--ink-muted)] leading-snug">Prueba el método completo sin ningún riesgo financiero.</p>
+              <h3 className="font-display text-sm font-black text-[color:var(--wine)]">
+                7 Días Garantizados
+              </h3>
+              <p className="mt-1 text-xs text-[color:var(--ink-muted)] leading-snug">
+                Prueba el método completo sin ningún riesgo financiero.
+              </p>
             </div>
           </div>
 
@@ -235,7 +253,9 @@ export default function OfertaEspecialPage() {
             </div>
 
             <div className="mt-2 flex items-baseline justify-center gap-2">
-              <span className="text-sm font-bold text-[color:var(--wine)]">Llévatelo hoy por solo:</span>
+              <span className="text-sm font-bold text-[color:var(--wine)]">
+                Llévatelo hoy por solo:
+              </span>
               <span className="font-display text-4xl sm:text-5xl font-black text-[color:var(--coral)]">
                 $9.90
               </span>
@@ -267,7 +287,8 @@ export default function OfertaEspecialPage() {
               ¿Te Identificas Con Alguno de Estos Casos?
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-xs sm:text-sm text-[color:var(--ink-muted)]">
-              Descubre cómo mujeres en situaciones exactamente iguales a la tuya transformaron sus glúteos en 28 días con el método.
+              Descubre cómo mujeres en situaciones exactamente iguales a la tuya transformaron sus
+              glúteos en 28 días con el método.
             </p>
           </div>
 
@@ -307,7 +328,12 @@ export default function OfertaEspecialPage() {
                   "Pensaba que necesitaba 2 horas en el gimnasio y no tenía tiempo."
                 </h4>
                 <p className="mt-2 text-xs sm:text-sm text-[color:var(--ink-muted)] leading-relaxed">
-                  <em>"Con dos hijos y trabajo de oficina, ir al gimnasio era imposible. Este método me salvó porque solo hago 15 minutos en mi sala antes de que los niños despierten. En la tercera semana sentí mis glúteos más levantados y duros, y los pantalones me quedan increíbles sin haber tocado una pesa."</em>
+                  <em>
+                    "Con dos hijos y trabajo de oficina, ir al gimnasio era imposible. Este método
+                    me salvó porque solo hago 15 minutos en mi sala antes de que los niños
+                    despierten. En la tercera semana sentí mis glúteos más levantados y duros, y los
+                    pantalones me quedan increíbles sin haber tocado una pesa."
+                  </em>
                 </p>
 
                 <div className="mt-4 rounded-xl bg-emerald-50 p-3 border border-emerald-200">
@@ -316,14 +342,17 @@ export default function OfertaEspecialPage() {
                     <span>Por qué funcionó para ella:</span>
                   </div>
                   <p className="mt-1 text-[11px] text-emerald-800">
-                    La alta densidad neuromuscular estimula el 100% de las fibras en 15 minutos sin tiempos muertos ni desplazamientos.
+                    La alta densidad neuromuscular estimula el 100% de las fibras en 15 minutos sin
+                    tiempos muertos ni desplazamientos.
                   </p>
                 </div>
               </div>
 
               <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between text-xs font-bold text-[color:var(--wine)]">
                 <span className="flex text-amber-500 font-bold">★★★★★</span>
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800 text-[11px]">Resultado: +3.5 cm de elevación</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800 text-[11px]">
+                  Resultado: +3.5 cm de elevación
+                </span>
               </div>
             </div>
 
@@ -362,7 +391,12 @@ export default function OfertaEspecialPage() {
                   "Las sentadillas y zancadas me destrozaban las rodillas y la espalda."
                 </h4>
                 <p className="mt-2 text-xs sm:text-sm text-[color:var(--ink-muted)] leading-relaxed">
-                  <em>"Cada vez que intentaba entrenar piernas terminaba con dolor de rodillas por días. Con la técnica brasileña de puente y abducción isométrica aprendí a quemar el glúteo directamente sin poner presión en las articulaciones. Por primera vez entreno sin dolor alguno."</em>
+                  <em>
+                    "Cada vez que intentaba entrenar piernas terminaba con dolor de rodillas por
+                    días. Con la técnica brasileña de puente y abducción isométrica aprendí a quemar
+                    el glúteo directamente sin poner presión en las articulaciones. Por primera vez
+                    entreno sin dolor alguno."
+                  </em>
                 </p>
 
                 <div className="mt-4 rounded-xl bg-emerald-50 p-3 border border-emerald-200">
@@ -371,14 +405,17 @@ export default function OfertaEspecialPage() {
                     <span>Por qué funcionó para ella:</span>
                   </div>
                   <p className="mt-1 text-[11px] text-emerald-800">
-                    Eliminamos la carga axial sobre rodillas y vértebras, focalizando la tensión mediante ángulos biomecánicos de suelo.
+                    Eliminamos la carga axial sobre rodillas y vértebras, focalizando la tensión
+                    mediante ángulos biomecánicos de suelo.
                   </p>
                 </div>
               </div>
 
               <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between text-xs font-bold text-[color:var(--wine)]">
                 <span className="flex text-amber-500 font-bold">★★★★★</span>
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800 text-[11px]">Resultado: Cero dolor articular</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800 text-[11px]">
+                  Resultado: Cero dolor articular
+                </span>
               </div>
             </div>
 
@@ -417,7 +454,12 @@ export default function OfertaEspecialPage() {
                   "Creí que por mi edad era imposible volver a tener glúteos firmes."
                 </h4>
                 <p className="mt-2 text-xs sm:text-sm text-[color:var(--ink-muted)] leading-relaxed">
-                  <em>"Después de los 45 años sentí que la gravedad y la celulitis habían ganado. Empecé el desafío sin mucha fe y en 28 días la piel de mis glúteos se tensó por completo. La guía nutricional anti-flacidez del bono fue el complemento perfecto para recuperar firmeza."</em>
+                  <em>
+                    "Después de los 45 años sentí que la gravedad y la celulitis habían ganado.
+                    Empecé el desafío sin mucha fe y en 28 días la piel de mis glúteos se tensó por
+                    completo. La guía nutricional anti-flacidez del bono fue el complemento perfecto
+                    para recuperar firmeza."
+                  </em>
                 </p>
 
                 <div className="mt-4 rounded-xl bg-emerald-50 p-3 border border-emerald-200">
@@ -426,14 +468,17 @@ export default function OfertaEspecialPage() {
                     <span>Por qué funcionó para ella:</span>
                   </div>
                   <p className="mt-1 text-[11px] text-emerald-800">
-                    Reactiva la memoria neuromuscular de las 3 porciones del glúteo y estimula la síntesis de colágeno natural en la fascia.
+                    Reactiva la memoria neuromuscular de las 3 porciones del glúteo y estimula la
+                    síntesis de colágeno natural en la fascia.
                   </p>
                 </div>
               </div>
 
               <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between text-xs font-bold text-[color:var(--wine)]">
                 <span className="flex text-amber-500 font-bold">★★★★★</span>
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800 text-[11px]">Resultado: Firmeza y reducción de flacidez</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800 text-[11px]">
+                  Resultado: Firmeza y reducción de flacidez
+                </span>
               </div>
             </div>
 
@@ -472,7 +517,12 @@ export default function OfertaEspecialPage() {
                   "Todo el ejercicio se me iba a los muslos y el glúteo seguía plano."
                 </h4>
                 <p className="mt-2 text-xs sm:text-sm text-[color:var(--ink-muted)] leading-relaxed">
-                  <em>"Siempre que hacía ejercicio terminaba con las piernas hinchadas y el bumbum plano. Con este protocolo aprendí la técnica de pre-activación: apagas los cuádriceps y obligas al glúteo medio a trabajar. Rellené los hoyuelos laterales y mi cintura se ve mucho más fina."</em>
+                  <em>
+                    "Siempre que hacía ejercicio terminaba con las piernas hinchadas y el bumbum
+                    plano. Con este protocolo aprendí la técnica de pre-activación: apagas los
+                    cuádriceps y obligas al glúteo medio a trabajar. Rellené los hoyuelos laterales
+                    y mi cintura se ve mucho más fina."
+                  </em>
                 </p>
 
                 <div className="mt-4 rounded-xl bg-emerald-50 p-3 border border-emerald-200">
@@ -481,14 +531,17 @@ export default function OfertaEspecialPage() {
                     <span>Por qué funcionó para ella:</span>
                   </div>
                   <p className="mt-1 text-[11px] text-emerald-800">
-                    Aisla el glúteo medio y mínimo para dar redondez y proyección lateral sin hipertrofiar los muslos frontales.
+                    Aisla el glúteo medio y mínimo para dar redondez y proyección lateral sin
+                    hipertrofiar los muslos frontales.
                   </p>
                 </div>
               </div>
 
               <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between text-xs font-bold text-[color:var(--wine)]">
                 <span className="flex text-amber-500 font-bold">★★★★★</span>
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800 text-[11px]">Resultado: Curva lateral y silueta reloj de arena</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800 text-[11px]">
+                  Resultado: Curva lateral y silueta reloj de arena
+                </span>
               </div>
             </div>
           </div>
@@ -504,7 +557,8 @@ export default function OfertaEspecialPage() {
               5 Razones Contundentes Para Entrar Hoy Mismo
             </h2>
             <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-white/80">
-              No es otro programa genérico de fitness. Es una fórmula científica de activación neuromuscular diseñada exclusivamente para la anatomía femenina.
+              No es otro programa genérico de fitness. Es una fórmula científica de activación
+              neuromuscular diseñada exclusivamente para la anatomía femenina.
             </p>
           </div>
 
@@ -513,9 +567,12 @@ export default function OfertaEspecialPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[color:var(--lime)] font-black text-[color:var(--wine)] text-sm mb-3">
                 1
               </span>
-              <h3 className="font-display text-base font-black text-white">Aislamiento Biomecânico</h3>
+              <h3 className="font-display text-base font-black text-white">
+                Aislamiento Biomecânico
+              </h3>
               <p className="mt-1.5 text-xs text-white/80 leading-relaxed">
-                Aprenderás a dirigir el 100% de la contracción muscular al glúteo mayor y medio, sin sobrecargar los cuádriceps ni engrosar las piernas.
+                Aprenderás a dirigir el 100% de la contracción muscular al glúteo mayor y medio, sin
+                sobrecargar los cuádriceps ni engrosar las piernas.
               </p>
             </div>
 
@@ -523,9 +580,12 @@ export default function OfertaEspecialPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[color:var(--coral)] font-black text-white text-sm mb-3">
                 2
               </span>
-              <h3 className="font-display text-base font-black text-white">15 Minutos de Alta Densidad</h3>
+              <h3 className="font-display text-base font-black text-white">
+                15 Minutos de Alta Densidad
+              </h3>
               <p className="mt-1.5 text-xs text-white/80 leading-relaxed">
-                Sin horas interminables de cardio. Sesiones breves y dinámicas en video que puedes hacer en tu sala o habitación en cualquier horario.
+                Sin horas interminables de cardio. Sesiones breves y dinámicas en video que puedes
+                hacer en tu sala o habitación en cualquier horario.
               </p>
             </div>
 
@@ -533,9 +593,12 @@ export default function OfertaEspecialPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[color:var(--lime)] font-black text-[color:var(--wine)] text-sm mb-3">
                 3
               </span>
-              <h3 className="font-display text-base font-black text-white">Cero Equipo Necesario</h3>
+              <h3 className="font-display text-base font-black text-white">
+                Cero Equipo Necesario
+              </h3>
               <p className="mt-1.5 text-xs text-white/80 leading-relaxed">
-                Utiliza tu propio peso corporal y principios de tensión isométrica para estimular el crecimiento y firmeza sin gastar en gimnasios.
+                Utiliza tu propio peso corporal y principios de tensión isométrica para estimular el
+                crecimiento y firmeza sin gastar en gimnasios.
               </p>
             </div>
 
@@ -543,9 +606,12 @@ export default function OfertaEspecialPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[color:var(--coral)] font-black text-white text-sm mb-3">
                 4
               </span>
-              <h3 className="font-display text-base font-black text-white">4 Bonos Gratis de Regalo</h3>
+              <h3 className="font-display text-base font-black text-white">
+                4 Bonos Gratis de Regalo
+              </h3>
               <p className="mt-1.5 text-xs text-white/80 leading-relaxed">
-                Guía nutricional anti-flacidez, protocolo express anti-celulitis, tracker de progreso y acceso a la comunidad VIP sin costo extra.
+                Guía nutricional anti-flacidez, protocolo express anti-celulitis, tracker de
+                progreso y acceso a la comunidad VIP sin costo extra.
               </p>
             </div>
 
@@ -553,9 +619,13 @@ export default function OfertaEspecialPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 font-black text-white text-sm mb-3">
                 5
               </span>
-              <h3 className="font-display text-base font-black text-white">Garantía Total de 7 Días</h3>
+              <h3 className="font-display text-base font-black text-white">
+                Garantía Total de 7 Días
+              </h3>
               <p className="mt-1.5 text-xs text-white/80 leading-relaxed">
-                Prueba el programa durante una semana completa. Si no sientes la activación y la diferencia en tu cuerpo, te devolvemos el 100% de tu dinero de inmediato ($9.90 USD). Risco Cero.
+                Prueba el programa durante una semana completa. Si no sientes la activación y la
+                diferencia en tu cuerpo, te devolvemos el 100% de tu dinero de inmediato ($9.90
+                USD). Risco Cero.
               </p>
             </div>
           </div>
@@ -609,7 +679,8 @@ export default function OfertaEspecialPage() {
                     <Check size={13} strokeWidth={3} />
                   </span>
                   <span>
-                    <strong>Protocolo Guiado de 28 Días:</strong> Rutinas completas en video de 15 min al día.
+                    <strong>Protocolo Guiado de 28 Días:</strong> Rutinas completas en video de 15
+                    min al día.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -617,7 +688,8 @@ export default function OfertaEspecialPage() {
                     <Check size={13} strokeWidth={3} />
                   </span>
                   <span>
-                    <strong>Biomecánica Brasileña:</strong> Aislamiento de glúteos sin dolor de rodillas ni muslos gruesos.
+                    <strong>Biomecánica Brasileña:</strong> Aislamiento de glúteos sin dolor de
+                    rodillas ni muslos gruesos.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -625,7 +697,8 @@ export default function OfertaEspecialPage() {
                     <Check size={13} strokeWidth={3} />
                   </span>
                   <span>
-                    <strong>Entrena 100% en Casa:</strong> Sin máquinas, pesas pesadas ni mensualidades.
+                    <strong>Entrena 100% en Casa:</strong> Sin máquinas, pesas pesadas ni
+                    mensualidades.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -633,7 +706,10 @@ export default function OfertaEspecialPage() {
                     <Gift size={13} />
                   </span>
                   <span>
-                    <strong>Bono #1:</strong> Guía Nutricional Anti-Flacidez y Menú Firmeza <span className="text-[color:var(--coral)] font-bold">(Valor $37 USD - GRATIS)</span>
+                    <strong>Bono #1:</strong> Guía Nutricional Anti-Flacidez y Menú Firmeza{" "}
+                    <span className="text-[color:var(--coral)] font-bold">
+                      (Valor $37 USD - GRATIS)
+                    </span>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -641,7 +717,10 @@ export default function OfertaEspecialPage() {
                     <Gift size={13} />
                   </span>
                   <span>
-                    <strong>Bono #2:</strong> Protocolo Express Anti-Celulitis y Drenaje <span className="text-[color:var(--coral)] font-bold">(Valor $29 USD - GRATIS)</span>
+                    <strong>Bono #2:</strong> Protocolo Express Anti-Celulitis y Drenaje{" "}
+                    <span className="text-[color:var(--coral)] font-bold">
+                      (Valor $29 USD - GRATIS)
+                    </span>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -649,7 +728,10 @@ export default function OfertaEspecialPage() {
                     <Gift size={13} />
                   </span>
                   <span>
-                    <strong>Bono #3:</strong> Planificador Imprimible y Tracker de Hábitos <span className="text-[color:var(--coral)] font-bold">(Valor $19 USD - GRATIS)</span>
+                    <strong>Bono #3:</strong> Planificador Imprimible y Tracker de Hábitos{" "}
+                    <span className="text-[color:var(--coral)] font-bold">
+                      (Valor $19 USD - GRATIS)
+                    </span>
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -657,7 +739,10 @@ export default function OfertaEspecialPage() {
                     <Gift size={13} />
                   </span>
                   <span>
-                    <strong>Bono #4:</strong> Comunidad VIP de Alumnas y Soporte Vitalicio <span className="text-[color:var(--coral)] font-bold">(Valor $47 USD - GRATIS)</span>
+                    <strong>Bono #4:</strong> Comunidad VIP de Alumnas y Soporte Vitalicio{" "}
+                    <span className="text-[color:var(--coral)] font-bold">
+                      (Valor $47 USD - GRATIS)
+                    </span>
                   </span>
                 </li>
               </ul>
@@ -708,7 +793,8 @@ export default function OfertaEspecialPage() {
                   <ShieldCheck size={14} className="text-emerald-600" /> Garantía de 7 Días
                 </span>
                 <span className="flex items-center gap-1">
-                  <CreditCard size={13} className="text-[color:var(--wine)]" /> Tarjetas / PayPal / Efectivo
+                  <CreditCard size={13} className="text-[color:var(--wine)]" /> Tarjetas / PayPal /
+                  Efectivo
                 </span>
               </div>
             </div>
@@ -732,7 +818,8 @@ export default function OfertaEspecialPage() {
                 Diseñado Por Especialistas en Estética y Biomecánica Femenina
               </h2>
               <p className="text-xs sm:text-sm text-white/85 leading-relaxed">
-                Estudiamos los patrones de activación muscular del entrenamiento brasileño para crear un protocolo paso a paso, seguro y 100% aplicable en casa para cualquier edad.
+                Estudiamos los patrones de activación muscular del entrenamiento brasileño para
+                crear un protocolo paso a paso, seguro y 100% aplicable en casa para cualquier edad.
               </p>
               <div className="flex flex-wrap gap-4 pt-2 text-xs font-bold text-[color:var(--shock-yellow)]">
                 <span>✓ +10 Años de Experiencia</span>
@@ -758,7 +845,9 @@ export default function OfertaEspecialPage() {
           </h2>
 
           <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-emerald-900 leading-relaxed">
-            Si durante los primeros 7 días sientes que el método no es para ti, o simplemente cambias de opinión, solicitas tu reembolso con un solo clic en la plataforma y te devolvemos el 100% de tu dinero ($9.90 USD). Sin preguntas ni complicaciones.
+            Si durante los primeros 7 días sientes que el método no es para ti, o simplemente
+            cambias de opinión, solicitas tu reembolso con un solo clic en la plataforma y te
+            devolvemos el 100% de tu dinero ($9.90 USD). Sin preguntas ni complicaciones.
           </p>
 
           <div className="mt-5">
@@ -890,7 +979,8 @@ export default function OfertaEspecialPage() {
                 No Queremos Que El Dinero Sea Un Impedimento Para Tu Transformación
               </h2>
               <p className="mt-2 text-xs sm:text-sm font-medium text-[color:var(--ink-muted)]">
-                Por ser tu última oportunidad antes de salir, hemos liberado un cupón de emergencia exclusivo para ti.
+                Por ser tu última oportunidad antes de salir, hemos liberado un cupón de emergencia
+                exclusivo para ti.
               </p>
             </div>
 
@@ -910,7 +1000,9 @@ export default function OfertaEspecialPage() {
               </div>
 
               <div className="mt-1 flex items-baseline justify-center gap-1.5">
-                <span className="text-sm font-black text-[color:var(--wine)]">Llévalo hoy por solo:</span>
+                <span className="text-sm font-black text-[color:var(--wine)]">
+                  Llévalo hoy por solo:
+                </span>
                 <span className="font-display text-4xl sm:text-5xl font-black text-red-600">
                   $5.90
                 </span>
@@ -952,7 +1044,8 @@ export default function OfertaEspecialPage() {
                 onClick={() => setShowDownsellModal(false)}
                 className="block w-full text-center text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors underline"
               >
-                No gracias, prefiero perder esta oportunidad única y pagar el precio completo después
+                No gracias, prefiero perder esta oportunidad única y pagar el precio completo
+                después
               </button>
             </div>
 
