@@ -41,13 +41,13 @@ import {
 export const Route = createFileRoute("/oferta-especial")({
   head: () => ({
     meta: [
-      { title: "¡Espera! Oferta Especial Exclusiva | Método Brasileño 28 Días" },
+      { title: "¡Espera! Oferta Especial Exclusiva | BrazilianBooty 28 Días" },
       {
         name: "description",
         content:
-          "No dejes pasar tu transformación. Accede al Desafío Glúteos Brasileños de 28 Días con 90% de descuento especial.",
+          "No dejes pasar tu transformación. Accede a BrazilianBooty 28 Días con 90% de descuento especial.",
       },
-      { property: "og:title", content: "Oferta Especial - Método Brasileño 28 Días" },
+      { property: "og:title", content: "Oferta Especial - BrazilianBooty 28 Días" },
       {
         property: "og:description",
         content:
@@ -159,7 +159,7 @@ export default function OfertaEspecialPage() {
             </span>
             <span className="leading-none">
               <span className="block font-display text-sm font-black uppercase tracking-[-0.03em] text-[color:var(--wine)]">
-                MÉTODO BRASILEÑO
+                BRAZILIANBOOTY
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--coral)]">
                 DESAFÍO 28 DÍAS
@@ -783,14 +783,13 @@ export default function OfertaEspecialPage() {
 
               <div className="flex flex-wrap items-center justify-center gap-4 text-center text-[11px] font-semibold text-[color:var(--ink-muted)]">
                 <span className="flex items-center gap-1">
-                  <Lock size={13} className="text-emerald-600" /> Checkout Seguro Hotmart
+                  <Lock size={13} className="text-emerald-600" /> Checkout Seguro y Cifrado
                 </span>
                 <span className="flex items-center gap-1">
                   <ShieldCheck size={14} className="text-emerald-600" /> Garantía de 7 Días
                 </span>
                 <span className="flex items-center gap-1">
-                  <CreditCard size={13} className="text-[color:var(--wine)]" /> Tarjetas / PayPal /
-                  Efectivo
+                  <CreditCard size={13} className="text-[color:var(--wine)]" /> Tarjetas / Pagos Seguros
                 </span>
               </div>
             </div>
@@ -871,7 +870,7 @@ export default function OfertaEspecialPage() {
             {[
               {
                 q: "¿Cómo recibo el acceso al programa?",
-                a: "El acceso es 100% inmediato. Tras confirmar tu pago seguro de $9.90 USD en Hotmart, recibirás un correo electrónico con tus datos de acceso para ingresar a la plataforma en video y comenzar hoy mismo.",
+                a: "El acceso es 100% inmediato. Tras confirmar tu pago seguro de $9.90 USD, recibirás un correo electrónico con tus datos de acceso para ingresar a la plataforma en video y comenzar hoy mismo.",
               },
               {
                 q: "¿Necesito equipo o pesas para hacer las rutinas?",

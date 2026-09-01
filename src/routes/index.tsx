@@ -76,13 +76,13 @@ export const Route = createFileRoute("/")({
   }),
   head: () => ({
     meta: [
-      { title: "Desafío Glúteos Brasileños | Tu plan de 28 días" },
+      { title: "BrazilianBooty | Tu plan de 28 días" },
       {
         name: "description",
         content:
           "Responde un test breve y descubre una ruta de entrenamiento en casa adaptada a tu tiempo, objetivo y nivel.",
       },
-      { property: "og:title", content: "Tu ruta brasileña de 28 días" },
+      { property: "og:title", content: "BrazilianBooty - Tu ruta de 28 días" },
       {
         property: "og:description",
         content: "Un plan práctico de activación y fuerza para entrenar en casa.",
@@ -578,7 +578,7 @@ function Index() {
     }
   }, [screen, answers]);
 
-  // Backredirect System: Intercepts browser Back button and redirects to high-converting offer page or updates quiz step
+  // Backredirect & Exit-Intent System: Intercepta botão voltar do navegador e tentativa de saída no desktop
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -589,22 +589,26 @@ function Index() {
     }
 
     const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const etapaParam = params.get("etapa");
-      if (!etapaParam || etapaParam === "inicio") {
+      const search = window.location.search || "";
+      window.location.href = `/oferta-especial${search}`;
+    };
+
+    // Exit Intent Desktop: Cursor saindo pelo topo da janela na tela da oferta
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 15 && screen.kind === "final") {
         const search = window.location.search || "";
-        const targetUrl = `/oferta-especial${search}`;
-        window.location.href = targetUrl;
-      } else {
-        setScreen(slugToScreen(etapaParam));
+        window.location.href = `/oferta-especial${search}`;
       }
     };
 
     window.addEventListener("popstate", handlePopState);
+    document.addEventListener("mouseleave", handleMouseLeave);
+
     return () => {
       window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, []);
+  }, [screen.kind]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -731,10 +735,10 @@ function BrandMark() {
       </span>
       <span className="leading-none">
         <span className="block font-display text-sm font-black uppercase tracking-[-0.03em] text-[color:var(--wine)]">
-          Método
+          Brazilian
         </span>
         <span className="block text-[9px] font-black uppercase tracking-[0.19em] text-[color:var(--coral)]">
-          Brasileño 28
+          Booty
         </span>
       </span>
     </div>
@@ -2469,13 +2473,13 @@ function VslQuizOfferCard({ onCtaClick }: Readonly<{ onCtaClick: (location: stri
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-center text-[11px] font-semibold text-[color:var(--ink-muted)]">
             <span className="flex items-center gap-1">
-              <Lock size={13} className="text-emerald-600" /> Checkout Seguro Hotmart
+              <Lock size={13} className="text-emerald-600" /> Checkout Seguro y Cifrado
             </span>
             <span className="flex items-center gap-1">
               <ShieldCheck size={14} className="text-emerald-600" /> Garantía de 7 Días
             </span>
             <span className="flex items-center gap-1">
-              <CreditCard size={13} className="text-[color:var(--wine)]" /> Tarjetas / PayPal
+              <CreditCard size={13} className="text-[color:var(--wine)]" /> Tarjetas / Pagos Seguros
             </span>
           </div>
         </div>
@@ -2742,7 +2746,7 @@ function VslQuizComparisonTable() {
       <div className="text-center mb-6">
         <span className="eyebrow-pill mb-2">POR QUÉ ES SUPERIOR</span>
         <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
-          Método Brasileño vs. Rutinas Tradicionales
+          BrazilianBooty vs. Rutinas Tradicionales
         </h2>
       </div>
 
@@ -2752,7 +2756,7 @@ function VslQuizComparisonTable() {
             <tr className="border-b-2 border-[color:var(--wine)]">
               <th className="pb-3 font-bold text-[color:var(--ink-muted)]">Característica</th>
               <th className="pb-3 font-black text-[color:var(--coral)]">
-                ✨ Método Brasileño 28 Días
+                ✨ BrazilianBooty 28 Días
               </th>
               <th className="pb-3 font-medium text-[color:var(--ink-muted)]">
                 Rutinas de Gym / YouTube
@@ -3072,7 +3076,7 @@ function VslQuizFaq({
   const faqs = [
     {
       q: "¿Cómo y cuándo recibo mi acceso al programa?",
-      a: "El acceso es 100% inmediato. Tras confirmar tu pago seguro de $9.90 USD en Hotmart, recibirás un correo electrónico con tus credenciales de acceso para entrar a la plataforma y comenzar hoy mismo.",
+      a: "El acceso es 100% inmediato. Tras confirmar tu pago seguro de $9.90 USD, recibirás un correo electrónico con tus credenciales de acceso para entrar a la plataforma y comenzar hoy mismo.",
     },
     {
       q: "¿Necesito equipo o pesas para hacer las rutinas?",
@@ -3092,11 +3096,11 @@ function VslQuizFaq({
     },
     {
       q: "¿Qué métodos de pago aceptan?",
-      a: "Aceptamos todas las tarjetas de crédito, débito, PayPal y métodos locales disponibles en tu país a través de la pasarela cifrada de Hotmart.",
+      a: "Aceptamos todas las tarjetas de crédito, débito y los métodos de pago más seguros disponibles en tu país a través de nuestra pasarela cifrada de alta seguridad.",
     },
     {
       q: "¿Cómo funciona la garantía de devolución de 7 días?",
-      a: "Si dentro de los primeros 7 días sientes que el programa no cumple con tus expectativas, solicitas el reembolso directamente en la plataforma con un solo clic y se te devuelve el 100% de tu dinero.",
+      a: "Si dentro de los primeros 7 días sientes que el programa no cumple con tus expectativas, solicitas el reembolso directamente con un solo clic y se te devuelve el 100% de tu dinero.",
     },
   ];
 

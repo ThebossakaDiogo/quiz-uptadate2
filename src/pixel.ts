@@ -1,6 +1,6 @@
-export const META_PIXEL_ID = "2472461739900461";
-export const BASE_CHECKOUT_URL = "https://pay.hotmart.com/N107368916I?off=m7n77trl";
-export const BASE_BACKREDIRECT_URL = "https://pay.hotmart.com/N107368916I?off=tabofigi";
+export const META_PIXEL_ID = "4439066176411333";
+export const BASE_CHECKOUT_URL = "https://go.centerpag.com/PPU38CQFQBB";
+export const BASE_BACKREDIRECT_URL = "https://go.centerpag.com/PPU38CQFQBB";
 
 type MetaPixelFn = {
   (...args: unknown[]): void;
@@ -43,12 +43,12 @@ export function initMetaPixel() {
       if (n.callMethod) {
         n.callMethod(...args);
       } else {
-        if (!n.queue) n.queue = [];
+        n.queue ??= [];
         n.queue.push(args);
       }
     };
 
-    if (!window._fbq) window._fbq = n;
+    window._fbq ??= n;
     n.push = n;
     n.loaded = true;
     n.version = "2.0";
@@ -109,7 +109,7 @@ export function trackQuizStart() {
   fbq("trackCustom", "QuizStart", {
     step: 1,
     total_steps: 13,
-    quiz_name: "Desafío Glúteos Brasileños 28 días",
+    quiz_name: "BrazilianBooty - Desafío 28 Días",
   });
 }
 
@@ -201,7 +201,7 @@ export function trackQuizComplete(profileSummary: Record<string, unknown> = {}) 
   });
 
   fbq("track", "Lead", {
-    content_name: "Quiz 28 Días Completado",
+    content_name: "BrazilianBooty - Quiz Completado",
     content_category: "Quiz Lead",
     value: 9.9,
     currency: "USD",
@@ -219,9 +219,9 @@ export function trackInitiateCheckout(
   extra: Record<string, unknown> = {},
 ) {
   fbq("track", "InitiateCheckout", {
-    content_name: "Desafío Glúteos Brasileños 28 Días",
+    content_name: "BrazilianBooty - Desafío 28 Días",
     content_category: "Programa Digital",
-    content_ids: ["BUMBUM28"],
+    content_ids: ["BRAZILIANBOOTY28"],
     content_type: "product",
     value: productValue,
     currency: "USD",
@@ -233,7 +233,7 @@ export function trackInitiateCheckout(
 }
 
 /**
- * Reads URL search params and appends UTMs + tracking tokens directly to Hotmart Checkout URL.
+ * Reads URL search params and appends UTMs + tracking tokens directly to Checkout URL.
  */
 export function getDecoratedCheckoutUrl(baseUrl = BASE_CHECKOUT_URL): string {
   if (!baseUrl) return "#";
@@ -243,43 +243,24 @@ export function getDecoratedCheckoutUrl(baseUrl = BASE_CHECKOUT_URL): string {
     const url = new URL(baseUrl, window.location.origin);
     const currentParams = new URLSearchParams(window.location.search);
 
-    const paramsToPass = [
-      "utm_source",
-      "utm_medium",
-      "utm_campaign",
-      "utm_content",
-      "utm_term",
-      "fbclid",
-      "gclid",
-      "src",
-      "sck",
-    ];
-
-    let hasCustomSrc = false;
-    paramsToPass.forEach((param) => {
-      const val = currentParams.get(param);
-      if (val) {
-        url.searchParams.set(param, val);
-        if (param === "src" || param === "sck") hasCustomSrc = true;
+    // Pass all query parameters forward (UTMs, fbclid, gclid, ttclid, etc.)
+    currentParams.forEach((value, key) => {
+      if (value) {
+        url.searchParams.set(key, value);
       }
     });
 
-    // If query string explicitly has custom off parameter, allow override
-    if (currentParams.has("off")) {
-      const offVal = currentParams.get("off");
-      if (offVal) url.searchParams.set("off", offVal);
-    }
-
-    if (!hasCustomSrc) {
+    // Provide default src/sck for sales tracking if not already set
+    if (!url.searchParams.has("src") && !url.searchParams.has("sck")) {
       const utmSource = currentParams.get("utm_source") || "meta_ads";
-      const utmCampaign = currentParams.get("utm_campaign") || "quiz_bumbum28";
+      const utmCampaign = currentParams.get("utm_campaign") || "quiz_brazilianbooty";
       url.searchParams.set("src", `${utmSource}_${utmCampaign}`);
       url.searchParams.set("sck", `${utmSource}_${utmCampaign}`);
     }
 
     return url.toString();
   } catch (err) {
-    console.warn("[Meta Pixel] Error building checkout URL:", err);
+    console.warn("[Tracking] Error building checkout URL:", err);
     return baseUrl;
   }
 }
@@ -343,7 +324,7 @@ export function trackVslCtaClick(location = "vsl_primary_cta") {
   trackInitiateCheckout(location, 9.9, "BUMBUM90");
   fbq("trackCustom", "VslCtaClick", {
     click_location: location,
-    product: "Desafío Glúteos Brasileños 28 Días",
+    product: "BrazilianBooty - Desafío 28 Días",
     value: 9.9,
     currency: "USD",
   });
@@ -353,8 +334,8 @@ export function trackVslCtaClick(location = "vsl_primary_cta") {
  * Track Backredirect page view
  */
 export function trackBackredirectView() {
-  trackPageView("Backredirect - Oferta Especial 28 Días");
-  trackViewContent("Backredirect Especial", {
+  trackPageView("Backredirect - BrazilianBooty 28 Días");
+  trackViewContent("Backredirect BrazilianBooty", {
     page_type: "backredirect",
     value: 9.9,
     currency: "USD",
@@ -371,7 +352,7 @@ export function trackBackredirectCtaClick(location = "backredirect_primary_cta")
   trackInitiateCheckout(location, 9.9, "BUMBUM90", { page: "backredirect" });
   fbq("trackCustom", "BackredirectCtaClick", {
     click_location: location,
-    product: "Desafío Glúteos Brasileños 28 Días",
+    product: "BrazilianBooty - Desafío 28 Días",
     value: 9.9,
     currency: "USD",
   });
@@ -382,7 +363,7 @@ export function trackBackredirectCtaClick(location = "backredirect_primary_cta")
  */
 export function trackDownsellModalView() {
   fbq("trackCustom", "DownsellModalView", {
-    offer: "Plan 28 Días Downsell",
+    offer: "BrazilianBooty Plan 28 Días Downsell",
     price: 5.9,
     currency: "USD",
     timestamp: new Date().toISOString(),
@@ -397,7 +378,7 @@ export function trackDownsellCtaClick(location = "downsell_modal_cta") {
 
   fbq("trackCustom", "DownsellCtaClick", {
     click_location: location,
-    product: "Desafío Glúteos Brasileños 28 Días Downsell",
+    product: "BrazilianBooty - Desafío 28 Días Downsell",
     value: 5.9,
     currency: "USD",
   });
