@@ -1854,6 +1854,355 @@
   animation: slide-in-from-bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Biometrics & Diagnostic Styles */
+.biometric-card {
+  border: 2px solid var(--wine);
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  box-shadow: 4px 4px 0 var(--wine);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.biometric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 var(--wine);
+}
+
+.biometric-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: oklch(0.92 0.05 105);
+  outline: none;
+  border: 1.5px solid var(--wine);
+}
+
+.biometric-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 2.5px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), 0 0 0 2px var(--wine);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.biometric-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: var(--coral-dark);
+}
+
+.biometric-slider::-moz-range-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 2.5px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), 0 0 0 2px var(--wine);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.diagnostic-chart-card {
+  border: 3px solid var(--wine);
+  background: white;
+  border-radius: 1.75rem;
+  padding: 1.25rem;
+  box-shadow: 6px 6px 0 var(--wine);
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .diagnostic-chart-card {
+    padding: 1.5rem;
+  }
+}
+
+.vsl-pitch-box {
+  animation: scale-up 0.5s cubic-bezier(0.16, 1, 0.3, 1), pulse-glow 2.5s infinite;
+}
+
+/* ==========================================================================
+   Scratch Coupon Premium Interactive Styles
+   ========================================================================== */
+.coupon-panel {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.coupon-gift {
+  position: relative;
+  display: inline-flex;
+  height: 4.25rem;
+  width: 4.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, var(--coral), #ff4d6d);
+  color: white;
+  box-shadow: 0 12px 30px -10px oklch(0.68 0.29 350 / 0.6), 4px 4px 0 var(--wine);
+  border: 2.5px solid var(--wine);
+  animation: float-gentle 4s ease-in-out infinite alternate;
+}
+
+.scratch-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9.5;
+  min-height: 220px;
+  border-radius: 1.75rem;
+  overflow: hidden;
+  border: 3.5px solid var(--wine);
+  background: white;
+  box-shadow: 8px 8px 0 var(--wine), 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.scratch-wrap.is-revealed {
+  box-shadow: 8px 8px 0 var(--coral), 0 0 35px oklch(0.68 0.29 350 / 0.3);
+  border-color: var(--wine);
+  animation: pop-reveal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.coupon-reveal {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 30%, #fff 0%, #fff1f2 60%, #ffe4e6 100%);
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.coupon-ticket-icon {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--coral);
+  color: white;
+  box-shadow: 0 4px 15px oklch(0.68 0.29 350 / 0.4);
+}
+
+.scratch-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+  transition: opacity 0.45s ease;
+}
+
+.scratch-canvas:active {
+  cursor: grabbing;
+}
+
+.scratch-wrap.is-revealed .scratch-canvas {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scratch-hint-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.08);
+  transition: opacity 0.3s ease;
+}
+
+.scratch-hint-pulse {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  animation: pulse 1.8s infinite;
+}
+
+.coupon-progress-bar {
+  width: 100%;
+  height: 0.5rem;
+  background: oklch(0.24 0.085 27 / 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+
+.coupon-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--coral), var(--lime));
+  border-radius: 999px;
+  transition: width 0.2s ease-out;
+}
+
+.coupon-fallback {
+  background: none;
+  border: none;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.15s ease;
+}
+
+.coupon-fallback:hover {
+  color: var(--wine);
+}
+
+.coupon-success {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #ecfdf5;
+  border: 2px solid #10b981;
+  color: #065f46;
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  animation: slide-in-from-bottom 0.3s ease;
+}
+
+.coupon-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  overflow: hidden;
+}
+
+.coupon-confetti i {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 14px;
+  background: var(--coral);
+  border-radius: 2px;
+  opacity: 0.9;
+  animation: confetti-fall 2.5s ease-in-out infinite;
+}
+
+.coupon-confetti i:nth-child(2n) {
+  background: var(--lime);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.coupon-confetti i:nth-child(3n) {
+  background: var(--shock-yellow);
+  width: 7px;
+  height: 12px;
+}
+
+.coupon-confetti i:nth-child(4n) {
+  background: #a855f7;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(280px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes pop-reveal {
+  0% {
+    transform: scale(0.95);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(0.68 0.29 350 / 0.4), 8px 8px 0 var(--wine);
+  }
+  50% {
+    box-shadow: 0 0 25px 4px oklch(0.68 0.29 350 / 0.6), 8px 8px 0 var(--wine);
+  }
+}
+
+/* ==========================================================================
+   Mobile & Responsive Enhancements (iPhone SE to Large Tablets)
+   ========================================================================== */
+@media (max-width: 480px) {
+  .hero-frame {
+    height: min(130vw, 32rem);
+  }
+
+  .cta-button {
+    min-height: 3.4rem;
+    font-size: 0.78rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .option-card {
+    padding: 0.75rem;
+    gap: 0.65rem;
+  }
+
+  .biometric-card {
+    padding: 1rem;
+  }
+
+  .diagnostic-chart-card {
+    padding: 1rem;
+    border-radius: 1.25rem;
+  }
+
+  .vsl-hero-wrapper {
+    max-width: 100%;
+  }
+
+  .scratch-wrap {
+    min-height: 190px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1864,3 +2213,4 @@
     transition-duration: 0.01ms !important;
   }
 }
+

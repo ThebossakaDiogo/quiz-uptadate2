@@ -1,6 +1,6 @@
-export const META_PIXEL_ID = "4439066176411333";
-export const BASE_CHECKOUT_URL = "https://go.centerpag.com/PPU38CQFQBB";
-export const BASE_BACKREDIRECT_URL = "https://go.centerpag.com/PPU38CQFQBB";
+export const META_PIXEL_ID = "1749248649530991";
+export const BASE_CHECKOUT_URL = "https://go.centerpag.com/PPU38CQFHQ9";
+export const BASE_BACKREDIRECT_URL = "https://go.centerpag.com/PPU38CQFPHQ";
 
 type MetaPixelFn = {
   (...args: unknown[]): void;
@@ -406,10 +406,54 @@ export function trackFaqToggle(faqQuestion: string, isOpen: boolean, screenConte
 }
 
 /**
- * Track UI sound toggle
+ * Track Biometrics selection (Weight, Height, IMC)
  */
-export function trackSoundToggle(enabled: boolean) {
-  fbq("trackCustom", "SoundToggleClick", {
-    sound_enabled: enabled,
+export function trackBiometrics(weight: number, height: number, imc: number) {
+  fbq("trackCustom", "QuizBiometricsSaved", {
+    weight_kg: weight,
+    height_cm: height,
+    calculated_imc: imc,
+  });
+}
+
+/**
+ * Track Diagnostic screen view with calculations
+ */
+export function trackDiagnosticView(details: Record<string, unknown> = {}) {
+  fbq("trackCustom", "QuizDiagnosticView", {
+    ...details,
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * Track Dedicated VSL page view
+ */
+export function trackVslPageView() {
+  trackPageView("VSL Presentación - BrazilianBooty 28 Días");
+  trackViewContent("Quiz VSL Dedicated Page", {
+    page_type: "vsl_presentation",
+  });
+}
+
+/**
+ * Track Full Plan offer page view
+ */
+export function trackPlanPageView(details: Record<string, unknown> = {}) {
+  trackPageView("Plano 28 Días - BrazilianBooty");
+  trackViewContent("Quiz Plan Offer Screen", {
+    page_type: "full_offer_plan",
+    price: 9.9,
+    currency: "USD",
+    ...details,
+  });
+}
+
+/**
+ * Track Sound toggle interaction in quiz UI
+ */
+export function trackSoundToggle(soundEnabled: boolean) {
+  fbq("trackCustom", "QuizSoundToggle", {
+    sound_enabled: soundEnabled,
   });
 }

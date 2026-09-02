@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  BarChart3,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -21,12 +22,17 @@ import {
   Clock3,
   CreditCard,
   Dumbbell,
+  Flame,
   Gift,
   Heart,
   Lock,
   LockKeyhole,
+  Minus,
   Pause,
   Play,
+  Plus,
+  Ruler,
+  Scale,
   ShieldCheck,
   Sparkles,
   Star,
@@ -49,11 +55,14 @@ import age4 from "@/assets/age-4.jpg";
 import {
   BASE_CHECKOUT_URL,
   getDecoratedCheckoutUrl,
+  trackBiometrics,
   trackCouponContinueClick,
   trackCouponScratchStart,
   trackCouponUnlocked,
+  trackDiagnosticView,
   trackFaqToggle,
   trackLandingStartClick,
+  trackPlanPageView,
   trackQuizAnswer,
   trackQuizComplete,
   trackQuizNavigationBack,
@@ -62,9 +71,9 @@ import {
   trackViewContent,
   trackVslCtaClick,
   trackVslMilestone,
+  trackVslPageView,
   trackVslPitchReached,
   trackVslPlay,
-  trackVslSpeedChange,
   trackVslUnmute,
 } from "../pixel";
 
@@ -111,14 +120,22 @@ type Question = {
   grid?: boolean;
 };
 
+export type Biometrics = {
+  weight: number; // kg
+  height: number; // cm
+};
+
 type Screen =
   | { kind: "landing" }
   | { kind: "coach" }
   | Question
+  | { kind: "biometrics" }
   | { kind: "info" }
   | { kind: "result" }
   | { kind: "analyzing" }
+  | { kind: "diagnostic" }
   | { kind: "coupon" }
+  | { kind: "vsl" }
   | { kind: "final" };
 
 const TOTAL = 13;
@@ -423,6 +440,7 @@ function SoundControl() {
 
 const STORAGE_ANSWERS_KEY = "mb28_quiz_answers";
 const STORAGE_SCREEN_KEY = "mb28_quiz_screen";
+const STORAGE_BIOMETRICS_KEY = "mb28_quiz_biometrics";
 
 function screenToSlug(screen: Screen): string {
   switch (screen.kind) {
@@ -432,16 +450,22 @@ function screenToSlug(screen: Screen): string {
       return "apresentacao";
     case "question":
       return `pergunta-${screen.n}`;
+    case "biometrics":
+      return "medidas";
     case "info":
       return "ativacao";
     case "result":
       return "resultado-parcial";
     case "analyzing":
       return "analisando";
+    case "diagnostic":
+      return "diagnostico";
     case "coupon":
       return "cupon";
+    case "vsl":
+      return "vsl";
     case "final":
-      return "oferta";
+      return "plano";
     default:
       return "inicio";
   }
@@ -451,17 +475,25 @@ function slugToScreen(slug: string | null | undefined): Screen {
   if (!slug || slug === "inicio" || slug === "landing") return { kind: "landing" };
   if (slug === "apresentacao" || slug === "coach" || slug === "bienvenida")
     return { kind: "coach" };
+  if (slug === "medidas" || slug === "peso-altura" || slug === "biometria")
+    return { kind: "biometrics" };
   if (slug === "ativacao" || slug === "info" || slug === "ciencia" || slug === "activacion")
     return { kind: "info" };
   if (
     slug === "resultado-parcial" ||
     slug === "result" ||
-    slug === "diagnostico" ||
     slug === "progreso"
   )
     return { kind: "result" };
   if (slug === "analisando" || slug === "analyzing" || slug === "analisis")
     return { kind: "analyzing" };
+  if (
+    slug === "diagnostico" ||
+    slug === "diagnostico-completo" ||
+    slug === "graficos" ||
+    slug === "relatorio"
+  )
+    return { kind: "diagnostic" };
   if (
     slug === "cupon" ||
     slug === "cupom" ||
@@ -472,9 +504,11 @@ function slugToScreen(slug: string | null | undefined): Screen {
   ) {
     return { kind: "coupon" };
   }
+  if (slug === "vsl" || slug === "video" || slug === "presentacion") {
+    return { kind: "vsl" };
+  }
   if (
     slug === "oferta" ||
-    slug === "vsl" ||
     slug === "final" ||
     slug === "resultado" ||
     slug === "plano" ||
@@ -499,14 +533,26 @@ function getFallbackPreviousScreen(screen: Screen): Screen | null {
     case "coach":
       return { kind: "landing" };
     case "question":
-      return screen.n > 1 ? questions[screen.n - 2] : { kind: "coach" };
+      if (screen.n === 1) return { kind: "coach" };
+      if (screen.n === 9) return { kind: "result" };
+      if (screen.n === 10) return { kind: "biometrics" };
+      return questions[screen.n - 2];
+    case "biometrics":
+      return questions[8]; // Pergunta 9 (Idade)
     case "info":
-      return questions[7];
+      return questions[7]; // Pergunta 8
     case "result":
       return { kind: "info" };
     case "analyzing":
+      return questions[12]; // Pergunta 13
+    case "diagnostic":
+      return questions[12]; // Pergunta 13
     case "coupon":
-      return questions[12];
+      return { kind: "diagnostic" };
+    case "vsl":
+      return { kind: "coupon" };
+    case "final":
+      return { kind: "vsl" };
     default:
       return null;
   }
@@ -548,9 +594,24 @@ function Index() {
     return {};
   });
 
+  const [biometrics, setBiometrics] = useState<Biometrics>(() => {
+    if (typeof window === "undefined") return { weight: 62, height: 165 };
+    try {
+      const saved =
+        window.sessionStorage.getItem(STORAGE_BIOMETRICS_KEY) ||
+        window.localStorage.getItem(STORAGE_BIOMETRICS_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {
+      // fallback
+    }
+    return { weight: 62, height: 165 };
+  });
+
   const [transitioning, setTransitioning] = useState(false);
 
-  // Sincroniza URL com o slug da etapa atual e salva respostas para persistir no F5
+  // Sincroniza URL com o slug da etapa atual e salva respostas e biometria
   useEffect(() => {
     if (typeof window === "undefined") return;
     const currentSlug = screenToSlug(screen);
@@ -558,6 +619,8 @@ function Index() {
       window.sessionStorage.setItem(STORAGE_SCREEN_KEY, currentSlug);
       window.sessionStorage.setItem(STORAGE_ANSWERS_KEY, JSON.stringify(answers));
       window.localStorage.setItem(STORAGE_ANSWERS_KEY, JSON.stringify(answers));
+      window.sessionStorage.setItem(STORAGE_BIOMETRICS_KEY, JSON.stringify(biometrics));
+      window.localStorage.setItem(STORAGE_BIOMETRICS_KEY, JSON.stringify(biometrics));
 
       const url = new URL(window.location.href);
       if (currentSlug === "inicio") {
@@ -576,7 +639,7 @@ function Index() {
     } catch {
       // Ignore in restricted environments
     }
-  }, [screen, answers]);
+  }, [screen, answers, biometrics]);
 
   // Backredirect & Exit-Intent System: Intercepta botão voltar do navegador e tentativa de saída no desktop
   useEffect(() => {
@@ -593,9 +656,9 @@ function Index() {
       window.location.href = `/oferta-especial${search}`;
     };
 
-    // Exit Intent Desktop: Cursor saindo pelo topo da janela na tela da oferta
+    // Exit Intent Desktop: Cursor saindo pelo topo da janela na tela da oferta ou VSL
     const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 15 && screen.kind === "final") {
+      if (e.clientY <= 15 && (screen.kind === "final" || screen.kind === "vsl")) {
         const search = window.location.search || "";
         window.location.href = `/oferta-especial${search}`;
       }
@@ -615,6 +678,8 @@ function Index() {
 
     if (screen.kind === "question") {
       trackQuizProgress(screen.n, screen.title);
+    } else if (screen.kind === "vsl") {
+      trackVslPageView();
     } else if (screen.kind === "final") {
       const goal = profileData.goals[answers[11] ?? 0];
       const obstacle = profileData.obstacles[answers[12] ?? 0];
@@ -626,11 +691,26 @@ function Index() {
         user_obstacle: obstacle,
         user_age: age,
         user_time: time,
+        user_weight: biometrics.weight,
+        user_height: biometrics.height,
+      });
+      trackPlanPageView({
+        goal,
+        obstacle,
+        age,
+        time,
+      });
+    } else if (screen.kind === "diagnostic") {
+      const imc = Number((biometrics.weight / Math.pow(biometrics.height / 100, 2)).toFixed(1));
+      trackDiagnosticView({
+        imc,
+        weight: biometrics.weight,
+        height: biometrics.height,
       });
     } else {
       trackViewContent(screen.kind);
     }
-  }, [screen, answers]);
+  }, [screen, answers, biometrics]);
 
   const go = (next: Screen) => {
     setHistory((items) => [...items, screen]);
@@ -682,12 +762,18 @@ function Index() {
     window.setTimeout(() => {
       setTransitioning(false);
       if (question.n === 8) go({ kind: "info" });
+      else if (question.n === 9) go({ kind: "biometrics" });
       else if (question.n === 13) go({ kind: "analyzing" });
       else go(questions[question.n]);
     }, 520);
   };
 
-  const isWide = screen.kind === "landing" || screen.kind === "coach" || screen.kind === "final";
+  const isWide =
+    screen.kind === "landing" ||
+    screen.kind === "coach" ||
+    screen.kind === "diagnostic" ||
+    screen.kind === "vsl" ||
+    screen.kind === "final";
 
   return (
     <main className="quiz-canvas min-h-screen overflow-hidden text-foreground selection:bg-[color:var(--coral)] selection:text-white">
@@ -709,6 +795,20 @@ function Index() {
             onSelect={(index) => selectAnswer(screen, index)}
           />
         )}
+        {screen.kind === "biometrics" && (
+          <BiometricsScreen
+            initialWeight={biometrics.weight}
+            initialHeight={biometrics.height}
+            onBack={back}
+            onSave={(weight, height) => {
+              setBiometrics({ weight, height });
+              const imc = Number((weight / Math.pow(height / 100, 2)).toFixed(1));
+              trackBiometrics(weight, height, imc);
+              playUiSound("select");
+              go(questions[9]); // Pergunta 10 (Compromisso)
+            }}
+          />
+        )}
         {screen.kind === "info" && (
           <InfoScreen onBack={back} onNext={() => go({ kind: "result" })} />
         )}
@@ -716,12 +816,34 @@ function Index() {
           <ResultScreen answers={answers} onNext={() => go(questions[8])} />
         )}
         {screen.kind === "analyzing" && (
-          <AnalyzingScreen answers={answers} onDone={() => go({ kind: "coupon" })} />
+          <AnalyzingScreen
+            answers={answers}
+            biometrics={biometrics}
+            onDone={() => go({ kind: "diagnostic" })}
+          />
+        )}
+        {screen.kind === "diagnostic" && (
+          <DiagnosticDetailedScreen
+            answers={answers}
+            biometrics={biometrics}
+            onBack={back}
+            onNext={() => go({ kind: "coupon" })}
+          />
         )}
         {screen.kind === "coupon" && (
-          <ScratchCouponScreen onBack={back} onContinue={() => go({ kind: "final" })} />
+          <ScratchCouponScreen onBack={back} onContinue={() => go({ kind: "vsl" })} />
         )}
-        {screen.kind === "final" && <FinalScreen answers={answers} />}
+        {screen.kind === "vsl" && (
+          <VslDedicatedScreen
+            answers={answers}
+            biometrics={biometrics}
+            onBack={back}
+            onProceedToOffer={() => go({ kind: "final" })}
+          />
+        )}
+        {screen.kind === "final" && (
+          <FinalScreen answers={answers} biometrics={biometrics} />
+        )}
       </div>
     </main>
   );
@@ -1425,19 +1547,227 @@ function ResultMetric({
   );
 }
 
+function BiometricsScreen({
+  initialWeight = 62,
+  initialHeight = 165,
+  onBack,
+  onSave,
+}: Readonly<{
+  initialWeight?: number;
+  initialHeight?: number;
+  onBack: () => void;
+  onSave: (weight: number, height: number) => void;
+}>) {
+  const [height, setHeight] = useState(initialHeight);
+  const [weight, setWeight] = useState(initialWeight);
+
+  const heightInMeters = height / 100;
+  const imc = Number((weight / (heightInMeters * heightInMeters)).toFixed(1));
+  const estimatedBmr = Math.round(10 * weight + 6.25 * height - 5 * 30 - 161);
+
+  let imcCategory = "Composición Óptima";
+  let imcBadgeColor = "bg-emerald-500 text-white";
+  let imcAdvice =
+    "Tu estructura responde rápidamente a estímulos de activación neuromuscular directa sin sobrecargar articulaciones.";
+
+  if (imc < 18.5) {
+    imcCategory = "Biotipo Delgado";
+    imcBadgeColor = "bg-amber-500 text-white";
+    imcAdvice =
+      "El método potenciará el volumen y la curva glútea sin exigir dietas hipercalóricas ni desgaste excesivo.";
+  } else if (imc >= 25 && imc < 30) {
+    imcCategory = "Curvas & Densidad";
+    imcBadgeColor = "bg-orange-500 text-white";
+    imcAdvice =
+      "Excelente base muscular. El aislamiento neuromuscular reducirá flacidez y elevará el pliegue glúteo en 28 días.";
+  } else if (imc >= 30) {
+    imcCategory = "Protección Articular Prioritaria";
+    imcBadgeColor = "bg-rose-500 text-white";
+    imcAdvice =
+      "Los ejercicios en el suelo eliminan la compresión axial en rodillas y columna, garantizando un progreso 100% seguro.";
+  }
+
+  const handleAdjustHeight = (delta: number) => {
+    setHeight((prev) => Math.max(130, Math.min(215, prev + delta)));
+  };
+
+  const handleAdjustWeight = (delta: number) => {
+    setWeight((prev) => Math.max(35, Math.min(150, prev + delta)));
+  };
+
+  return (
+    <section className="screen-enter text-left space-y-6">
+      <div className="flex items-center justify-between">
+        <button type="button" onClick={onBack} className="back-button" aria-label="Volver">
+          <ArrowLeft size={18} />
+        </button>
+        <span className="rounded-full bg-[color:var(--wine)] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white">
+          Paso Biométrico • 10/13
+        </span>
+        <BrandMark />
+      </div>
+
+      <div>
+        <span className="eyebrow-pill mb-2 inline-flex items-center gap-1.5">
+          <Scale size={13} className="text-[color:var(--coral)]" /> CALIBRACIÓN BIOMECÁNICA
+        </span>
+        <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-black text-[color:var(--wine)]">
+          ¿Cuáles son tu estatura y peso actuales?
+        </h1>
+        <p className="mt-2 text-xs sm:text-sm font-medium text-[color:var(--ink-muted)] leading-relaxed">
+          Esto nos permite calcular tu palanca articular y calibrar la activación de las 3 porciones
+          glúteas para proteger rodillas y espalda baja.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* Selector Estatura */}
+        <div className="biometric-card space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-xs font-black uppercase text-[color:var(--wine)]">
+              <Ruler size={16} className="text-[color:var(--coral)]" /> Estatura
+            </span>
+            <div className="flex items-baseline gap-1 font-display">
+              <span className="text-3xl font-black text-[color:var(--wine)]">{height}</span>
+              <span className="text-xs font-bold text-[color:var(--ink-muted)]">cm</span>
+            </div>
+          </div>
+
+          <input
+            type="range"
+            min={130}
+            max={210}
+            value={height}
+            onChange={(e) => setHeight(Number(e.target.value))}
+            className="biometric-slider"
+            aria-label="Seleccionar estatura en centímetros"
+          />
+
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              onClick={() => handleAdjustHeight(-1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[color:var(--wine)] bg-white text-[color:var(--wine)] hover:bg-[color:var(--cream)] active:scale-95 transition-transform"
+            >
+              <Minus size={15} strokeWidth={3} />
+            </button>
+            <span className="text-[11px] font-semibold text-[color:var(--ink-muted)]">
+              Ajuste fino
+            </span>
+            <button
+              type="button"
+              onClick={() => handleAdjustHeight(1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[color:var(--wine)] bg-white text-[color:var(--wine)] hover:bg-[color:var(--cream)] active:scale-95 transition-transform"
+            >
+              <Plus size={15} strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+
+        {/* Selector Peso */}
+        <div className="biometric-card space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-xs font-black uppercase text-[color:var(--wine)]">
+              <Scale size={16} className="text-[color:var(--coral)]" /> Peso Actual
+            </span>
+            <div className="flex items-baseline gap-1 font-display">
+              <span className="text-3xl font-black text-[color:var(--wine)]">{weight}</span>
+              <span className="text-xs font-bold text-[color:var(--ink-muted)]">kg</span>
+            </div>
+          </div>
+
+          <input
+            type="range"
+            min={35}
+            max={140}
+            value={weight}
+            onChange={(e) => setWeight(Number(e.target.value))}
+            className="biometric-slider"
+            aria-label="Seleccionar peso en kilogramos"
+          />
+
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              onClick={() => handleAdjustWeight(-1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[color:var(--wine)] bg-white text-[color:var(--wine)] hover:bg-[color:var(--cream)] active:scale-95 transition-transform"
+            >
+              <Minus size={15} strokeWidth={3} />
+            </button>
+            <span className="text-[11px] font-semibold text-[color:var(--ink-muted)]">
+              Ajuste fino
+            </span>
+            <button
+              type="button"
+              onClick={() => handleAdjustWeight(1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[color:var(--wine)] bg-white text-[color:var(--wine)] hover:bg-[color:var(--cream)] active:scale-95 transition-transform"
+            >
+              <Plus size={15} strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Calculated IMC & Insight */}
+      <div className="rounded-2xl border-2 border-[color:var(--wine)] bg-[color:var(--cream)] p-4 sm:p-5 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[color:var(--wine)] text-white text-xs font-black">
+              IMC
+            </span>
+            <div>
+              <span className="text-xs font-black text-[color:var(--wine)]">
+                Índice de Masa: {imc} kg/m²
+              </span>
+            </div>
+          </div>
+          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${imcBadgeColor}`}>
+            {imcCategory}
+          </span>
+        </div>
+
+        <p className="text-xs font-medium text-[color:var(--ink-muted)] leading-relaxed">
+          {imcAdvice}
+        </p>
+
+        <div className="pt-2 border-t border-black/10 flex items-center justify-between text-[11px] font-bold text-[color:var(--wine)]">
+          <span className="flex items-center gap-1">
+            <ShieldCheck size={14} className="text-emerald-600" /> Cero impacto en columna
+          </span>
+          <span className="text-[color:var(--coral)]">Gasto Basal: ~{estimatedBmr} kcal/día</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onSave(weight, height)}
+        className="cta-button w-full py-4 text-base font-black tracking-wider text-white shadow-xl hover:scale-[1.01]"
+      >
+        <span className="button-sheen" />
+        <span className="flex items-center justify-center gap-2">
+          Guardar medidas y continuar
+          <ArrowRight size={20} />
+        </span>
+      </button>
+    </section>
+  );
+}
+
 function AnalyzingScreen({
   answers,
+  biometrics,
   onDone,
 }: Readonly<{
   answers: Record<number, number>;
+  biometrics?: Biometrics;
   onDone: () => void;
 }>) {
   const goal = ["elevación", "curvas", "definición", "confianza"][answers[11] ?? 0];
   const steps = [
-    `Priorizando ${goal} en tu ruta`,
-    "Ajustando duración y frecuencia",
-    "Preparando progresiones semanales",
-    "Añadiendo estrategia de constancia",
+    `Cruzando IMC (${biometrics ? (biometrics.weight / Math.pow(biometrics.height / 100, 2)).toFixed(1) : "22.5"}) con tu objetivo de ${goal}`,
+    "Ajustando palancas biomecánicas para proteger rodillas",
+    "Calculando curva de activación muscular progresiva",
+    "Generando informe gráfico personalizado de 28 días",
   ];
   const [completed, setCompleted] = useState(0);
 
@@ -1446,7 +1776,7 @@ function AnalyzingScreen({
       const timer = window.setTimeout(onDone, 700);
       return () => window.clearTimeout(timer);
     }
-    const timer = window.setTimeout(() => setCompleted((value) => value + 1), 780);
+    const timer = window.setTimeout(() => setCompleted((value) => value + 1), 750);
     return () => window.clearTimeout(timer);
   }, [completed, onDone, steps.length]);
 
@@ -1457,13 +1787,13 @@ function AnalyzingScreen({
         <Sparkles size={28} />
       </div>
       <p className="mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--coral)]">
-        Análisis en curso
+        Análisis Biomecánico en curso
       </p>
       <h2 className="mt-2 font-display text-3xl font-black leading-none tracking-[-0.045em] text-[color:var(--wine)]">
-        Construyendo tu ruta de 28 días
+        Construyendo tu diagnóstico de 28 días
       </h2>
       <p className="mt-3 text-sm text-[color:var(--ink-muted)]">
-        Cruzando tus respuestas para organizar una recomendación práctica.
+        Procesando tus medidas ({biometrics?.weight ?? 62} kg / {biometrics?.height ?? 165} cm) y tu perfil.
       </p>
 
       <div className="mt-7 space-y-3 text-left">
@@ -1500,6 +1830,269 @@ function AnalyzingScreen({
   );
 }
 
+function DiagnosticDetailedScreen({
+  answers,
+  biometrics,
+  onBack,
+  onNext,
+}: Readonly<{
+  answers: Record<number, number>;
+  biometrics: Biometrics;
+  onBack: () => void;
+  onNext: () => void;
+}>) {
+  const goal = profileData.goals[answers[11] ?? 0];
+  const obstacle = profileData.obstacles[answers[12] ?? 0];
+  const age = profileData.ages[answers[9] ?? 1];
+  const time = profileData.times[answers[6] ?? 0];
+
+  const heightInM = biometrics.height / 100;
+  const imc = Number((biometrics.weight / (heightInM * heightInM)).toFixed(1));
+  const bmr = Math.round(10 * biometrics.weight + 6.25 * biometrics.height - 5 * 30 - 161);
+
+  return (
+    <section className="screen-enter text-left space-y-8 pb-10">
+      <div className="flex items-center justify-between">
+        <button type="button" onClick={onBack} className="back-button" aria-label="Volver">
+          <ArrowLeft size={18} />
+        </button>
+        <span className="rounded-full bg-emerald-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-sm flex items-center gap-1">
+          <BadgeCheck size={13} /> Diagnóstico Biomecánico Oficial
+        </span>
+        <BrandMark />
+      </div>
+
+      {/* Header */}
+      <div className="text-center sm:text-left">
+        <span className="eyebrow-pill mb-2 inline-flex items-center gap-1.5">
+          <BarChart3 size={13} className="text-[color:var(--coral)]" /> ANÁLISIS & PROYECCIÓN EN 28 DÍAS
+        </span>
+        <h1 className="font-display text-2xl sm:text-3xl md:text-5xl font-black text-[color:var(--wine)]">
+          Tu Diagnóstico de Compatibilidad Está Listo
+        </h1>
+        <p className="mt-3 text-xs sm:text-sm font-medium text-[color:var(--ink-muted)] leading-relaxed">
+          Hemos calibrado tus datos biométricos (<strong className="text-[color:var(--wine)]">{biometrics.weight} kg</strong>,{" "}
+          <strong className="text-[color:var(--wine)]">{biometrics.height} cm</strong>, {age}) con tu objetivo de{" "}
+          <strong className="text-[color:var(--coral)]">{goal.toLowerCase()}</strong> en sesiones de{" "}
+          <strong className="text-[color:var(--wine)]">{time}</strong>.
+        </p>
+      </div>
+
+      {/* Metrics Row */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="rounded-2xl border-2 border-[color:var(--wine)] bg-white p-3.5 shadow-[3px_3px_0_var(--wine)] text-center">
+          <span className="text-[10px] font-black uppercase text-[color:var(--ink-muted)]">Índice IMC</span>
+          <strong className="mt-1 block font-display text-xl font-black text-[color:var(--wine)]">{imc}</strong>
+          <span className="text-[10px] font-bold text-emerald-700">Calibrado</span>
+        </div>
+        <div className="rounded-2xl border-2 border-[color:var(--wine)] bg-white p-3.5 shadow-[3px_3px_0_var(--wine)] text-center">
+          <span className="text-[10px] font-black uppercase text-[color:var(--ink-muted)]">Aislamiento Glúteo</span>
+          <strong className="mt-1 block font-display text-xl font-black text-[color:var(--coral)]">94.8%</strong>
+          <span className="text-[10px] font-bold text-[color:var(--coral)]">+70% vs gym</span>
+        </div>
+        <div className="rounded-2xl border-2 border-[color:var(--wine)] bg-white p-3.5 shadow-[3px_3px_0_var(--wine)] text-center">
+          <span className="text-[10px] font-black uppercase text-[color:var(--ink-muted)]">Gasto Metabólico</span>
+          <strong className="mt-1 block font-display text-xl font-black text-[color:var(--wine)]">~{bmr}</strong>
+          <span className="text-[10px] font-bold text-[color:var(--ink-muted)]">kcal/día</span>
+        </div>
+        <div className="rounded-2xl border-2 border-[color:var(--wine)] bg-white p-3.5 shadow-[3px_3px_0_var(--wine)] text-center">
+          <span className="text-[10px] font-black uppercase text-[color:var(--ink-muted)]">Éxito Proyectado</span>
+          <strong className="mt-1 block font-display text-xl font-black text-emerald-600">98.6%</strong>
+          <span className="text-[10px] font-bold text-emerald-700">En 28 Días</span>
+        </div>
+      </div>
+
+      {/* GRAPH 1: 28-Day Evolution Comparison (SVG) */}
+      <div className="diagnostic-chart-card space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/10 pb-3">
+          <div>
+            <h3 className="font-display text-base sm:text-lg font-black text-[color:var(--wine)]">
+              📈 Proyección de Firmeza y Elevación (28 Días)
+            </h3>
+            <p className="text-xs text-[color:var(--ink-muted)]">
+              Comparativa real: Método Brasileño vs Ejercicios Tradicionales
+            </p>
+          </div>
+          <span className="rounded-full bg-[color:var(--lime)] px-2.5 py-1 text-[10px] font-black text-[color:var(--wine)]">
+            +4.2 cm de elevación promedio
+          </span>
+        </div>
+
+        {/* SVG Chart */}
+        <div className="w-full overflow-hidden rounded-xl bg-slate-950 p-4 pt-6 text-white shadow-inner">
+          <svg viewBox="0 0 500 220" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+            {/* Grid lines */}
+            <line x1="40" y1="30" x2="480" y2="30" stroke="#334155" strokeDasharray="3 3" strokeWidth="1" />
+            <line x1="40" y1="80" x2="480" y2="80" stroke="#334155" strokeDasharray="3 3" strokeWidth="1" />
+            <line x1="40" y1="130" x2="480" y2="130" stroke="#334155" strokeDasharray="3 3" strokeWidth="1" />
+            <line x1="40" y1="180" x2="480" y2="180" stroke="#475569" strokeWidth="1.5" />
+
+            {/* Y-Axis Labels */}
+            <text x="32" y="34" fill="#94a3b8" fontSize="10" textAnchor="end" fontWeight="bold">100%</text>
+            <text x="32" y="84" fill="#94a3b8" fontSize="10" textAnchor="end" fontWeight="bold">65%</text>
+            <text x="32" y="134" fill="#94a3b8" fontSize="10" textAnchor="end" fontWeight="bold">30%</text>
+            <text x="32" y="184" fill="#94a3b8" fontSize="10" textAnchor="end" fontWeight="bold">0%</text>
+
+            {/* X-Axis Labels */}
+            <text x="50" y="202" fill="#cbd5e1" fontSize="10" textAnchor="middle" fontWeight="bold">Inicio</text>
+            <text x="155" y="202" fill="#cbd5e1" fontSize="10" textAnchor="middle" fontWeight="bold">Semana 1</text>
+            <text x="260" y="202" fill="#cbd5e1" fontSize="10" textAnchor="middle" fontWeight="bold">Semana 2</text>
+            <text x="365" y="202" fill="#cbd5e1" fontSize="10" textAnchor="middle" fontWeight="bold">Semana 3</text>
+            <text x="465" y="202" fill="#a3e635" fontSize="11" textAnchor="middle" fontWeight="900">Día 28 ★</text>
+
+            {/* Curve A: Traditional (Red/Grey - Stagnation) */}
+            <path
+              d="M 50 160 Q 155 145, 260 148 T 465 155"
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth="2.5"
+              strokeDasharray="5 4"
+            />
+            {/* Dots Traditional */}
+            <circle cx="50" cy="160" r="3.5" fill="#ef4444" />
+            <circle cx="260" cy="148" r="3.5" fill="#ef4444" />
+            <circle cx="465" cy="155" r="4.5" fill="#ef4444" />
+            <text x="465" y="142" fill="#f87171" fontSize="9" textAnchor="middle" fontWeight="bold">Estancamiento</text>
+
+            {/* Curve B: BrazilianBooty (Vibrant Green & Glow) */}
+            <defs>
+              <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#ff2fb3" />
+                <stop offset="50%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#84cc16" />
+              </linearGradient>
+              <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#84cc16" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#84cc16" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            {/* Filled Area under curve */}
+            <path
+              d="M 50 150 C 130 135, 200 95, 260 70 C 320 50, 400 38, 465 30 L 465 180 L 50 180 Z"
+              fill="url(#areaGrad)"
+            />
+
+            {/* Main curve line */}
+            <path
+              d="M 50 150 C 130 135, 200 95, 260 70 C 320 50, 400 38, 465 30"
+              fill="none"
+              stroke="url(#glowGrad)"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+
+            {/* Milestone Points */}
+            <circle cx="50" cy="150" r="4" fill="#ff2fb3" stroke="#fff" strokeWidth="1.5" />
+            <circle cx="155" cy="115" r="4.5" fill="#f59e0b" stroke="#fff" strokeWidth="1.5" />
+            <circle cx="260" cy="70" r="5" fill="#eab308" stroke="#fff" strokeWidth="1.5" />
+            <circle cx="365" cy="45" r="5.5" fill="#84cc16" stroke="#fff" strokeWidth="2" />
+            <circle cx="465" cy="30" r="7" fill="#a3e635" stroke="#fff" strokeWidth="2.5" />
+
+            <text x="465" y="18" fill="#a3e635" fontSize="11" textAnchor="middle" fontWeight="900">96% Activación</text>
+          </svg>
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-3 text-[11px]">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-5 rounded bg-gradient-to-r from-[color:var(--coral)] to-[color:var(--lime)]" />
+              <span className="font-bold text-slate-200">Desafío BrazilianBooty (Aislamiento Puro)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-0.5 w-4 border-t-2 border-dashed border-red-500" />
+              <span className="text-slate-400">Sentadillas tradicionales (Carga articular)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* GRAPH 2: Muscle Distribution Bar Comparison */}
+      <div className="diagnostic-chart-card space-y-4">
+        <h3 className="font-display text-base sm:text-lg font-black text-[color:var(--wine)]">
+          🎯 Distribución de Carga: ¿Dónde va el estímulo?
+        </h3>
+
+        <div className="space-y-4 text-xs">
+          {/* Metodo Brasileño */}
+          <div className="rounded-xl bg-emerald-50/80 p-3.5 border border-emerald-200">
+            <div className="flex items-center justify-between font-bold text-emerald-950 mb-1.5">
+              <span>Método Brasileño (En el suelo sin peso)</span>
+              <span className="text-emerald-700 font-black">88% Glúteo Puro</span>
+            </div>
+            <div className="flex h-4 w-full overflow-hidden rounded-full bg-emerald-200/50">
+              <div style={{ width: "88%" }} className="bg-emerald-600 flex items-center justify-center text-[9px] font-black text-white">
+                88% Glúteos
+              </div>
+              <div style={{ width: "8%" }} className="bg-emerald-400 flex items-center justify-center text-[9px] font-bold text-emerald-950">
+                8%
+              </div>
+              <div style={{ width: "4%" }} className="bg-emerald-300" />
+            </div>
+            <p className="mt-1.5 text-[11px] text-emerald-800">
+              ✓ Estimula glúteo mayor y medio sin ensanchar piernas ni forzar ligamentos.
+            </p>
+          </div>
+
+          {/* Sentadilla convencional */}
+          <div className="rounded-xl bg-red-50/80 p-3.5 border border-red-200">
+            <div className="flex items-center justify-between font-bold text-red-950 mb-1.5">
+              <span>Entrenamiento Tradicional / Sentadillas</span>
+              <span className="text-red-700 font-black">Solo 14% Glúteo</span>
+            </div>
+            <div className="flex h-4 w-full overflow-hidden rounded-full bg-red-200/50">
+              <div style={{ width: "68%" }} className="bg-red-500 flex items-center justify-center text-[9px] font-black text-white">
+                68% Muslos
+              </div>
+              <div style={{ width: "18%" }} className="bg-red-400 flex items-center justify-center text-[9px] font-bold text-white">
+                18% Rodillas
+              </div>
+              <div style={{ width: "14%" }} className="bg-red-700 flex items-center justify-center text-[9px] font-bold text-white">
+                14%
+              </div>
+            </div>
+            <p className="mt-1.5 text-[11px] text-red-800">
+              ⚠️ La mayor parte del esfuerzo se va a los cuádriceps y sobrecarga la espalda baja.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Overcoming the main obstacle */}
+      <div className="rounded-2xl border-2 border-[color:var(--wine)] bg-[color:var(--cream)] p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color:var(--coral)] text-white shadow-sm">
+            <Flame size={18} />
+          </span>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-[color:var(--coral)]">
+              Estrategia Anti-Abandono Personalizada
+            </span>
+            <h4 className="font-display text-sm sm:text-base font-black text-[color:var(--wine)] mt-0.5">
+              Superando tu principal obstáculo: {obstacle}
+            </h4>
+            <p className="mt-1 text-xs text-[color:var(--ink-muted)] leading-relaxed">
+              Tu protocolo está calibrado con micro-sesiones guiadas paso a paso de {time} al día,
+              eliminando la fricción para que mantengas la constancia sin esfuerzo mental.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Button to Coupon */}
+      <button
+        type="button"
+        onClick={onNext}
+        className="cta-button w-full py-4 text-base sm:text-lg font-black tracking-wider text-white shadow-xl hover:scale-[1.01]"
+      >
+        <span className="button-sheen" />
+        <span className="flex items-center justify-center gap-2">
+          Desbloquear Mi Cupón y Ver Presentación en Video
+          <ArrowRight size={22} />
+        </span>
+      </button>
+    </section>
+  );
+}
+
 function ScratchCouponScreen({
   onBack,
   onContinue,
@@ -1507,185 +2100,275 @@ function ScratchCouponScreen({
   onBack: () => void;
   onContinue: () => void;
 }>) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const moveCountRef = useRef(0);
   const revealedRef = useRef(false);
   const startedScratchRef = useRef(false);
+
   const [revealed, setRevealed] = useState(false);
+  const [scratchPercent, setScratchPercent] = useState(0);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  const triggerVibration = (pattern: number | number[]) => {
+    if (typeof window !== "undefined" && "navigator" in window && navigator.vibrate) {
+      try {
+        navigator.vibrate(pattern);
+      } catch {
+        // ignore
+      }
+    }
+  };
 
   const revealCoupon = () => {
     if (revealedRef.current) return;
     revealedRef.current = true;
     setRevealed(true);
+    setScratchPercent(100);
     trackCouponUnlocked();
     playUiSound("success");
+    triggerVibration([30, 40, 70]);
+  };
+
+  const renderCanvasMask = (width: number, height: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas || width <= 0 || height <= 0) return;
+
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2.5);
+    canvas.width = Math.round(width * pixelRatio);
+    canvas.height = Math.round(height * pixelRatio);
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.scale(pixelRatio, pixelRatio);
+
+    // Rich metallic gradient with gold and pink sparkles
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, "#ff2fb3");
+    gradient.addColorStop(0.35, "#a855f7");
+    gradient.addColorStop(0.7, "#6366f1");
+    gradient.addColorStop(1, "#3b82f6");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Diagonal texture pattern
+    ctx.globalAlpha = 0.14;
+    ctx.fillStyle = "#ffffff";
+    for (let x = -height; x < width + height; x += 28) {
+      ctx.save();
+      ctx.translate(x, 0);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(0, -height, 7, height * 3);
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+
+    // Center badge background on canvas
+    ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+    ctx.beginPath();
+    ctx.roundRect(width / 2 - 120, height / 2 - 38, 240, 76, 16);
+    ctx.fill();
+
+    // Text on scratch surface
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `900 ${Math.min(17, width / 20)}px DM Sans, sans-serif`;
+    ctx.fillText("✨ RASPA AQUÍ CON EL DEDO", width / 2, height / 2 - 9);
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.font = `700 ${Math.min(11, width / 31)}px DM Sans, sans-serif`;
+    ctx.fillText("TU CUPÓN ESTÁ ESCONDIDO DEBAJO", width / 2, height / 2 + 15);
   };
 
   useEffect(() => {
-    const renderCanvas = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width || canvas.clientWidth || 340;
-      const height = rect.height || canvas.clientHeight || 180;
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(width * pixelRatio);
-      canvas.height = Math.round(height * pixelRatio);
-
-      const context = canvas.getContext("2d");
-      if (!context) return;
-      context.scale(pixelRatio, pixelRatio);
-
-      const gradient = context.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, "#ff2fb3");
-      gradient.addColorStop(0.5, "#a735ff");
-      gradient.addColorStop(1, "#5914b8");
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, width, height);
-
-      context.globalAlpha = 0.12;
-      context.fillStyle = "#ffffff";
-      for (let x = -height; x < width + height; x += 34) {
-        context.save();
-        context.translate(x, 0);
-        context.rotate(Math.PI / 4);
-        context.fillRect(0, -height, 9, height * 3);
-        context.restore();
+    const handleResize = () => {
+      if (revealedRef.current) return;
+      const rect = container.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        renderCanvasMask(rect.width, rect.height);
       }
-      context.globalAlpha = 1;
-
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-      context.fillStyle = "#ffffff";
-      context.font = `800 ${Math.min(18, width / 19)}px DM Sans, sans-serif`;
-      context.fillText("DESLIZA PARA RASPAR", width / 2, height / 2 - 8);
-      context.globalAlpha = 0.7;
-      context.font = `700 ${Math.min(11, width / 31)}px DM Sans, sans-serif`;
-      context.fillText("TU RECOMPENSA ESTÁ DEBAJO", width / 2, height / 2 + 20);
-      context.globalAlpha = 1;
     };
 
-    const animFrame = requestAnimationFrame(renderCanvas);
-    return () => cancelAnimationFrame(animFrame);
+    handleResize();
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
   }, []);
 
   const checkRevealProgress = () => {
+    if (revealedRef.current) return;
     const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
 
-    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     let transparent = 0;
     let sampled = 0;
-    const sampleEvery = 18 * 4;
+    const sampleEvery = 16 * 4;
+
     for (let index = 3; index < pixels.length; index += sampleEvery) {
       sampled += 1;
-      if (pixels[index] < 40) transparent += 1;
+      if (pixels[index] < 45) transparent += 1;
     }
-    if (transparent / sampled > 0.36) revealCoupon();
+
+    const ratio = sampled > 0 ? transparent / sampled : 0;
+    const percent = Math.min(100, Math.round(ratio * 100));
+    setScratchPercent(percent);
+
+    // Auto-reveal when >= 35% has been scratched
+    if (ratio >= 0.35) {
+      revealCoupon();
+    }
   };
 
-  const scratch = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (!drawingRef.current || revealed) return;
+  const scratchAt = (clientX: number, clientY: number) => {
+    if (!drawingRef.current || revealedRef.current) return;
     const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
 
     const rect = canvas.getBoundingClientRect();
-    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const point = { x: clientX - rect.left, y: clientY - rect.top };
     const pixelRatio = canvas.width / rect.width;
-    context.globalCompositeOperation = "destination-out";
-    context.lineCap = "round";
-    context.lineJoin = "round";
-    context.lineWidth = 46;
-    context.beginPath();
-    const previous = lastPointRef.current ?? point;
-    context.moveTo(previous.x, previous.y);
-    context.lineTo(point.x, point.y);
-    context.stroke();
-    context.beginPath();
-    context.arc(point.x, point.y, 23, 0, Math.PI * 2);
-    context.fill();
-    lastPointRef.current = point;
 
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = Math.max(38, Math.round(48 * (rect.width / 380)));
+
+    const previous = lastPointRef.current ?? point;
+
+    ctx.beginPath();
+    ctx.moveTo(previous.x, previous.y);
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    lastPointRef.current = point;
     moveCountRef.current += 1;
-    if (moveCountRef.current % Math.max(3, Math.round(6 / pixelRatio)) === 0) {
+
+    if (moveCountRef.current % Math.max(2, Math.round(5 / pixelRatio)) === 0) {
       checkRevealProgress();
+      if (moveCountRef.current % 12 === 0) {
+        triggerVibration(10);
+      }
     }
   };
 
-  const startScratch = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+  const handlePointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (revealedRef.current) return;
     if (!startedScratchRef.current) {
       startedScratchRef.current = true;
+      setHasInteracted(true);
       trackCouponScratchStart();
+      triggerVibration(20);
     }
     drawingRef.current = true;
+    lastPointRef.current = null;
     event.currentTarget.setPointerCapture(event.pointerId);
-    scratch(event);
+    scratchAt(event.clientX, event.clientY);
   };
 
-  const stopScratch = () => {
+  const handlePointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (!drawingRef.current || revealedRef.current) return;
+    scratchAt(event.clientX, event.clientY);
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     drawingRef.current = false;
     lastPointRef.current = null;
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    } catch {
+      // ignore
+    }
     checkRevealProgress();
   };
 
   return (
-    <section className="coupon-panel screen-enter">
-      <SimpleTopbar onBack={onBack} label="Recompensa desbloqueada" />
+    <section className="coupon-panel screen-enter text-center space-y-6">
+      <SimpleTopbar onBack={onBack} label="Recompensa exclusiva" />
 
-      <div className="coupon-heading mt-8 text-center">
+      <div className="coupon-heading mt-4 text-center">
         <span className="coupon-gift">
-          <Gift size={27} />
-          <i />
+          <Gift size={32} />
         </span>
-        <p className="mt-5 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--coral)]">
-          Por completar las 13 respuestas
+        <p className="mt-4 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--coral)]">
+          Fase 1 completada con éxito
         </p>
-        <h1 className="mt-2 font-display text-4xl font-black leading-[0.96] tracking-[-0.05em] text-[color:var(--wine)] sm:text-5xl">
-          Hay un regalo reservado para ti.
+        <h1 className="mt-1 font-display text-3xl font-black leading-[0.96] tracking-[-0.05em] text-[color:var(--wine)] sm:text-5xl">
+          ¡Tienes un premio reservado!
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-sm font-medium leading-6 text-[color:var(--ink-muted)]">
-          Raspa la tarjeta con el dedo o el mouse para descubrir tu descuento antes de ver tu plan.
+        <p className="mx-auto mt-3 max-w-md text-xs sm:text-sm font-medium leading-relaxed text-[color:var(--ink-muted)]">
+          Raspa la tarjeta deslizando tu dedo o ratón para descubrir el beneficio especial asignado a tu perfil.
         </p>
       </div>
 
-      <div className={`scratch-wrap mt-7 ${revealed ? "is-revealed" : ""}`}>
+      <div
+        ref={containerRef}
+        className={`scratch-wrap mt-4 ${revealed ? "is-revealed" : ""}`}
+      >
+        {/* Hidden reward card under scratch mask */}
         <div className="coupon-reveal" aria-live="polite">
           <span className="coupon-ticket-icon">
-            <TicketPercent size={24} />
+            <TicketPercent size={28} />
           </span>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--coral)]">
-            Cupón exclusivo desbloqueado
+          <span className="mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--coral)]">
+            Cupón exclusivo asignado
           </span>
-          <strong className="mt-1 font-display text-6xl font-black tracking-[-0.07em] text-[color:var(--wine)]">
+          <strong className="mt-1 font-display text-5xl sm:text-6xl font-black tracking-[-0.07em] text-[color:var(--wine)]">
             90% OFF
           </strong>
-          <span className="mt-2 rounded-full border border-dashed border-[color:var(--wine)]/25 bg-white/55 px-4 py-2 font-mono text-sm font-black tracking-[0.18em] text-[color:var(--wine)]">
+          <span className="mt-2 rounded-full border-2 border-dashed border-[color:var(--wine)]/30 bg-white/80 px-4 py-1.5 font-mono text-sm font-black tracking-[0.2em] text-[color:var(--wine)] shadow-sm">
             BUMBUM90
           </span>
         </div>
+
+        {/* Scratchable Mask Canvas */}
         <canvas
           ref={canvasRef}
           className="scratch-canvas"
-          aria-label="Raspa esta tarjeta para revelar tu descuento"
-          onPointerDown={startScratch}
-          onPointerMove={scratch}
-          onPointerUp={stopScratch}
-          onPointerCancel={stopScratch}
-          onPointerLeave={stopScratch}
+          aria-label="Raspa esta tarjeta deslizando con el dedo para descubrir tu cupón"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onPointerLeave={handlePointerUp}
         />
+
+        {/* Hand/Finger Scratch hint icon before first touch */}
+        {!hasInteracted && !revealed && (
+          <div className="scratch-hint-overlay">
+            <div className="scratch-hint-pulse">
+              <Sparkles size={16} className="text-[color:var(--shock-yellow)] animate-spin" />
+              <span>Desliza para raspar aquí</span>
+            </div>
+          </div>
+        )}
+
+        {/* Confetti Explosion on Reveal */}
         {revealed && (
           <div className="coupon-confetti" aria-hidden="true">
-            {Array.from({ length: 18 }).map((_, index) => (
+            {Array.from({ length: 24 }).map((_, index) => (
               <i
                 key={index}
                 style={{
-                  left: `${8 + ((index * 29) % 84)}%`,
-                  animationDelay: `${(index % 6) * 75}ms`,
+                  left: `${4 + ((index * 23) % 92)}%`,
+                  animationDelay: `${(index % 8) * 85}ms`,
                 }}
               />
             ))}
@@ -1693,44 +2376,64 @@ function ScratchCouponScreen({
         )}
       </div>
 
+      {/* Progress Bar under Scratch */}
+      {!revealed && (
+        <div className="mx-auto max-w-sm px-2">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[color:var(--ink-muted)] mb-1">
+            <span>Progreso de raspado</span>
+            <span className="font-mono text-[color:var(--wine)]">{scratchPercent}%</span>
+          </div>
+          <div className="coupon-progress-bar">
+            <div
+              className="coupon-progress-fill"
+              style={{ width: `${Math.min(100, Math.round((scratchPercent / 35) * 100))}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Fallback button or Success alert */}
       {!revealed ? (
         <button
           type="button"
           data-sound="none"
-          className="coupon-fallback mt-4"
+          className="coupon-fallback"
           onClick={revealCoupon}
         >
-          No puedo raspar, revelar mi cupón
+          ¿Prefieres no raspar? Haz clic para revelar cupón
         </button>
       ) : (
-        <output className="coupon-success mt-5">
-          <span>
+        <output className="coupon-success mx-auto max-w-md">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
             <Check size={16} strokeWidth={3} />
           </span>
-          <p>
-            <strong>¡Descuento aplicado!</strong> Verás el valor final en la siguiente página.
+          <p className="text-xs sm:text-sm">
+            <strong>¡90% OFF Desbloqueado!</strong> Tu descuento ya fue asignado para ver la presentación oficial en video.
           </p>
         </output>
       )}
 
-      <button
-        type="button"
-        onClick={() => {
-          trackCouponContinueClick();
-          onContinue();
-        }}
-        disabled={!revealed}
-        className={`cta-button group mt-6 ${revealed ? "coupon-cta-ready" : "coupon-cta-locked"}`}
-      >
-        <span>
-          {revealed ? "Aplicar 90% OFF y ver mi plan" : "Raspa para liberar tu descuento"}
-        </span>
-        {revealed ? <ChevronRight size={20} /> : <LockKeyhole size={18} />}
-        <span className="button-sheen" aria-hidden="true" />
-      </button>
-      <p className="mt-3 text-center text-[10px] font-semibold text-[color:var(--ink-muted)]">
-        El cupón se aplica automáticamente en esta experiencia.
-      </p>
+      {/* Main CTA Button */}
+      <div className="pt-2">
+        <button
+          type="button"
+          onClick={() => {
+            trackCouponContinueClick();
+            onContinue();
+          }}
+          disabled={!revealed}
+          className={`cta-button group ${revealed ? "coupon-cta-ready" : "opacity-60 cursor-not-allowed"}`}
+        >
+          <span className="button-sheen" />
+          <span className="flex items-center justify-center gap-2 text-sm sm:text-base font-black">
+            {revealed ? "APLICAR 90% OFF Y VER VIDEO OFICIAL" : "RASPA PARA LIBERAR TU DESCUENTO"}
+            {revealed ? <ChevronRight size={20} /> : <LockKeyhole size={18} />}
+          </span>
+        </button>
+        <p className="mt-2 text-center text-[10px] font-semibold text-[color:var(--ink-muted)]">
+          El cupón de 90% OFF se mantiene guardado automáticamente.
+        </p>
+      </div>
     </section>
   );
 }
@@ -1752,8 +2455,133 @@ const profileData = {
   times: ["8-10 min", "10-15 min", "20+ min"],
 };
 
-function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>) {
-  const [showPitch, setShowPitch] = useState(true);
+/**
+ * Dedicated VSL Video Presentation Page (Before navigating to full Plan)
+ */
+function VslDedicatedScreen({
+  answers,
+  biometrics,
+  onBack,
+  onProceedToOffer,
+}: Readonly<{
+  answers: Record<number, number>;
+  biometrics: Biometrics;
+  onBack: () => void;
+  onProceedToOffer: () => void;
+}>) {
+  const goal = profileData.goals[answers[11] ?? 0];
+  const time = profileData.times[answers[6] ?? 0];
+
+  const [hasUnlockedPitch, setHasUnlockedPitch] = useState(false);
+
+  const handlePitchReached = () => {
+    if (!hasUnlockedPitch) {
+      setHasUnlockedPitch(true);
+      playUiSound("success");
+    }
+  };
+
+  return (
+    <section className="screen-enter text-center space-y-6 pb-12 text-[color:var(--wine)]">
+      {/* Header */}
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-4">
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={onBack} className="back-button" aria-label="Volver">
+            <ArrowLeft size={18} />
+          </button>
+          <BrandMark />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 rounded-full bg-[color:var(--wine)] px-3 py-1.5 text-[10px] font-black uppercase text-white shadow-sm">
+            <span className="vsl-pulse-dot" />
+            <LiveViewerCounter />
+          </span>
+          <span className="flex items-center gap-1 rounded-full bg-[color:var(--lime)] px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[color:var(--wine)] shadow-sm">
+            <TicketPercent size={13} strokeWidth={3} /> 90% OFF APLICADO
+          </span>
+        </div>
+      </header>
+
+      {/* Main Headline */}
+      <div className="mx-auto max-w-2xl space-y-2 text-left sm:text-center">
+        <span className="eyebrow-pill inline-flex items-center gap-1.5">
+          <CirclePlay size={13} className="text-[color:var(--coral)]" /> PRESENTACIÓN OFICIAL EN VIDEO
+        </span>
+        <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-black text-[color:var(--wine)] leading-tight">
+          Mira Este Breve Video Para Desbloquear Tu Plan de 28 Días
+        </h1>
+        <p className="text-xs sm:text-sm font-medium text-[color:var(--ink-muted)]">
+          Aprende el método biomecánico brasileño para tonificar glúteos en {time} al día desde casa.
+        </p>
+      </div>
+
+      {/* VSL Video Player with accelerating/decelerating progress bar and 1min pitch trigger */}
+      <div className="mt-4">
+        <VslQuizPlayer src="/vsl-video.mp4" onPitchReached={handlePitchReached} />
+      </div>
+
+      {/* Status Bar / Pitch Reveal */}
+      <div className="mx-auto max-w-lg">
+        {!hasUnlockedPitch ? (
+          <div className="rounded-2xl border border-dashed border-[color:var(--wine)]/30 bg-white/60 p-4 backdrop-blur-sm transition-all text-xs font-semibold text-[color:var(--ink-muted)]">
+            <span className="inline-flex items-center gap-1.5 text-[color:var(--wine)] font-bold">
+              <Lock size={14} className="text-[color:var(--coral)]" />
+              Mira el video: Tu acceso completo se desbloqueará en unos segundos...
+            </span>
+          </div>
+        ) : (
+          <div className="vsl-pitch-box rounded-3xl border-4 border-[color:var(--coral)] bg-white p-6 md:p-8 text-center shadow-2xl space-y-4">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--wine)] px-3.5 py-1 text-xs font-black uppercase text-[color:var(--lime)] shadow-md animate-bounce">
+              <Flame size={15} /> ¡ACCESO AL PLAN DESBLOQUEADO!
+            </span>
+
+            <h2 className="font-display text-2xl sm:text-3xl font-black text-[color:var(--wine)]">
+              Tu Transformación de 28 Días Está Lista
+            </h2>
+
+            <p className="text-xs sm:text-sm font-medium text-[color:var(--ink-muted)]">
+              Ruta adaptada a tu meta de <strong>{goal.toLowerCase()}</strong> en <strong>{time} al día</strong> con 90% de descuento aplicado ($9.90 USD).
+            </p>
+
+            <button
+              type="button"
+              onClick={onProceedToOffer}
+              className="cta-button w-full py-4 text-base sm:text-lg font-black tracking-wider text-white shadow-xl hover:scale-[1.02] bg-gradient-to-r from-[color:var(--coral)] via-[#e11d48] to-[color:var(--wine)]"
+            >
+              <span className="button-sheen" />
+              <span className="flex items-center justify-center gap-2">
+                VER MI PLAN COMPLETO Y BONOS (90% OFF)
+                <ArrowRight size={22} />
+              </span>
+            </button>
+
+            <div className="flex items-center justify-center gap-4 text-[11px] font-bold text-[color:var(--ink-muted)]">
+              <span className="flex items-center gap-1 text-emerald-700">
+                <ShieldCheck size={14} /> Garantía de 7 Días
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <Sparkles size={13} className="text-amber-500" /> 4 Bonos de Regalo
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Full Plan & Sales Page
+ */
+function FinalScreen({
+  answers,
+  biometrics,
+}: Readonly<{
+  answers: Record<number, number>;
+  biometrics?: Biometrics;
+}>) {
   const [showFloatingCta, setShowFloatingCta] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const offerSectionRef = useRef<HTMLDivElement>(null);
@@ -1764,8 +2592,7 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
   const time = profileData.times[answers[6] ?? 0];
 
   useEffect(() => {
-    trackViewContent("Quiz Final VSL Screen", {
-      video_src: "/vsl-video.mp4",
+    trackPlanPageView({
       user_goal: goal,
       user_obstacle: obstacle,
       user_age: age,
@@ -1777,7 +2604,7 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
     const handleScroll = () => {
       if (offerSectionRef.current) {
         const rect = offerSectionRef.current.getBoundingClientRect();
-        setShowFloatingCta(window.scrollY > 650 && rect.bottom > 100);
+        setShowFloatingCta(window.scrollY > 400 && rect.bottom > 100);
       }
     };
 
@@ -1791,12 +2618,8 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
     window.location.href = checkoutUrl;
   };
 
-  const handleVideoPitchReached = () => {
-    setShowPitch(true);
-  };
-
   return (
-    <section className="screen-enter pb-24 sm:pb-12 text-[color:var(--wine)]">
+    <section className="screen-enter pb-24 sm:pb-12 text-[color:var(--wine)] space-y-10">
       {/* Header with live status and 90% discount pill */}
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-4">
         <BrandMark />
@@ -1811,8 +2634,8 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
         </div>
       </header>
 
-      {/* Personalized Hero banner reflecting their quiz answers */}
-      <div className="final-hero mt-6">
+      {/* Personalized Hero banner reflecting their quiz answers and biometrics */}
+      <div className="final-hero">
         <div className="relative z-10 text-left">
           <span className="dark-eyebrow">Tu ruta personalizada de 28 días</span>
           <h1 className="mt-3 max-w-2xl font-display text-[2.2rem] font-black leading-[0.95] tracking-[-0.04em] text-white sm:text-5xl">
@@ -1828,6 +2651,9 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
             <ProfileTag icon={<Target size={14} />} text={goal} />
             <ProfileTag icon={<Clock3 size={14} />} text={`${time} por sesión`} />
             <ProfileTag icon={<CalendarDays size={14} />} text={age} />
+            {biometrics && (
+              <ProfileTag icon={<Scale size={14} />} text={`${biometrics.weight} kg • ${biometrics.height} cm`} />
+            )}
           </div>
         </div>
         <div className="final-hero-orb" aria-hidden="true">
@@ -1836,101 +2662,79 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
         </div>
       </div>
 
-      {/* Headline for Video */}
-      <div className="mt-8 text-center">
-        <span className="eyebrow-pill mb-2">
-          <Sparkles size={13} className="text-[color:var(--coral)]" />
-          PRESENTACIÓN EN VIDEO DE TU RUTA
-        </span>
-        <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-black text-[color:var(--wine)]">
-          Mira Este Breve Video Para Desbloquear Tu Plan
-        </h2>
-        <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-[color:var(--ink-muted)]">
-          Aprende cómo activar las 3 porciones del glúteo en 15 minutos en casa sin dolor de
-          rodillas.
-        </p>
-      </div>
-
-      {/* 3x4 VSL Video Player with Smart Psychological Progress Bar */}
-      <div className="mt-6">
-        <VslQuizPlayer src="/vsl-video.mp4" onPitchReached={handleVideoPitchReached} />
-      </div>
-
       {/* Full Pitch / Offer Section */}
-      {showPitch && (
-        <div ref={offerSectionRef} className="mt-12 animate-fade-in space-y-12">
-          {/* Main $9.90 USD Offer Card */}
-          <VslQuizOfferCard onCtaClick={handleCtaClick} />
+      <div ref={offerSectionRef} className="animate-fade-in space-y-12">
+        {/* Main $9.90 USD Offer Card */}
+        <VslQuizOfferCard onCtaClick={handleCtaClick} />
 
-          {/* Itemized Value Breakdown */}
-          <VslQuizIncludedSummary />
+        {/* Itemized Value Breakdown */}
+        <VslQuizIncludedSummary />
 
-          {/* 4-Week Roadmap */}
-          <VslQuizRoadmap />
+        {/* 4-Week Roadmap */}
+        <VslQuizRoadmap />
 
-          {/* 4 Free Bonuses */}
-          <VslQuizBonuses />
+        {/* 4 Free Bonuses */}
+        <VslQuizBonuses />
 
-          {/* Comparison Table */}
-          <VslQuizComparisonTable />
+        {/* Comparison Table */}
+        <VslQuizComparisonTable />
 
-          {/* Real Transformations with Student Photos */}
-          <VslQuizSocialProof />
+        {/* Real Transformations with Student Photos */}
+        <VslQuizSocialProof />
 
-          {/* Target Audience Guide */}
-          <VslQuizTargetAudience />
+        {/* Target Audience Guide */}
+        <VslQuizTargetAudience />
 
-          {/* 3-Pillar Method & Coaches Authority */}
-          <VslQuizMethodAndCoaches />
+        {/* 3-Pillar Method & Coaches Authority */}
+        <VslQuizMethodAndCoaches />
 
-          {/* 7-Day Money-Back Guarantee Seal */}
-          <VslQuizGuarantee onCtaClick={() => handleCtaClick("quiz_guarantee_cta")} />
+        {/* 7-Day Money-Back Guarantee Seal */}
+        <VslQuizGuarantee onCtaClick={() => handleCtaClick("quiz_guarantee_cta")} />
 
-          {/* Secondary Urgency CTA Banner */}
-          <div className="rounded-3xl border-3 border-[color:var(--wine)] bg-white/85 p-6 text-center shadow-[6px_6px_0_var(--wine)] backdrop-blur-md md:p-10">
-            <span className="vsl-offer-badge mb-3">🔥 CUPÓN ACTIVO: 90% DE DESCUENTO</span>
-            <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
-              ¿Lista para transformar tu silueta en 28 días?
-            </h2>
-            <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-[color:var(--ink-muted)]">
-              Accede de por vida al Desafío Glúteos Brasileños + 4 bonos de regalo por un único pago
-              de solo <strong className="text-[color:var(--coral)]">$9.90 USD</strong>.
-            </p>
+        {/* Secondary Urgency CTA Banner */}
+        <div className="rounded-3xl border-3 border-[color:var(--wine)] bg-white/85 p-6 text-center shadow-[6px_6px_0_var(--wine)] backdrop-blur-md md:p-10">
+          <span className="vsl-offer-badge mb-3">🔥 CUPÓN ACTIVO: 90% DE DESCUENTO</span>
+          <h2 className="font-display text-2xl font-black text-[color:var(--wine)] md:text-3xl">
+            ¿Lista para transformar tu silueta en 28 días?
+          </h2>
+          <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-[color:var(--ink-muted)]">
+            Accede de por vida al Desafío Glúteos Brasileños + 4 bonos de regalo por un único pago
+            de solo <strong className="text-[color:var(--coral)]">$9.90 USD</strong>.
+          </p>
 
-            <div className="mx-auto mt-6 max-w-lg">
-              <button
-                type="button"
-                onClick={() => handleCtaClick("quiz_secondary_cta")}
-                className="cta-button text-base font-black tracking-wider text-white shadow-xl hover:scale-[1.02]"
-              >
-                <span className="button-sheen" />
-                <span className="flex items-center justify-center gap-2">
-                  ¡QUIERO MI PLAN COMPLETO POR $9.90!
-                  <ArrowRight size={20} />
-                </span>
-              </button>
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-[color:var(--ink-muted)]">
-              <span className="flex items-center gap-1">
-                <ShieldCheck size={16} className="text-emerald-600" /> Garantía de 7 días
+          <div className="mx-auto mt-6 max-w-lg">
+            <button
+              type="button"
+              onClick={() => handleCtaClick("quiz_secondary_cta")}
+              className="cta-button text-base font-black tracking-wider text-white shadow-xl hover:scale-[1.02]"
+            >
+              <span className="button-sheen" />
+              <span className="flex items-center justify-center gap-2">
+                ¡QUIERO MI PLAN COMPLETO POR $9.90!
+                <ArrowRight size={20} />
               </span>
-              <span className="flex items-center gap-1">
-                <Lock size={15} className="text-emerald-600" /> Pago 100% Encriptado
-              </span>
-              <span className="flex items-center gap-1">
-                <Sparkles size={15} className="text-[color:var(--coral)]" /> Acceso De Por Vida
-              </span>
-            </div>
+            </button>
           </div>
 
-          {/* Extended FAQ Accordion */}
-          <VslQuizFaq openFaq={openFaq} setOpenFaq={setOpenFaq} />
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-[color:var(--ink-muted)]">
+            <span className="flex items-center gap-1">
+              <ShieldCheck size={16} className="text-emerald-600" /> Garantía de 7 días
+            </span>
+            <span className="flex items-center gap-1">
+              <Lock size={15} className="text-emerald-600" /> Pago 100% Encriptado
+            </span>
+            <span className="flex items-center gap-1">
+              <Sparkles size={15} className="text-[color:var(--coral)]" /> Acceso De Por Vida
+            </span>
+          </div>
         </div>
-      )}
+
+        {/* Extended FAQ Accordion */}
+        <VslQuizFaq openFaq={openFaq} setOpenFaq={setOpenFaq} />
+      </div>
 
       {/* Floating Sticky Bottom CTA on scroll ($9.90 USD) */}
-      {showFloatingCta && showPitch && (
+      {showFloatingCta && (
         <div className="vsl-floating-bottom-cta">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
             <div className="hidden sm:block text-left text-white">
@@ -1959,7 +2763,7 @@ function FinalScreen({ answers }: Readonly<{ answers: Record<number, number> }>)
 }
 
 /**
- * 3x4 VSL Player with Smart Psychological Progress Bar inside the Quiz Route
+ * High-Converting VSL Player (Smart Retention, Psychological Progress, No Time Digits)
  */
 function VslQuizPlayer({
   src,
@@ -1970,15 +2774,12 @@ function VslQuizPlayer({
 }>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const progressBarRef = useRef<HTMLButtonElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
   const [showControls, setShowControls] = useState(true);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
 
   const trackedMilestones = useRef<Set<number>>(new Set());
@@ -2007,7 +2808,8 @@ function VslQuizPlayer({
         }
       });
 
-      if (current >= 15 || percent >= 10) {
+      // Dispara o pitch exatamente aos 30 segundos de VSL
+      if (current >= 30 || percent >= 25) {
         if (!pitchTrackedRef.current) {
           pitchTrackedRef.current = true;
           trackVslPitchReached();
@@ -2084,7 +2886,6 @@ function VslQuizPlayer({
     video.muted = false;
     video.volume = 1;
     setIsMuted(false);
-    setVolume(1);
 
     if (video.paused) {
       void video.play();
@@ -2103,47 +2904,6 @@ function VslQuizPlayer({
     }
     video.muted = nextMuted;
     setIsMuted(nextMuted);
-    if (!nextMuted && video.volume === 0) {
-      video.volume = 1;
-      setVolume(1);
-    }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVol = Number.parseFloat(e.target.value);
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.volume = newVol;
-    setVolume(newVol);
-    const shouldMute = newVol === 0;
-    video.muted = shouldMute;
-    setIsMuted(shouldMute);
-  };
-
-  const handleSeek = (e: ReactMouseEvent<HTMLButtonElement | HTMLElement>) => {
-    const bar = progressBarRef.current;
-    const video = videoRef.current;
-    if (!bar || !video || !duration) return;
-
-    const rect = bar.getBoundingClientRect();
-    const clickPos = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const seekTime = (clickPos / rect.width) * duration;
-    video.currentTime = seekTime;
-    setCurrentTime(seekTime);
-  };
-
-  const handleSpeedToggle = (e: ReactMouseEvent) => {
-    e.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
-
-    const speeds = [1, 1.25, 1.5];
-    const nextIdx = (speeds.indexOf(playbackSpeed) + 1) % speeds.length;
-    const nextSpeed = speeds[nextIdx];
-    video.playbackRate = nextSpeed;
-    setPlaybackSpeed(nextSpeed);
-    trackVslSpeedChange(nextSpeed);
   };
 
   const handleMouseMove = () => {
@@ -2155,39 +2915,51 @@ function VslQuizPlayer({
       if (isPlaying) {
         setShowControls(false);
       }
-    }, 3000);
-  };
-
-  const formatTime = (seconds: number) => {
-    if (Number.isNaN(seconds) || seconds <= 0) return "00:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }, 2800);
   };
 
   /**
-   * Psychological progress bar formula:
-   * Starts fast, decelerates towards end.
+   * Fast & engaging psychological progress bar:
+   * Starts faster to capture initial attention, smooth continuous fill
    */
   const getPsychologicalProgress = (current: number, total: number) => {
-    if (!total || total <= 0 || current <= 0) return 0;
+    if (!total || total <= 0 || current <= 0) return 5;
     const ratio = Math.min(1, Math.max(0, current / total));
     if (ratio >= 0.995) return 100;
-    const curved = (1 - Math.pow(1 - ratio, 2.7)) * 96;
-    return Math.min(99, Math.max(1, curved));
+    const curved = (1 - Math.pow(1 - ratio, 1.65)) * 100;
+    return Math.min(99, Math.max(6, Math.round(curved)));
   };
 
   const progressPercent = getPsychologicalProgress(currentTime, duration);
 
+  // Dynamic context message based on 30s pitch timeline
+  let dynamicStatus = "🔊 Sube el volumen y mira con atención";
+  if (currentTime > 10 && currentTime < 28) {
+    dynamicStatus = "🔥 Explicando el método de activación...";
+  } else if (currentTime >= 28) {
+    dynamicStatus = "✨ ¡Acceso al plan completo desbloqueado!";
+  }
+
   return (
-    <div className="vsl-hero-wrapper mx-auto w-full max-w-[440px]">
+    <div className="vsl-hero-wrapper mx-auto w-full max-w-[420px]">
       <div
         ref={containerRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => isPlaying && setShowControls(false)}
         onContextMenu={(e) => e.preventDefault()}
-        className="vsl-video-frame group relative select-none aspect-[3/4]"
+        className="vsl-video-frame group relative select-none aspect-[3/4] overflow-hidden rounded-3xl border-3 border-[color:var(--wine)] shadow-[8px_8px_0_var(--wine)] bg-black"
       >
+        {/* Top Floating Badge: Live status & dynamic phase */}
+        <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none">
+          <span className="flex items-center gap-1.5 rounded-full bg-black/65 px-2.5 py-1 text-[10px] font-black uppercase text-white backdrop-blur-md border border-white/10">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>PRESENTACIÓN OFICIAL</span>
+          </span>
+          <span className="hidden sm:flex items-center gap-1 rounded-full bg-[color:var(--wine)]/80 px-2.5 py-1 text-[10px] font-bold text-white/90 backdrop-blur-md border border-white/10">
+            {dynamicStatus}
+          </span>
+        </div>
+
         {/* Video Element */}
         <video
           ref={videoRef}
@@ -2202,7 +2974,7 @@ function VslQuizPlayer({
 
         {/* Unmute Overlay Banner */}
         {isMuted && isPlaying && (
-          <button type="button" onClick={handleUnmute} className="vsl-unmute-banner">
+          <button type="button" onClick={handleUnmute} className="vsl-unmute-banner z-40">
             <VolumeX size={18} className="animate-pulse text-[color:var(--lime)]" />
             <span>Haz Clic Para Activar El Audio 🔊</span>
             <div className="flex items-center gap-0.5">
@@ -2216,7 +2988,7 @@ function VslQuizPlayer({
 
         {/* Play Overlay Button */}
         {!isPlaying && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-opacity">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/45 backdrop-blur-[2px] transition-opacity">
             <button
               type="button"
               onClick={togglePlay}
@@ -2228,93 +3000,65 @@ function VslQuizPlayer({
           </div>
         )}
 
-        {/* Custom Video Controls Bar */}
+        {/* Bottom Clean Video Controls (Without numeric timers) */}
         <div
-          className={`absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-3 pt-6 text-white transition-opacity duration-300 ${
+          className={`absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-3 pt-6 text-white transition-opacity duration-300 ${
             showControls || !isPlaying ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
-          {/* Smart Accelerating / Decelerating Progress Bar */}
-          <button
-            type="button"
-            ref={progressBarRef}
-            onClick={handleSeek}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-                e.preventDefault();
-                const step = e.key === "ArrowRight" ? 5 : -5;
-                if (videoRef.current) {
-                  videoRef.current.currentTime = Math.max(
-                    0,
-                    Math.min(duration, videoRef.current.currentTime + step),
-                  );
-                }
-              }
-            }}
-            aria-label="Progreso del video"
-            className="group/bar relative mb-2.5 h-2 w-full cursor-pointer rounded-full bg-white/25 hover:h-2.5 transition-all overflow-hidden block border-none p-0"
+          {/* Psychological Continuous Progress Line (No numbers) */}
+          <div
+            className="relative mb-3 h-2 w-full rounded-full bg-white/20 overflow-hidden"
+            aria-hidden="true"
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[color:var(--coral)] to-[color:var(--lime)] relative transition-[width] duration-300 ease-out pointer-events-none"
+              className="h-full rounded-full bg-gradient-to-r from-[color:var(--coral)] via-[#ff2fb3] to-[color:var(--lime)] transition-[width] duration-300 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
-          </button>
+          </div>
 
-          {/* Controls row */}
-          <div className="flex items-center justify-between gap-2 text-xs font-semibold">
-            {/* Left controls */}
-            <div className="flex items-center gap-2.5">
+          {/* Minimal Controls row */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={togglePlay}
-                className="rounded p-1 text-white hover:text-[color:var(--lime)] transition-colors"
+                className="rounded-lg bg-white/15 p-2 text-white hover:bg-white/25 hover:text-[color:var(--lime)] transition-colors"
                 aria-label={isPlaying ? "Pausar" : "Reproducir"}
               >
-                {isPlaying ? <Pause size={18} /> : <Play size={18} fill="currentColor" />}
+                {isPlaying ? <Pause size={17} /> : <Play size={17} fill="currentColor" />}
               </button>
 
-              <div className="flex items-center gap-1 group/vol">
-                <button
-                  type="button"
-                  onClick={handleToggleMute}
-                  className="rounded p-1 text-white hover:text-[color:var(--lime)] transition-colors"
-                  aria-label={isMuted ? "Activar sonido" : "Silenciar"}
-                >
-                  {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                </button>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={isMuted ? 0 : volume}
-                  onChange={handleVolumeChange}
-                  className="h-1.5 w-12 cursor-pointer accent-[color:var(--coral)] opacity-80 hover:opacity-100"
-                  aria-label="Control de volumen"
-                />
-              </div>
-
-              <span className="font-mono text-[10px] text-white/90">{formatTime(currentTime)}</span>
-            </div>
-
-            {/* Right controls */}
-            <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={handleSpeedToggle}
-                className="rounded bg-white/20 px-2 py-1 text-[10px] font-bold tracking-wider uppercase hover:bg-white/30 transition-colors"
-                title="Velocidad de reproducción"
+                onClick={handleToggleMute}
+                className="flex items-center gap-1.5 rounded-lg bg-white/15 px-2.5 py-2 text-xs font-bold text-white hover:bg-white/25 transition-colors"
+                aria-label={isMuted ? "Activar sonido" : "Silenciar"}
               >
-                {playbackSpeed}x
+                {isMuted ? (
+                  <>
+                    <VolumeX size={17} className="text-[color:var(--coral)] animate-pulse" />
+                    <span className="text-[11px]">Activar Audio</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 size={17} className="text-emerald-400" />
+                    <span className="text-[11px]">Audio ON</span>
+                  </>
+                )}
               </button>
             </div>
+
+            <span className="text-[11px] font-bold text-white/80 flex items-center gap-1">
+              <ShieldCheck size={14} className="text-emerald-400" /> HD 1080p
+            </span>
           </div>
         </div>
       </div>
 
       <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-[color:var(--ink-muted)]">
         <Volume2 size={15} className="text-[color:var(--coral)] animate-bounce" />
-        <span>Asegúrate de tener el audio activado para seguir todas las explicaciones</span>
+        <span>Asegúrate de mantener el audio encendido para no perder ninguna instrucción</span>
       </div>
     </div>
   );
