@@ -1,6 +1,6 @@
-export const META_PIXEL_ID = "1749248649530991";
-export const BASE_CHECKOUT_URL = "https://go.centerpag.com/PPU38CQFHQ9";
-export const BASE_BACKREDIRECT_URL = "https://go.centerpag.com/PPU38CQFPHQ";
+export const META_PIXEL_ID = "1072709848585797";
+export const BASE_CHECKOUT_URL = "https://go.centerpag.com/PPU38CQFGNA";
+export const BASE_BACKREDIRECT_URL = "https://go.centerpag.com/PPU38CQFSCU";
 
 type MetaPixelFn = {
   (...args: unknown[]): void;
