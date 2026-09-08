@@ -7,5 +7,18 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  server: {
+    port: 5173,
+    proxy: {
+      "/upsell": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+      "/app": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
+  },
   plugins: [tanstackStart({ server: { entry: "server" } }), viteReact(), tailwindcss()],
 });

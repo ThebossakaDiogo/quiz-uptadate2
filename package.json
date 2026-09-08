@@ -4,7 +4,9 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "concurrently -n \"QUIZ,APP-UPSELL\" -c \"magenta,cyan\" \"vite dev\" \"bun --cwd gluteos-coach-ai dev\"",
+    "dev:quiz": "vite dev",
+    "dev:app": "bun --cwd gluteos-coach-ai dev",
     "build": "vite build && nitro build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
@@ -32,6 +34,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
+    "concurrently": "^10.0.5",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.6",

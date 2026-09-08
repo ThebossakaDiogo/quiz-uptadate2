@@ -2818,20 +2818,33 @@ function VslQuizPlayer({
       }
     };
 
+    let animFrameId: number;
+    const updateProgressFrame = () => {
+      if (video && !video.paused) {
+        setCurrentTime(video.currentTime);
+        animFrameId = requestAnimationFrame(updateProgressFrame);
+      }
+    };
+
     const handlePlay = () => {
       setIsPlaying(true);
       if (!hasStartedPlaying) {
         setHasStartedPlaying(true);
         trackVslPlay();
       }
+      cancelAnimationFrame(animFrameId);
+      animFrameId = requestAnimationFrame(updateProgressFrame);
     };
 
     const handlePause = () => {
       setIsPlaying(false);
+      cancelAnimationFrame(animFrameId);
     };
 
     const handleEnded = () => {
       setIsPlaying(false);
+      cancelAnimationFrame(animFrameId);
+      setCurrentTime(video.duration || 1);
       trackVslMilestone(100);
     };
 
@@ -2849,6 +2862,8 @@ function VslQuizPlayer({
         .then(() => {
           setIsPlaying(true);
           setHasStartedPlaying(true);
+          cancelAnimationFrame(animFrameId);
+          animFrameId = requestAnimationFrame(updateProgressFrame);
         })
         .catch(() => {
           setIsPlaying(false);
@@ -2856,6 +2871,7 @@ function VslQuizPlayer({
     }
 
     return () => {
+      cancelAnimationFrame(animFrameId);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("play", handlePlay);
@@ -2919,18 +2935,39 @@ function VslQuizPlayer({
   };
 
   /**
-   * Fast & engaging psychological progress bar:
-   * Starts faster to capture initial attention, smooth continuous fill
+   * Dynamic psychological progress bar:
+   * Advances ~3x faster than real-time video speed in the initial phases to maximize retention,
+   * then smoothly transitions into 1x real-time video speed in the finale, progressing
+   * in lockstep with the video until full completion.
    */
-  const getPsychologicalProgress = (current: number, total: number) => {
-    if (!total || total <= 0 || current <= 0) return 5;
+  const getDynamicProgress = (current: number, total: number) => {
+    if (!total || total <= 0 || current <= 0) return 2.5;
     const ratio = Math.min(1, Math.max(0, current / total));
-    if (ratio >= 0.995) return 100;
-    const curved = (1 - Math.pow(1 - ratio, 1.65)) * 100;
-    return Math.min(99, Math.max(6, Math.round(curved)));
+    if (ratio >= 0.998) return 100;
+
+    // Transition threshold: from 0 to 80% of video duration, progress moves at ~3x speed.
+    // In the final 20% (0.80 to 1.00), it matches exact 1x video speed (1:1).
+    const threshold = 0.8;
+    let percent: number;
+
+    if (ratio < threshold) {
+      const u = ratio / threshold;
+      // Hermite/Cubic curve starting with derivative ~3x and smoothly converging to 1x at threshold:
+      // g(u) goes from 0 to 80, with g'(0) = 3*threshold*100 = 240, and g'(1) = 1*threshold*100 = 80
+      const a = 160;
+      const b = -320;
+      const c = 240;
+      const g = a * Math.pow(u, 3) + b * Math.pow(u, 2) + c * u;
+      percent = Math.max(2.5, g);
+    } else {
+      // In the final stretch (80% to 100% of video), progress matches the exact real-time video pace (1x)
+      percent = ratio * 100;
+    }
+
+    return Math.min(100, Math.max(2.5, parseFloat(percent.toFixed(2))));
   };
 
-  const progressPercent = getPsychologicalProgress(currentTime, duration);
+  const progressPercent = getDynamicProgress(currentTime, duration);
 
   // Dynamic context message based on 30s pitch timeline
   let dynamicStatus = "🔊 Sube el volumen y mira con atención";
@@ -3006,15 +3043,17 @@ function VslQuizPlayer({
             showControls || !isPlaying ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
-          {/* Psychological Continuous Progress Line (No numbers) */}
+          {/* Dynamic Psychological Progress Bar (3x speed initially, 1x in finale, with active shimmer and glow tip) */}
           <div
-            className="relative mb-3 h-2 w-full rounded-full bg-white/20 overflow-hidden"
+            className="vsl-progress-track relative mb-3 overflow-hidden"
             aria-hidden="true"
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[color:var(--coral)] via-[#ff2fb3] to-[color:var(--lime)] transition-[width] duration-300 ease-out"
+              className="vsl-progress-fill"
               style={{ width: `${progressPercent}%` }}
-            />
+            >
+              <div className="vsl-progress-glow-tip" />
+            </div>
           </div>
 
           {/* Minimal Controls row */}
