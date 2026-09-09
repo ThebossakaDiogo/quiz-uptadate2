@@ -9,15 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VslRouteImport } from './routes/vsl'
 import { Route as OfertaEspecialRouteImport } from './routes/oferta-especial'
 import { Route as IndexRouteImport } from './routes/index'
 
-const VslRoute = VslRouteImport.update({
-  id: '/vsl',
-  path: '/vsl',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OfertaEspecialRoute = OfertaEspecialRouteImport.update({
   id: '/oferta-especial',
   path: '/oferta-especial',
@@ -32,42 +26,31 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/oferta-especial': typeof OfertaEspecialRoute
-  '/vsl': typeof VslRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/oferta-especial': typeof OfertaEspecialRoute
-  '/vsl': typeof VslRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/oferta-especial': typeof OfertaEspecialRoute
-  '/vsl': typeof VslRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/oferta-especial' | '/vsl'
+  fullPaths: '/' | '/oferta-especial'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/oferta-especial' | '/vsl'
-  id: '__root__' | '/' | '/oferta-especial' | '/vsl'
+  to: '/' | '/oferta-especial'
+  id: '__root__' | '/' | '/oferta-especial'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OfertaEspecialRoute: typeof OfertaEspecialRoute
-  VslRoute: typeof VslRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/vsl': {
-      id: '/vsl'
-      path: '/vsl'
-      fullPath: '/vsl'
-      preLoaderRoute: typeof VslRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/oferta-especial': {
       id: '/oferta-especial'
       path: '/oferta-especial'
@@ -88,7 +71,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OfertaEspecialRoute: OfertaEspecialRoute,
-  VslRoute: VslRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
