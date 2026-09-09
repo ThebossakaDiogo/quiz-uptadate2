@@ -21,6 +21,7 @@ import {
   Clock,
   Clock3,
   CreditCard,
+  Crown,
   Dumbbell,
   Flame,
   Gift,
@@ -54,6 +55,8 @@ import age3 from "@/assets/age-3.jpg";
 import age4 from "@/assets/age-4.jpg";
 import {
   BASE_CHECKOUT_URL,
+  BASE_CHECKOUT_BASIC_URL,
+  BASE_CHECKOUT_VIP_URL,
   getDecoratedCheckoutUrl,
   trackBiometrics,
   trackCouponContinueClick,
@@ -62,7 +65,9 @@ import {
   trackDiagnosticView,
   trackFaqToggle,
   trackLandingStartClick,
+  trackPlanCheckoutClick,
   trackPlanPageView,
+  trackPlanSelection,
   trackQuizAnswer,
   trackQuizComplete,
   trackQuizNavigationBack,
@@ -2541,7 +2546,7 @@ function VslDedicatedScreen({
             </h2>
 
             <p className="text-xs sm:text-sm font-medium text-[color:var(--ink-muted)]">
-              Ruta adaptada a tu meta de <strong>{goal.toLowerCase()}</strong> en <strong>{time} al día</strong> con 90% de descuento aplicado ($9.90 USD).
+              Ruta adaptada a tu meta de <strong>{goal.toLowerCase()}</strong> en <strong>{time} al día</strong> con 90% de descuento aplicado (9,99 €).
             </p>
 
             <button
@@ -2597,8 +2602,8 @@ function FinalScreen({
       user_obstacle: obstacle,
       user_age: age,
       user_time: time,
-      price: 9.9,
-      currency: "USD",
+      price: 9.99,
+      currency: "EUR",
     });
 
     const handleScroll = () => {
@@ -2612,9 +2617,11 @@ function FinalScreen({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [goal, obstacle, age, time]);
 
-  const handleCtaClick = (location: string) => {
-    trackVslCtaClick(location);
-    const checkoutUrl = getDecoratedCheckoutUrl(BASE_CHECKOUT_URL);
+  const handleCtaClick = (location: string, plan: "vip" | "basic" = "vip") => {
+    trackVslCtaClick(`${location}_${plan}`);
+    trackPlanCheckoutClick(plan, plan === "vip" ? 19.99 : 9.99, location);
+    const targetUrl = plan === "vip" ? BASE_CHECKOUT_VIP_URL : BASE_CHECKOUT_BASIC_URL;
+    const checkoutUrl = getDecoratedCheckoutUrl(targetUrl);
     window.location.href = checkoutUrl;
   };
 
@@ -2629,7 +2636,7 @@ function FinalScreen({
             <LiveViewerCounter />
           </span>
           <span className="flex items-center gap-1 rounded-full bg-[color:var(--lime)] px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[color:var(--wine)] shadow-sm">
-            <TicketPercent size={13} strokeWidth={3} /> 90% APLICADO ($9.90 USD)
+            <TicketPercent size={13} strokeWidth={3} /> 90% APLICADO (9,99 €)
           </span>
         </div>
       </header>
@@ -2699,7 +2706,7 @@ function FinalScreen({
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-[color:var(--ink-muted)]">
             Accede de por vida al Desafío Glúteos Brasileños + 4 bonos de regalo por un único pago
-            de solo <strong className="text-[color:var(--coral)]">$9.90 USD</strong>.
+            de solo <strong className="text-[color:var(--coral)]">9,99 €</strong>.
           </p>
 
           <div className="mx-auto mt-6 max-w-lg">
@@ -2710,7 +2717,7 @@ function FinalScreen({
             >
               <span className="button-sheen" />
               <span className="flex items-center justify-center gap-2">
-                ¡QUIERO MI PLAN COMPLETO POR $9.90!
+                ¡QUIERO MI PLAN COMPLETO POR 9,99 €!
                 <ArrowRight size={20} />
               </span>
             </button>
@@ -2741,7 +2748,7 @@ function FinalScreen({
               <p className="text-xs font-bold text-[color:var(--lime)]">90% OFF APLICADO</p>
               <p className="text-sm font-black">
                 Desafío Glúteos 28 Días —{" "}
-                <span className="text-[color:var(--shock-yellow)]">$9.90 USD</span>
+                <span className="text-[color:var(--shock-yellow)]">9,99 €</span>
               </p>
             </div>
             <button
@@ -2751,7 +2758,7 @@ function FinalScreen({
             >
               <span className="button-sheen" />
               <span className="flex items-center justify-center gap-1.5">
-                ¡ACCEDER POR SOLO $9.90!
+                ¡ACCEDER POR SOLO 9,99 €!
                 <ArrowRight size={16} />
               </span>
             </button>
@@ -3104,9 +3111,18 @@ function VslQuizPlayer({
 }
 
 /**
- * Main Offer Card ($9.90 USD) for the Quiz Funnel
+ * Main Offer Card with 2 Plans (Basic vs VIP) for the Quiz Funnel
  */
-function VslQuizOfferCard({ onCtaClick }: Readonly<{ onCtaClick: (location: string) => void }>) {
+function VslQuizOfferCard({
+  onCtaClick,
+}: Readonly<{ onCtaClick: (location: string, plan?: "vip" | "basic") => void }>) {
+  const [selectedPlan, setSelectedPlan] = useState<"vip" | "basic">("vip");
+
+  const handlePlanChange = (plan: "vip" | "basic") => {
+    setSelectedPlan(plan);
+    trackPlanSelection(plan, plan === "vip" ? 19.99 : 9.99);
+  };
+
   return (
     <div className="relative overflow-hidden rounded-3xl border-4 border-[color:var(--wine)] bg-white p-6 shadow-[10px_10px_0_var(--wine)] md:p-10">
       {/* Top Banner */}
@@ -3117,11 +3133,40 @@ function VslQuizOfferCard({ onCtaClick }: Readonly<{ onCtaClick: (location: stri
             Desafío Glúteos Brasileños 28 Días
           </h2>
           <p className="text-xs font-medium text-[color:var(--ink-muted)]">
-            Acceso Completo De Por Vida + 4 Bonos de Regalo + Garantía Incondicional de 7 Días
+            Elige tu plan: Acceso Básico de 1 año o Plan VIP Completo Vitalicio con 4 Bonos
           </p>
         </div>
 
         <OfferCountdownTimer />
+      </div>
+
+      {/* Plan Selector Switcher */}
+      <div className="mb-6 flex justify-center">
+        <div className="inline-flex rounded-full border-2 border-[color:var(--wine)] bg-white p-1 shadow-sm">
+          <button
+            type="button"
+            onClick={() => handlePlanChange("vip")}
+            className={`flex items-center gap-1.5 rounded-full px-4 sm:px-6 py-2 text-xs font-black transition-all ${
+              selectedPlan === "vip"
+                ? "bg-[color:var(--coral)] text-white shadow-md scale-[1.02]"
+                : "text-[color:var(--wine)] hover:bg-black/5"
+            }`}
+          >
+            <Crown size={14} />
+            <span>PLAN VIP VITALICIO (19,99 €)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePlanChange("basic")}
+            className={`flex items-center gap-1.5 rounded-full px-4 sm:px-6 py-2 text-xs font-black transition-all ${
+              selectedPlan === "basic"
+                ? "bg-[color:var(--wine)] text-white shadow-md scale-[1.02]"
+                : "text-[color:var(--wine)] hover:bg-black/5"
+            }`}
+          >
+            <span>PLAN BÁSICO (9,99 €)</span>
+          </button>
+        </div>
       </div>
 
       {/* Content Columns */}
@@ -3178,49 +3223,62 @@ function VslQuizOfferCard({ onCtaClick }: Readonly<{ onCtaClick: (location: stri
                 <strong>Entrena 100% en Casa:</strong> Sin gimnasio ni máquinas pesadas.
               </span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
-                <Gift size={13} />
-              </span>
-              <span>
-                <strong>Bono #1:</strong> Guía Nutricional Anti-Flacidez y Menú Glúteos Firmes{" "}
-                <span className="text-[color:var(--coral)]">(Gratis hoy)</span>
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
-                <Gift size={13} />
-              </span>
-              <span>
-                <strong>Bono #2:</strong> Protocolo Express Anti-Celulitis y Drenaje Linfático{" "}
-                <span className="text-[color:var(--coral)]">(Gratis hoy)</span>
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
-                <Gift size={13} />
-              </span>
-              <span>
-                <strong>Bono #3:</strong> Tracker Imprimible y Planificador de Hábitos{" "}
-                <span className="text-[color:var(--coral)]">(Gratis hoy)</span>
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
-                <Gift size={13} />
-              </span>
-              <span>
-                <strong>Bono #4:</strong> Comunidad VIP de Alumnas y Soporte Vitalicio{" "}
-                <span className="text-[color:var(--coral)]">(Gratis hoy)</span>
-              </span>
-            </li>
+
+            {selectedPlan === "vip" ? (
+              <>
+                <li className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
+                    <Gift size={13} />
+                  </span>
+                  <span>
+                    <strong>Bono #1:</strong> Guía Nutricional Anti-Flacidez y Menú Glúteos Firmes{" "}
+                    <span className="text-[color:var(--coral)]">(Gratis en VIP)</span>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
+                    <Gift size={13} />
+                  </span>
+                  <span>
+                    <strong>Bono #2:</strong> Protocolo Express Anti-Celulitis y Drenaje Linfático{" "}
+                    <span className="text-[color:var(--coral)]">(Gratis en VIP)</span>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
+                    <Gift size={13} />
+                  </span>
+                  <span>
+                    <strong>Bono #3:</strong> Tracker Imprimible y Planificador de Hábitos{" "}
+                    <span className="text-[color:var(--coral)]">(Gratis en VIP)</span>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--coral)] text-white">
+                    <Gift size={13} />
+                  </span>
+                  <span>
+                    <strong>Bono #4:</strong> Comunidad VIP de Alumnas y Soporte Vitalicio{" "}
+                    <span className="text-[color:var(--coral)]">(Gratis en VIP)</span>
+                  </span>
+                </li>
+              </>
+            ) : (
+              <li className="flex items-start gap-2 text-[color:var(--ink-muted)] opacity-70">
+                <XCircle size={16} className="text-rose-400 shrink-0 mt-0.5" />
+                <span>
+                  Los 4 Bonos de Regalo (Nutrición, Anti-celulitis, Tracker y Comunidad VIP) son
+                  exclusivos del Plan VIP.
+                </span>
+              </li>
+            )}
           </ul>
 
           {/* Price Box */}
           <div className="rounded-2xl border-2 border-[color:var(--wine)] bg-[color:var(--cream)] p-4 text-center">
             <div className="flex items-center justify-center gap-3">
               <span className="text-sm font-bold text-[color:var(--ink-muted)] line-through">
-                Precio Regular: $97 USD
+                Precio Regular: {selectedPlan === "vip" ? "147,00 €" : "47,00 €"}
               </span>
               <span className="rounded-full bg-[color:var(--coral)] px-2.5 py-0.5 text-xs font-black text-white">
                 90% DE DESCUENTO
@@ -3232,24 +3290,23 @@ function VslQuizOfferCard({ onCtaClick }: Readonly<{ onCtaClick: (location: stri
                 Pago único hoy:
               </span>
               <span className="font-display text-4xl sm:text-5xl font-black text-[color:var(--coral)]">
-                $9.90
+                {selectedPlan === "vip" ? "19,99 €" : "9,99 €"}
               </span>
-              <span className="text-sm font-bold text-[color:var(--wine)]">USD</span>
             </div>
             <p className="mt-0.5 text-[11px] font-semibold text-[color:var(--ink-muted)]">
-              Pago único • Acceso ilimitado de por vida • Sin mensualidades ni cobros recurrentes
+              Pago único • {selectedPlan === "vip" ? "Acceso Vitalicio De Por Vida" : "Acceso por 1 Año"} • Sin cobros recurrentes
             </p>
           </div>
 
           {/* Big CTA */}
           <button
             type="button"
-            onClick={() => onCtaClick("quiz_offer_primary_cta")}
+            onClick={() => onCtaClick("quiz_offer_primary_cta", selectedPlan)}
             className="cta-button text-base md:text-lg font-black tracking-wider text-white shadow-xl hover:scale-[1.02]"
           >
             <span className="button-sheen" />
             <span className="flex items-center justify-center gap-2">
-              ¡QUIERO ACCESO POR SOLO $9.90 USD!
+              ¡QUIERO EL {selectedPlan === "vip" ? "PLAN VIP (19,99 €)" : "PLAN BÁSICO (9,99 €)"}!
               <ArrowRight size={22} />
             </span>
           </button>
@@ -3276,28 +3333,28 @@ function VslQuizOfferCard({ onCtaClick }: Readonly<{ onCtaClick: (location: stri
  */
 function VslQuizIncludedSummary() {
   const items = [
-    { name: "Programa Completo Desafío Glúteos Brasileños 28 Días", value: "$97.00 USD" },
-    { name: "Módulo 1: Despertar Neuromuscular y Activación Inicial", value: "$27.00 USD" },
-    { name: "Módulo 2: Sobrecarga Progresiva y Volumen Lateral", value: "$37.00 USD" },
-    { name: "Módulo 3: Escultura, Elevación y Firmeza Máxima", value: "$37.00 USD" },
+    { name: "Programa Completo Desafío Glúteos Brasileños 28 Días", value: "97,00 €" },
+    { name: "Módulo 1: Despertar Neuromuscular y Activación Inicial", value: "27,00 €" },
+    { name: "Módulo 2: Sobrecarga Progresiva y Volumen Lateral", value: "37,00 €" },
+    { name: "Módulo 3: Escultura, Elevación y Firmeza Máxima", value: "37,00 €" },
     {
       name: "Bono #1: Guía Nutricional Anti-Flacidez y Menú Glúteos Firmes",
-      value: "$37.00 USD",
+      value: "37,00 €",
       free: true,
     },
     {
       name: "Bono #2: Protocolo Express Anti-Celulitis y Drenaje",
-      value: "$29.00 USD",
+      value: "29,00 €",
       free: true,
     },
     {
       name: "Bono #3: Planificador Imprimible de Hábitos y Tracker Diario",
-      value: "$19.00 USD",
+      value: "19,00 €",
       free: true,
     },
     {
       name: "Bono #4: Acceso VIP a la Comunidad y Soporte De Por Vida",
-      value: "$47.00 USD",
+      value: "47,00 €",
       free: true,
     },
     { name: "Garantía Incondicional de Reembolso Total en 7 Días", value: "INVALUABLE" },
@@ -3334,14 +3391,14 @@ function VslQuizIncludedSummary() {
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[color:var(--wine)] p-4 text-white">
         <div>
           <span className="text-xs text-white/70 block">VALOR TOTAL REAL:</span>
-          <span className="text-sm font-bold line-through text-white/60">$229.00 USD</span>
+          <span className="text-sm font-bold line-through text-white/60">229,00 €</span>
         </div>
         <div className="text-right">
           <span className="text-xs font-bold text-[color:var(--lime)] block">
             PRECIO PROMOCIONAL HOY:
           </span>
           <span className="font-display text-3xl font-black text-[color:var(--shock-yellow)]">
-            $9.90 USD
+            9,99 €
           </span>
         </div>
       </div>
@@ -3432,25 +3489,25 @@ function VslQuizBonuses() {
     {
       badge: "BONO #1",
       title: "Guía Nutricional Anti-Flacidez",
-      value: "$37 USD",
+      value: "37,00 €",
       desc: "Menús simples y qué comer antes y después de entrenar para estimular la síntesis de colágeno y firmeza.",
     },
     {
       badge: "BONO #2",
       title: "Protocolo Anti-Celulitis Express",
-      value: "$29 USD",
+      value: "29,00 €",
       desc: "Secuencias de drenaje y activación circulatoria en casa para alisar la textura de la piel en glúteos y piernas.",
     },
     {
       badge: "BONO #3",
       title: "Tracker Imprimible de 28 Días",
-      value: "$19 USD",
+      value: "19,00 €",
       desc: "Plantilla visual para registrar tus medidas, tus fotos de progreso y mantener la motivación al 100%.",
     },
     {
       badge: "BONO #4",
       title: "Comunidad VIP de Alumnas & Soporte",
-      value: "$47 USD",
+      value: "47,00 €",
       desc: "Espacio privado exclusivo para resolver preguntas, compartir recetas y motivarte con compañeras.",
     },
   ];
@@ -3462,7 +3519,7 @@ function VslQuizBonuses() {
           🎁 4 REGALOS EXCLUSIVOS INCLUIDOS HOY
         </span>
         <h3 className="font-display mt-2 text-xl font-black text-[color:var(--wine)] md:text-2xl">
-          Llévate Estos 4 Bonos de Regalo (Valorados en $132 USD) por $0
+          Llévate Estos 4 Bonos de Regalo (Valorados en 132,00 €) por 0,00 €
         </h3>
       </div>
 
@@ -3828,8 +3885,8 @@ function VslQuizGuarantee({ onCtaClick }: Readonly<{ onCtaClick: () => void }>) 
       <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-emerald-900 leading-relaxed">
         Prueba el Desafío Glúteos Brasileños durante 7 días completos. Si por cualquier motivo no
         sientes la activación y los cambios en tu cuerpo, simplemente solicita tu reembolso con un
-        clic y te devolvemos el 100% de tu dinero de inmediato ($9.90 USD). Sin preguntas ni
-        trámites.
+        clic y te devolvemos el 100% de tu dinero de inmediato (9,99 €). Sin preguntas ni
+        complicaciones.
       </p>
 
       <div className="mt-5">
@@ -3839,7 +3896,7 @@ function VslQuizGuarantee({ onCtaClick }: Readonly<{ onCtaClick: () => void }>) 
           className="cta-button max-w-md mx-auto text-sm font-black uppercase text-white shadow-md hover:scale-[1.02]"
         >
           <span className="button-sheen" />
-          <span>PROBAR EL MÉTODO SIN RIESGO POR $9.90</span>
+          <span>PROBAR EL MÉTODO SIN RIESGO POR 9,99 €</span>
         </button>
       </div>
     </section>
@@ -3980,7 +4037,7 @@ function OfferCountdownTimer() {
       <Clock size={16} className="text-[color:var(--coral)] animate-spin-slow" />
       <div className="text-left">
         <span className="block text-[10px] font-extrabold uppercase tracking-wide text-[color:var(--coral-dark)]">
-          El cupón de $9.90 expira en:
+          El cupón de 9,99 € expira en:
         </span>
         <span className="font-mono text-sm font-black text-[color:var(--wine)]">
           {minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}

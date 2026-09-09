@@ -991,10 +991,10 @@ export default function OfertaEspecialPage() {
 
               <div className="mt-2 flex items-center justify-center gap-2">
                 <span className="text-xs sm:text-sm font-bold text-gray-400 line-through">
-                  Precio Normal: $97 USD
+                  Precio Normal: 97,00 €
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-gray-400 line-through">
-                  Oferta $9.90
+                  Oferta 9,99 €
                 </span>
               </div>
 
@@ -1003,9 +1003,8 @@ export default function OfertaEspecialPage() {
                   Llévalo hoy por solo:
                 </span>
                 <span className="font-display text-4xl sm:text-5xl font-black text-red-600">
-                  $5.90
+                  5,99 €
                 </span>
-                <span className="text-sm font-bold text-[color:var(--wine)]">USD / R$ 5,90</span>
               </div>
 
               <div className="mt-3 space-y-1.5 text-left text-xs font-bold text-[color:var(--wine)]">
@@ -1033,7 +1032,7 @@ export default function OfertaEspecialPage() {
               >
                 <span className="button-sheen" />
                 <span className="flex items-center justify-center gap-2">
-                  ¡SÍ, QUIERO MI PLAN POR SOLO $5.90!
+                  ¡SÍ, QUIERO MI PLAN POR SOLO 5,99 €!
                   <ArrowRight size={22} />
                 </span>
               </button>
@@ -1079,7 +1078,7 @@ export default function OfertaEspecialPage() {
                     OFERTA DE RESCATE ACTIVA
                   </span>
                   <span className="rounded bg-[color:var(--wine)] px-1.5 py-0.2 text-[10px] font-black text-[color:var(--lime)]">
-                    $5.90 USD
+                    5,99 €
                   </span>
                 </div>
                 <p className="text-[11px] font-medium text-[color:var(--ink-muted)]">
@@ -1096,7 +1095,7 @@ export default function OfertaEspecialPage() {
               >
                 <span className="button-sheen" />
                 <span className="flex items-center justify-center gap-1.5">
-                  ¡ACCEDER POR $5.90!
+                  ¡ACCEDER POR 5,99 €!
                   <ArrowRight size={16} />
                 </span>
               </button>

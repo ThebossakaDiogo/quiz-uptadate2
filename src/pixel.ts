@@ -1,6 +1,8 @@
-export const META_PIXEL_ID = "1072709848585797";
-export const BASE_CHECKOUT_URL = "https://go.centerpag.com/PPU38CQFGNA";
-export const BASE_BACKREDIRECT_URL = "https://go.centerpag.com/PPU38CQFSCU";
+export const META_PIXEL_ID = "3172223002972659";
+export const BASE_CHECKOUT_URL = "https://pay.hotmart.com/S107338787U?bid=1788973203703";
+export const BASE_CHECKOUT_BASIC_URL = "https://pay.hotmart.com/S107338787U?bid=1788973203703";
+export const BASE_CHECKOUT_VIP_URL = "https://pay.hotmart.com/S107338787U?off=4g14fspt";
+export const BASE_BACKREDIRECT_URL = "https://pay.hotmart.com/S107338787U?off=ww74ql3x";
 
 type MetaPixelFn = {
   (...args: unknown[]): void;
@@ -87,8 +89,8 @@ export function trackViewContent(screenName: string, extraParams: Record<string,
     content_name: screenName,
     content_category: "Quiz Funnel 28 Dias",
     content_type: "quiz_step",
-    value: 9.9,
-    currency: "USD",
+    value: 9.99,
+    currency: "EUR",
     ...extraParams,
   });
 }
@@ -203,8 +205,8 @@ export function trackQuizComplete(profileSummary: Record<string, unknown> = {}) 
   fbq("track", "Lead", {
     content_name: "BrazilianBooty - Quiz Completado",
     content_category: "Quiz Lead",
-    value: 9.9,
-    currency: "USD",
+    value: 9.99,
+    currency: "EUR",
     ...profileSummary,
   });
 }
@@ -214,7 +216,7 @@ export function trackQuizComplete(profileSummary: Record<string, unknown> = {}) 
  */
 export function trackInitiateCheckout(
   clickLocation = "final_cta",
-  productValue = 9.9,
+  productValue = 9.99,
   couponCode = "BUMBUM90",
   extra: Record<string, unknown> = {},
 ) {
@@ -224,7 +226,7 @@ export function trackInitiateCheckout(
     content_ids: ["BRAZILIANBOOTY28"],
     content_type: "product",
     value: productValue,
-    currency: "USD",
+    currency: "EUR",
     num_items: 1,
     coupon: couponCode,
     click_location: clickLocation,
@@ -246,6 +248,10 @@ export function getDecoratedCheckoutUrl(baseUrl = BASE_CHECKOUT_URL): string {
     // Pass all query parameters forward (UTMs, fbclid, gclid, ttclid, etc.)
     currentParams.forEach((value, key) => {
       if (value) {
+        // Protect Hotmart offer configuration from baseUrl
+        if ((key === "off" || key === "bid") && url.searchParams.has(key)) {
+          return;
+        }
         url.searchParams.set(key, value);
       }
     });
@@ -321,12 +327,12 @@ export function trackVslSpeedChange(speed: number) {
  * Track CTA click on the VSL page
  */
 export function trackVslCtaClick(location = "vsl_primary_cta") {
-  trackInitiateCheckout(location, 9.9, "BUMBUM90");
+  trackInitiateCheckout(location, 9.99, "BUMBUM90");
   fbq("trackCustom", "VslCtaClick", {
     click_location: location,
     product: "BrazilianBooty - Desafío 28 Días",
-    value: 9.9,
-    currency: "USD",
+    value: 9.99,
+    currency: "EUR",
   });
 }
 
@@ -337,8 +343,8 @@ export function trackBackredirectView() {
   trackPageView("Backredirect - BrazilianBooty 28 Días");
   trackViewContent("Backredirect BrazilianBooty", {
     page_type: "backredirect",
-    value: 9.9,
-    currency: "USD",
+    value: 5.99,
+    currency: "EUR",
   });
   fbq("trackCustom", "BackredirectView", {
     timestamp: new Date().toISOString(),
@@ -346,15 +352,15 @@ export function trackBackredirectView() {
 }
 
 /**
- * Track CTA click on Backredirect page ($9.90 offer)
+ * Track CTA click on Backredirect page (5,99 € offer)
  */
 export function trackBackredirectCtaClick(location = "backredirect_primary_cta") {
-  trackInitiateCheckout(location, 9.9, "BUMBUM90", { page: "backredirect" });
+  trackInitiateCheckout(location, 5.99, "BUMBUM590", { page: "backredirect" });
   fbq("trackCustom", "BackredirectCtaClick", {
     click_location: location,
     product: "BrazilianBooty - Desafío 28 Días",
-    value: 9.9,
-    currency: "USD",
+    value: 5.99,
+    currency: "EUR",
   });
 }
 
@@ -364,23 +370,23 @@ export function trackBackredirectCtaClick(location = "backredirect_primary_cta")
 export function trackDownsellModalView() {
   fbq("trackCustom", "DownsellModalView", {
     offer: "BrazilianBooty Plan 28 Días Downsell",
-    price: 5.9,
-    currency: "USD",
+    price: 5.99,
+    currency: "EUR",
     timestamp: new Date().toISOString(),
   });
 }
 
 /**
- * Track CTA click on Downsell offer ($5.90)
+ * Track CTA click on Downsell offer (5,99 €)
  */
 export function trackDownsellCtaClick(location = "downsell_modal_cta") {
-  trackInitiateCheckout(location, 5.9, "BUMBUM590", { page: "downsell_modal" });
+  trackInitiateCheckout(location, 5.99, "BUMBUM590", { page: "downsell_modal" });
 
   fbq("trackCustom", "DownsellCtaClick", {
     click_location: location,
     product: "BrazilianBooty - Desafío 28 Días Downsell",
-    value: 5.9,
-    currency: "USD",
+    value: 5.99,
+    currency: "EUR",
   });
 }
 
@@ -443,8 +449,8 @@ export function trackPlanPageView(details: Record<string, unknown> = {}) {
   trackPageView("Plano 28 Días - BrazilianBooty");
   trackViewContent("Quiz Plan Offer Screen", {
     page_type: "full_offer_plan",
-    price: 9.9,
-    currency: "USD",
+    price: 9.99,
+    currency: "EUR",
     ...details,
   });
 }
@@ -455,5 +461,42 @@ export function trackPlanPageView(details: Record<string, unknown> = {}) {
 export function trackSoundToggle(soundEnabled: boolean) {
   fbq("trackCustom", "QuizSoundToggle", {
     sound_enabled: soundEnabled,
+  });
+}
+
+/**
+ * Track Plan selection between Basic and VIP
+ */
+export function trackPlanSelection(planType: "basic" | "vip", price: number) {
+  fbq("trackCustom", "PlanSelected", {
+    plan_type: planType,
+    price: price,
+    currency: "EUR",
+  });
+}
+
+/**
+ * Track Plan Checkout CTA click (Basic or VIP)
+ */
+export function trackPlanCheckoutClick(
+  planType: "basic" | "vip",
+  price: number,
+  location = "sales_page_plan_cta"
+) {
+  trackInitiateCheckout(
+    location,
+    price,
+    planType === "vip" ? "VIP90" : "BUMBUM90",
+    {
+      plan_type: planType,
+      content_name: planType === "vip" ? "Plan VIP Vitalicio" : "Plan Basico 28 Dias",
+    }
+  );
+
+  fbq("trackCustom", "SalesPlanCheckoutClick", {
+    plan_type: planType,
+    price: price,
+    location: location,
+    currency: "EUR",
   });
 }
